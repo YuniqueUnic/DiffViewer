@@ -1,0 +1,25 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:s="clr-namespace:System;assembly=mscorlib">
+    <s:String x:Key="DiffViewer">DiffViewer</s:String>
+    <s:String x:Key="Import">Import</s:String>
+    <s:String x:Key="Export">Export</s:String>
+    <s:String x:Key="Raw">Raw</s:String>
+    <s:String x:Key="Baseline">Baseline</s:String>
+    <s:String x:Key="Actual">Actual</s:String>
+    <s:String x:Key="Identical">Identical</s:String>
+    <s:String x:Key="Different">Different</s:String>
+    <s:String x:Key="About">About</s:String>
+    <s:String x:Key="ThirdLibraries">This software uses open source libraries</s:String>
+    <s:String x:Key="SpecialThanks">Special Thanks</s:String>
+    <s:String x:Key="CopyrightOwner">CopyrightOwner ©</s:String>
+    <s:String x:Key="License">License</s:String>
+    <s:String x:Key="ThirdComponents">This software uses the following third-party components</s:String>
+    <s:String x:Key="English">English</s:String>
+    <s:String x:Key="Chinese">Chinese</s:String>
+    <s:String x:Key="Search">Search</s:String>
+    <s:String x:Key="Minimize">Minimize</s:String>
+    <s:String x:Key="Maximize">Maximize</s:String>
+    <s:String x:Key="Close">Close</s:String>
+    <s:String x:Key="Languages">Languages</s:String>
+</ResourceDictionary>
