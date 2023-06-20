@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DiffViewer.Managers;
 using DiffViewer.Managers.Helper;
+using DiffViewer.Services;
 using MvvmDialogs;
 using MvvmDialogs.FrameworkDialogs.OpenFile;
 using Serilog;
@@ -18,6 +19,7 @@ public partial class MainWindowViewModel : ObservableObject
     private ILogger _logger;
     private IDialogService _dialogService;
     private int m_totalLineCount;
+
     public MainWindowViewModel(ILogger logger , IDialogService dialogService)
     {
         _logger = logger;
@@ -26,7 +28,8 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    string _searchText = $"{App.Current.Resources.MergedDictionaries[0]["Search"]}...";
+    string _searchText = "Search...";
+    //string _searchText = $"{App.Current.Resources.MergedDictionaries[0]["Search"]}...";
 
     [ObservableProperty]
     string _importedFileFullPath = "Import the Diff File...";

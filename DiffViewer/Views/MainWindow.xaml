@@ -79,13 +79,18 @@
                       HorizontalAlignment="Center"
                       VerticalAlignment="Center"
                       Foreground="{StaticResource TextDark}">
-                    <MenuItem Padding="2"
+                    <MenuItem Padding="8,2"
                               Foreground="{StaticResource TextLightGrey}"
                               Background="{StaticResource ThemeSecondary}"
                               d:Header="DiffViewer"
                               FontSize="12"
                               FontWeight="SemiBold"
                               Header="{DynamicResource DiffViewer}">
+                        <MenuItem.Icon>
+                            <Image Style="{StaticResource IconImageStyle}" Source="{StaticResource DiffViewerIcon}" />
+                        </MenuItem.Icon>
+
+
                         <MenuItem Style="{StaticResource NormalMenuItemStyle}"
                                   Header="{DynamicResource About}"
                                   Command="{Binding AboutWindow}" />

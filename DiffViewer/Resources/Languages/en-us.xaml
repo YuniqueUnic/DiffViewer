@@ -22,4 +22,5 @@
     <s:String x:Key="Maximize">Maximize</s:String>
     <s:String x:Key="Close">Close</s:String>
     <s:String x:Key="Languages">Languages</s:String>
+    <s:String x:Key="Slogan">Born from fun, fun for the future.</s:String>
 </ResourceDictionary>

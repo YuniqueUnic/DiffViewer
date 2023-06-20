@@ -22,5 +22,5 @@
     <s:String x:Key="Maximize">最大化</s:String>
     <s:String x:Key="Close">关闭</s:String>
     <s:String x:Key="Languages">语言</s:String>
-
+    <s:String x:Key="Slogan">生来有趣, 乐游未来.</s:String>
 </ResourceDictionary>
