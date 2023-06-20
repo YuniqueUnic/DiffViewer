@@ -1,9 +1,11 @@
 ﻿using DiffViewer.Managers;
 using DiffViewer.Services;
+using DiffViewer.ViewModels;
 using Serilog;
 using System;
 using System.IO;
 using System.Windows;
+using VSTSDataProvider.ViewModels;
 
 namespace DiffViewer;
 

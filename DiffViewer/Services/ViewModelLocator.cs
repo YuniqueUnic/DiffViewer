@@ -5,6 +5,7 @@ using MvvmDialogs;
 using Serilog;
 using Serilog.Events;
 using System;
+using VSTSDataProvider.ViewModels;
 
 namespace DiffViewer.Services;
 
@@ -54,7 +55,12 @@ public class ViewModelLocator
         services.AddSingleton<IDialogService>(_ => { return new DialogService(); });
         services.AddSingleton<AppConfigManager>();
         // register VM services
+        services.AddTransient<AboutViewModel>();
         services.AddSingleton<MainWindowViewModel>();
+
+        //var a = services.BuildServiceProvider();
+        //Console.WriteLine(a.GetRequiredService<AboutViewModel>().loggerAbout.Equals(a.GetRequiredService<MainWindowViewModel>().logger1));
+        //int ab = 0;
 
         // return IOC Container
         return services.BuildServiceProvider();
@@ -64,5 +70,5 @@ public class ViewModelLocator
 
     public MainWindowViewModel MainWindow_ViewModel => Services.GetRequiredService<MainWindowViewModel>();
 
-
+    public AboutViewModel About_ViewModel=> Services.GetRequiredService<AboutViewModel>();
 }

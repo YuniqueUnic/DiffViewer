@@ -18,6 +18,13 @@ internal class AboutManager
 
     #region FlowDocumentContent
 
+    public enum LicenseType
+    {
+        MIT,
+        //"Apache-2.0"
+        Apache2,
+    }
+
     private string _softwareName = nameof(_softwareName);
     private string _softwareVersion = nameof(_softwareVersion);
     private string _copyrightOwner = nameof(_copyrightOwner);
@@ -25,14 +32,19 @@ internal class AboutManager
 
     private List<OpenSourceProject> _openSourceLibraries = new List<OpenSourceProject>
     {
+        new OpenSourceProject { Name = "CommunityToolkit.Mvvm", Version = "8.2.0", License = "MIT", Url = "https://github.com/CommunityToolkit/dotnet" },
+        new OpenSourceProject { Name = "Microsoft.Extensions.DependencyInjection", Version = "7.0.0", License = "MIT", Url = "https://github.com/Microsoft/XamlBehaviorsWpf" },
         new OpenSourceProject { Name = "Microsoft.Xaml.Behaviors.Wpf", Version = "1.1.39", License = "MIT", Url = "https://github.com/Microsoft/XamlBehaviorsWpf" },
-        new OpenSourceProject { Name = "MiniExcel", Version = "1.30.3", License = "Apache-2.0", Url = "https://github.com/mini-software/MiniExcel" },
-        new OpenSourceProject { Name = "Newtonsoft.Json", Version = "13.0.3", License = "MIT", Url = "https://www.newtonsoft.com/json" }
+        new OpenSourceProject { Name = "MvvmDialogs", Version = "9.1.0", License = "Apache-2.0", Url = "https://github.com/FantasticFiasco/mvvm-dialogs" },
+        new OpenSourceProject { Name = "Serilog", Version = "3.0.0", License = "Apache-2.0", Url = "https://serilog.net/" },
+        new OpenSourceProject { Name = "Serilog.Sinks.Console", Version = "4.1.0", License = "Apache-2.0", Url = "https://github.com/serilog/serilog-sinks-console" },
+        new OpenSourceProject { Name = "Serilog.Sinks.File", Version = "5.0.0", License = "Apache-2.0", Url = "https://serilog.net/" }
     };
 
     private List<OpenSourceProject> _thirdPartyComponents = new List<OpenSourceProject>
     {
-        new OpenSourceProject { Name = "ICON", Version = "", License = "", Url = "https://icons8.com/" },
+        new OpenSourceProject { Name = "IconPark", Version = "1.3.0", License = "Apache-2.0", Url = "https://iconpark.bytedance.com/official" },
+        //new OpenSourceProject { Name = "ICON", Version = "", License = "", Url = "https://icons8.com/" },
         //new OpenSourceProject { Name = "第三方组件名称2", Version = "第三方组件版本号2", License = "第三方组件许可证2", Url = "http://Bing.com" },
         //new OpenSourceProject { Name = "第三方组件名称3", Version = "第三方组件版本号3", License = "第三方组件许可证3", Url = "http://Google.com" }
     };

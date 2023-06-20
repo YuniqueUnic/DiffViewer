@@ -22,7 +22,6 @@ public partial class AboutViewModel :ObservableObject
     public AboutViewModel(ILogger logger)
     {
         _logger= logger;
-      
     }
 
 
@@ -41,6 +40,5 @@ public partial class AboutViewModel :ObservableObject
         _logger.Debug("CloseWindowCommand called");
         WeakReferenceMessenger.Default.Send(new DiffViewer.Messages.WindowActionMessage() { Sender = this, Message = "Close" });
     }
-
 
 }
