@@ -22,6 +22,7 @@
             <SolidColorBrush x:Key="TextDarkGrey" Color="#363636" />
             <SolidColorBrush x:Key="TextGreyDeepen" Color="#FF606060" />
 
+            <BitmapImage x:Key="DiffViewerIcon" UriSource="./Resources/Images/Icons/DiffViewer.png" />
             <BitmapImage x:Key="CloseIcon" UriSource="./Resources/Images/Icons/Close.png" />
             <BitmapImage x:Key="SearchIcon" UriSource="./Resources/Images/Icons/Search.png" />
             <BitmapImage x:Key="MaximizeIcon" UriSource="./Resources/Images/Icons/Maximize.png" />
