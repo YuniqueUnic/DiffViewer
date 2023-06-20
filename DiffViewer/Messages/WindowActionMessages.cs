@@ -8,3 +8,12 @@ class WindowActionMessage : Models.RequestMsg
 {
 
 }
+
+/// <summary>
+/// Set the RichText Content
+/// </summary>
+class SetRichTextBoxDocumentMessage : Models.RequestMsg
+{
+
+}
+

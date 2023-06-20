@@ -3,12 +3,8 @@ using DiffViewer.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Navigation;
 
 namespace DiffViewer.Managers;
@@ -16,14 +12,12 @@ namespace DiffViewer.Managers;
 internal class AboutManager
 {
 
+    public AboutManager( ) { GetSoftwareAssemblyInfos(); }
+
     #region FlowDocumentContent
 
-    public enum LicenseType
-    {
-        MIT,
-        //"Apache-2.0"
-        Apache2,
-    }
+    private const string MIT = "MIT";
+    private const string Apache2 = "Apache-2.0";
 
     private string _softwareName = nameof(_softwareName);
     private string _softwareVersion = nameof(_softwareVersion);
@@ -32,18 +26,18 @@ internal class AboutManager
 
     private List<OpenSourceProject> _openSourceLibraries = new List<OpenSourceProject>
     {
-        new OpenSourceProject { Name = "CommunityToolkit.Mvvm", Version = "8.2.0", License = "MIT", Url = "https://github.com/CommunityToolkit/dotnet" },
-        new OpenSourceProject { Name = "Microsoft.Extensions.DependencyInjection", Version = "7.0.0", License = "MIT", Url = "https://github.com/Microsoft/XamlBehaviorsWpf" },
-        new OpenSourceProject { Name = "Microsoft.Xaml.Behaviors.Wpf", Version = "1.1.39", License = "MIT", Url = "https://github.com/Microsoft/XamlBehaviorsWpf" },
-        new OpenSourceProject { Name = "MvvmDialogs", Version = "9.1.0", License = "Apache-2.0", Url = "https://github.com/FantasticFiasco/mvvm-dialogs" },
-        new OpenSourceProject { Name = "Serilog", Version = "3.0.0", License = "Apache-2.0", Url = "https://serilog.net/" },
-        new OpenSourceProject { Name = "Serilog.Sinks.Console", Version = "4.1.0", License = "Apache-2.0", Url = "https://github.com/serilog/serilog-sinks-console" },
-        new OpenSourceProject { Name = "Serilog.Sinks.File", Version = "5.0.0", License = "Apache-2.0", Url = "https://serilog.net/" }
+        new OpenSourceProject { Name = "CommunityToolkit.Mvvm", Version = "8.2.0", License = MIT, Url = "https://github.com/CommunityToolkit/dotnet" },
+        new OpenSourceProject { Name = "Microsoft.Extensions.DependencyInjection", Version = "7.0.0", License = MIT, Url = "https://github.com/Microsoft/XamlBehaviorsWpf" },
+        new OpenSourceProject { Name = "Microsoft.Xaml.Behaviors.Wpf", Version = "1.1.39", License = MIT, Url = "https://github.com/Microsoft/XamlBehaviorsWpf" },
+        new OpenSourceProject { Name = "MvvmDialogs", Version = "9.1.0", License = Apache2, Url = "https://github.com/FantasticFiasco/mvvm-dialogs" },
+        new OpenSourceProject { Name = "Serilog", Version = "3.0.0", License = Apache2, Url = "https://serilog.net/" },
+        new OpenSourceProject { Name = "Serilog.Sinks.Console", Version = "4.1.0", License = Apache2, Url = "https://github.com/serilog/serilog-sinks-console" },
+        new OpenSourceProject { Name = "Serilog.Sinks.File", Version = "5.0.0", License = Apache2, Url = "https://serilog.net/" }
     };
 
     private List<OpenSourceProject> _thirdPartyComponents = new List<OpenSourceProject>
     {
-        new OpenSourceProject { Name = "IconPark", Version = "1.3.0", License = "Apache-2.0", Url = "https://iconpark.bytedance.com/official" },
+        new OpenSourceProject { Name = "IconPark", Version = "1.3.0", License = Apache2, Url = "https://iconpark.bytedance.com/official" },
         //new OpenSourceProject { Name = "ICON", Version = "", License = "", Url = "https://icons8.com/" },
         //new OpenSourceProject { Name = "第三方组件名称2", Version = "第三方组件版本号2", License = "第三方组件许可证2", Url = "http://Bing.com" },
         //new OpenSourceProject { Name = "第三方组件名称3", Version = "第三方组件版本号3", License = "第三方组件许可证3", Url = "http://Google.com" }
@@ -97,37 +91,37 @@ internal class AboutManager
         set => _specialThanks = value;
     }
 
-    public FlowDocument GenerateLicenseInfoDocument()
+    public FlowDocument GenerateLicenseInfoDocument( )
     {
         FlowDocument flowDocument = new FlowDocument();
-        AddParagraph(flowDocument, new Bold(new Run($"{SoftwareName} v{SoftwareVersion}")));
-        AddParagraph(flowDocument, new Run($"{GetStringFromAppResources("CopyrightOwner")} © {CopyrightOwner} {ReleaseDate}"));
-        AddParagraph(flowDocument, new Run($"{GetStringFromAppResources("ThirdLibraries")}"));
-        AddList(flowDocument, OpenSourceLibraries);
-        AddParagraph(flowDocument, new Run($"{GetStringFromAppResources("ThirdComponents")}"));
-        AddList(flowDocument, ThirdPartyComponents);
-        AddParagraph(flowDocument, new Run($"{GetStringFromAppResources("SpecialThanks")}"));
-        AddList(flowDocument, SpecialThanks);
-        AddExtraInfosList(flowDocument, null);
+        AddParagraph(flowDocument , new Bold(new Run($"{SoftwareName} v{SoftwareVersion}")));
+        AddParagraph(flowDocument , new Run($"{GetStringFromAppResources("CopyrightOwner")} {CopyrightOwner} {ReleaseDate}"));
+        AddParagraph(flowDocument , new Run($"{GetStringFromAppResources("ThirdLibraries")}"));
+        AddList(flowDocument , OpenSourceLibraries);
+        AddParagraph(flowDocument , new Run($"{GetStringFromAppResources("ThirdComponents")}"));
+        AddList(flowDocument , ThirdPartyComponents);
+        AddParagraph(flowDocument , new Run($"{GetStringFromAppResources("SpecialThanks")}"));
+        AddList(flowDocument , SpecialThanks);
+        AddExtraInfosList(flowDocument , null);
 
         return flowDocument;
     }
 
-    private void AddParagraph(FlowDocument flowDocument, Inline inline)
+    private void AddParagraph(FlowDocument flowDocument , Inline inline)
     {
         Paragraph paragraph = new Paragraph();
         paragraph.Inlines.Add(inline);
         flowDocument.Blocks.Add(paragraph);
     }
 
-    private void AddList(FlowDocument flowDocument, List<OpenSourceProject> items)
+    private void AddList(FlowDocument flowDocument , List<OpenSourceProject> items)
     {
         List list = new List();
-        foreach (OpenSourceProject item in items)
+        foreach( OpenSourceProject item in items )
         {
             ListItem listItem = new ListItem();
 
-            if (!string.IsNullOrEmpty(item.Url))
+            if( !string.IsNullOrEmpty(item.Url) )
             {
                 Hyperlink hyperlink = new Hyperlink(new Run($"{item.Name} " + (item.Version.IsNullOrWhiteSpaceOrEmpty() ? "" : $"v{item.Version}")));
                 hyperlink.NavigateUri = new Uri(item.Url); // set the hyperlink target
@@ -139,7 +133,7 @@ internal class AboutManager
                 listItem.Blocks.Add(new Paragraph(new Run($"{item.Name} " + (item.Version.IsNullOrWhiteSpaceOrEmpty() ? "" : $"v{item.Version}"))));
             }
 
-            if (!string.IsNullOrEmpty(item.License))
+            if( !string.IsNullOrEmpty(item.License) )
             {
                 listItem.Blocks.Add(new Paragraph(new Italic(new Run($"{GetStringFromAppResources("License")} {item.License}"))));
             }
@@ -149,21 +143,22 @@ internal class AboutManager
         flowDocument.Blocks.Add(list);
     }
 
-    private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+    private void Hyperlink_RequestNavigate(object sender , RequestNavigateEventArgs e)
     {
         try
         {
             // open the link in the default browser
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
-                FileName = e.Uri.AbsoluteUri,
+                FileName = e.Uri.AbsoluteUri ,
                 UseShellExecute = true
             };
 
             Process.Start(startInfo);
         }
-        catch (Exception ex)
+        catch( Exception ex )
         {
+            App.Logger.Error(ex , "Hyperlink_RequestNavigate");
             // handle the exception
         }
 
@@ -171,14 +166,14 @@ internal class AboutManager
     }
 
     //TODO: Add update/usage/etc infos
-    private void AddExtraInfosList(FlowDocument flowDocument, List<OpenSourceProject> items)
+    private void AddExtraInfosList(FlowDocument flowDocument , List<OpenSourceProject> items)
     {
-        AddParagraph(flowDocument, new Run($"{GetStringFromAppResources("Slogan")}"));
+        AddParagraph(flowDocument , new Run($"{GetStringFromAppResources("Slogan")}"));
     }
 
     #endregion FlowDocumentContent
 
-    private void GetSoftwareAssemblyInfos()
+    private void GetSoftwareAssemblyInfos( )
     {
         Assembly assembly = Assembly.GetExecutingAssembly();
         AssemblyName assemblyName = assembly.GetName();
@@ -188,15 +183,15 @@ internal class AboutManager
         string copyright = string.Empty;
         string releaseDate = string.Empty;
 
-        object[] attributes = assembly.GetCustomAttributes(typeof(AssemblyTrademarkAttribute), false);
-        if (attributes.Length > 0)
+        object[] attributes = assembly.GetCustomAttributes(typeof(AssemblyTrademarkAttribute) , false);
+        if( attributes.Length > 0 )
         {
             AssemblyTrademarkAttribute trademarkAttribute = (AssemblyTrademarkAttribute)attributes[0];
             copyright = trademarkAttribute.Trademark;
         }
 
-        attributes = assembly.GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), false);
-        if (attributes.Length > 0)
+        attributes = assembly.GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute) , false);
+        if( attributes.Length > 0 )
         {
             AssemblyInformationalVersionAttribute informationalVersionAttribute = (AssemblyInformationalVersionAttribute)attributes[0];
             releaseDate = informationalVersionAttribute.InformationalVersion.Split('+')[0];
@@ -218,10 +213,10 @@ internal class AboutManager
             App.Logger.Information(location);
             return value;
         }
-        catch (Exception e)
+        catch( Exception e )
         {
             location += " cause problem.";
-            App.Logger.Error(location, e);
+            App.Logger.Error(location , e);
             throw;
         }
     }

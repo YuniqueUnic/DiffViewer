@@ -1,11 +1,9 @@
 ﻿using DiffViewer.Managers;
 using DiffViewer.Services;
-using DiffViewer.ViewModels;
 using Serilog;
 using System;
 using System.IO;
 using System.Windows;
-using VSTSDataProvider.ViewModels;
 
 namespace DiffViewer;
 
@@ -25,8 +23,17 @@ public partial class App : Application
     {
         InitializeComponent();
         LanguageChanged += OnLanguageChanged;
-        ViewModelLocator = (App.Current.FindResource("VMsLocator") as ViewModelLocator) ?? new();
+
+        ShowWindows();
+
         AppConfigManager.SwitchLanguageTo("zh-cn");
+    }
+
+    private void ShowWindows( )
+    {
+        ViewModelLocator = (App.Current.FindResource("VMsLocator") as ViewModelLocator) ?? new();
+
+        ViewModelLocator.Main_Window.Show();
     }
 
     /// <summary>

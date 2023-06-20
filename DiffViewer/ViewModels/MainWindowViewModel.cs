@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DiffViewer.Managers;
 using DiffViewer.Managers.Helper;
-using DiffViewer.Services;
+using DiffViewer.Views;
 using MvvmDialogs;
 using MvvmDialogs.FrameworkDialogs.OpenFile;
 using Serilog;
@@ -93,6 +93,14 @@ public partial class MainWindowViewModel : ObservableObject
     {
         _logger.Debug("SwitchLanguageCommand called");
         AppConfigManager.SwitchLanguageTo(lang);
+    }
+
+    [RelayCommand]
+    public void ShowAboutWindow( )
+    {
+        _logger.Debug("ShowAboutWindowCommand called");
+        WeakReferenceMessenger.Default.Send(new Messages.WindowActionMessage() { Sender = this , Message = $"Show{nameof(AboutWindow)}" });
+        App.ViewModelLocator.About_Window.Show();
     }
 
     /// <summary>

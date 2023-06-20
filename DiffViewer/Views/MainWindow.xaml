@@ -18,9 +18,9 @@
         WindowStartupLocation="CenterScreen"
         WindowStyle="None">
 
-    <Window.DataContext>
+    <d:Window.DataContext>
         <Binding Path="MainWindow_ViewModel" Source="{StaticResource VMsLocator}" />
-    </Window.DataContext>
+    </d:Window.DataContext>
 
     <Grid Name="BaseGrid" Margin="4,0,4,2">
         <Grid.RowDefinitions>
@@ -107,8 +107,8 @@
                                       CommandParameter="{Binding RelativeSource={RelativeSource self}, Path=Tag}" />
                         </MenuItem>
                         <MenuItem Style="{StaticResource NormalMenuItemStyle}"
-                                  Header="SHowIcon"
-                                  Command="{Binding ShowIconCommand}" />
+                                  Header="{DynamicResource About}"
+                                  Command="{Binding ShowAboutWindowCommand}" />
                     </MenuItem>
                 </Menu>
 
