@@ -6,25 +6,10 @@ using MvvmDialogs;
 using Serilog;
 using Serilog.Events;
 using System;
-using System.Windows;
 using VSTSDataProvider.ViewModels;
 
 namespace DiffViewer.Services;
 
-
-public static class WindowHelper
-{
-    public static Window SetDataContext(this Window window , object dataContext)
-    {
-        window.DataContext = dataContext;
-        return window;
-    }
-    public static Window SetOwnerWindow(this Window window , Window owner)
-    {
-        window.Owner = owner;
-        return window;
-    }
-}
 
 public class ViewModelLocator
 {
@@ -94,8 +79,8 @@ public class ViewModelLocator
         // register VM services
         services.AddTransient<AboutViewModel>();
         services.AddTransient<MainWindowViewModel>();
+        services.AddTransient<IWindow , AboutWindow>(sp => new AboutWindow { DataContext = About_ViewModel });
         services.AddSingleton<MainWindow>(sp => new MainWindow { DataContext = MainWindow_ViewModel });
-        services.AddTransient<AboutWindow>(sp => new AboutWindow { DataContext = About_ViewModel , Owner = Main_Window });
 
         //var a = services.BuildServiceProvider();
         //Console.WriteLine(a.GetRequiredService<AboutViewModel>().loggerAbout.Equals(a.GetRequiredService<MainWindowViewModel>().logger1));

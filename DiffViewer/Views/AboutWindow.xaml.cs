@@ -1,6 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using DiffViewer.Messages;
+using MvvmDialogs;
+using System.ComponentModel;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using VSTSDataProvider.ViewModels;
 
@@ -9,18 +12,18 @@ namespace DiffViewer.Views
     /// <summary>
     /// AboutWindow.xaml 的交互逻辑
     /// </summary>
-    public partial class AboutWindow : Window
+    public partial class AboutWindow : Window, IWindow
     {
         public AboutWindow( )
         {
             InitializeComponent();
 
-            //this.DataContext = App.ViewModelLocator.About_ViewModel;
-
             RegisteMessengers();
 
             App.LanguageChanged += App_LanguageChanged;
         }
+
+        ContentControl IWindow.Owner { get => this.Owner; set => this.Owner = (Window)value; }
 
         private void App_LanguageChanged(object? sender , LanguageChangedEventArgs e)
         {
@@ -51,9 +54,6 @@ namespace DiffViewer.Views
                     case "Minimize":
                         this.WindowState = WindowState.Minimized;
                         break;
-                    case $"Show{nameof(AboutWindow)}":
-                        this.Activate();
-                        break;
                     default:
                         App.Logger.Warning<WindowActionMessage>($"Unknown WindowActionMessage: {m.Message}" , m);
                         break;
@@ -71,7 +71,12 @@ namespace DiffViewer.Views
             });
         }
 
-
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            //base.OnClosing(e);
+            this.Visibility = Visibility.Hidden;
+            e.Cancel = true;
+        }
 
     }
 }

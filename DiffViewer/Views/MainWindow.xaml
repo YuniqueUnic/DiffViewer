@@ -22,6 +22,44 @@
         <Binding Path="MainWindow_ViewModel" Source="{StaticResource VMsLocator}" />
     </d:Window.DataContext>
 
+    <Window.Resources>
+
+        <Style x:Key="ThreeStateCheckBoxStyle" TargetType="{x:Type CheckBox}">
+            <Setter Property="IsThreeState" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type CheckBox}">
+                        <StackPanel Orientation="Horizontal">
+                            <StackPanel.Resources>
+                                <Style BasedOn="{StaticResource IconImageStyle}" TargetType="Image">
+                                    <Setter Property="Width" Value="16" />
+                                    <Setter Property="Height" Value="16" />
+                                </Style>
+                            </StackPanel.Resources>
+                            <!--  Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged,  -->
+                            <Image Name="Part_TrueImage"
+                                   Visibility="{TemplateBinding IsChecked,
+                                                                Converter={StaticResource IsCheckedToVisibility},
+                                                                ConverterParameter='True'}"
+                                   Source="{StaticResource PassedIcon}" />
+                            <Image Name="Part_FalseImage"
+                                   Visibility="{TemplateBinding IsChecked,
+                                                                Converter={StaticResource IsCheckedToVisibility},
+                                                                ConverterParameter='False'}"
+                                   Source="{StaticResource FailedIcon}" />
+                            <Image Name="Part_NullImage"
+                                   Visibility="{TemplateBinding IsChecked,
+                                                                Converter={StaticResource IsCheckedToVisibility},
+                                                                ConverterParameter='Null'}"
+                                   Source="{StaticResource ErrorIcon}" />
+                        </StackPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+
     <Grid Name="BaseGrid" Margin="4,0,4,2">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -66,12 +104,9 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="2*" />
                     <ColumnDefinition Width="3*" />
+                    <ColumnDefinition Width="7*" />
                 </Grid.ColumnDefinitions>
-                <TextBox Name="OnlySearchTextBox"
-                         Visibility="Hidden"
-                         Text="{DynamicResource Search}" />
                 <!--  Grid.Column="0"  -->
                 <Menu Name="TitleMenu"
                       Grid.Column="0"
@@ -92,8 +127,8 @@
 
 
                         <MenuItem Style="{StaticResource NormalMenuItemStyle}"
-                                  Header="{DynamicResource About}"
-                                  Command="{Binding AboutWindow}" />
+                                  Header="{DynamicResource Usage}"
+                                  Command="{Binding ShowUsageWindowCommand}" />
                         <MenuItem Style="{StaticResource NormalMenuItemStyle}" Header="{DynamicResource Languages}">
                             <MenuItem Style="{StaticResource NormalMenuItemStyle}"
                                       Header="{DynamicResource Chinese}"
@@ -111,6 +146,10 @@
                                   Command="{Binding ShowAboutWindowCommand}" />
                     </MenuItem>
                 </Menu>
+                <TextBox Name="OnlySearchTextBox"
+                         Grid.Column="1"
+                         Visibility="Hidden"
+                         Text="{DynamicResource Search}" />
 
                 <TextBox Name="SearchTextBox"
                          Style="{StaticResource LeftIconTextBoxStyle}"
@@ -124,7 +163,14 @@
                          MaxLength="200"
                          Tag="{StaticResource SearchIcon}"
                          ToolTip="{Binding ElementName=OnlySearchTextBox, Path=Text, StringFormat='{}{0}...'}"
-                         Text="{Binding SearchText}" />
+                         Text="{Binding SearchText}">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Return"
+                                    Modifiers="Ctrl"
+                                    Command="{Binding TrytoSearchTextCommand}"
+                                    CommandParameter="{Binding SearchText}" />
+                    </TextBox.InputBindings>
+                </TextBox>
                 <StackPanel Grid.Column="2"
                             Margin="4,2"
                             HorizontalAlignment="Left"
@@ -137,13 +183,13 @@
                         <Image Style="{StaticResource IconImageStyle}"
                                d:Source="../Resources/Images/Icons/Import.png"
                                Source="{StaticResource ImportIcon}" />
-                        <i:Interaction.Behaviors>
-                            <iMy:ClickBehavior ClickTimes="2"
-                                               IsEnable="True"
-                                               Command="{Binding ImportDiffFileCommand}"
-                                               CommandParameter="Import Diff File"
-                                               iMy:CommandRelayed.CommandName="ImportDiffFileCommand" />
-                        </i:Interaction.Behaviors>
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseDoubleClick">
+                                <i:InvokeCommandAction EventArgsConverter="{StaticResource MouseButtonClickToBool}"
+                                                       Command="{Binding ImportDiffFileCommand}"
+                                                       PassEventArgsToCommand="True" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
                     </Button>
                     <TextBlock Name="ImportTextBlock"
                                Margin="4,0,0,0"
@@ -153,7 +199,9 @@
                                ToolTip="{Binding RelativeSource={RelativeSource self}, Path=Text}"
                                Text="{Binding ImportedFileFullPath}">
                         <i:Interaction.Behaviors>
-                            <iMy:CopyBehavior Text="{Binding ElementName=ImportTextBlock, Path=Text}" />
+                            <iMy:CopyBehavior ClickTimes="2"
+                                              MouseButton="Right"
+                                              Text="{Binding ElementName=ImportTextBlock, Path=Text}" />
                         </i:Interaction.Behaviors>
                     </TextBlock>
                 </StackPanel>
@@ -163,21 +211,91 @@
         <Grid Name="MainFunctionGrid" Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="*" MinWidth="48" />
+                <ColumnDefinition Width="5" />
                 <ColumnDefinition Width="3*" />
             </Grid.ColumnDefinitions>
-            <RichTextBox Grid.Column="0" />
-            <RichTextBox Grid.Column="2" />
+            <TextBox Grid.Column="0" Text="{Binding LeftResult}" />
+            <GridSplitter Grid.Column="1"
+                          Width="5"
+                          HorizontalAlignment="Stretch"
+                          ShowsPreview="True" />
+            <GridSplitter Grid.Column="3"
+                          Width="5"
+                          HorizontalAlignment="Stretch"
+                          ShowsPreview="True" />
+            <TextBox Grid.Column="4" Text="{Binding RightResult}" />
             <Grid Name="CenterGrid"
                   Grid.Row="0"
-                  Grid.Column="1">
+                  Grid.Column="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="8*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <ListBox Grid.Row="1" />
+                <ListBox Grid.Row="1"
+                         ScrollViewer.CanContentScroll="True"
+                         ScrollViewer.PanningMode="VerticalFirst"
+                         SelectedItem="{Binding SelectedTestCase}"
+                         ItemsSource="{Binding DiffTestCases, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <ListBox.Resources>
+                        <Style TargetType="{x:Type ListBox}">
+                            <Setter Property="Background" Value="{StaticResource TextLightGrey}" />
+                            <Setter Property="ItemTemplate">
+                                <Setter.Value>
+                                    <DataTemplate>
+                                        <Grid Name="ItemGrid">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <CheckBox Style="{StaticResource ThreeStateCheckBoxStyle}"
+                                                      Grid.Column="0"
+                                                      IsChecked="{Binding IsIdentical}" />
+                                            <TextBlock Name="Part_NameTextBlock"
+                                                       Grid.Column="1"
+                                                       Margin="4,0"
+                                                       IsEnabled="False"
+                                                       ToolTip="{Binding Name}"
+                                                       Text="{Binding Name}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                        <Style TargetType="{x:Type ListBoxItem}">
+                            <Setter Property="Background" Value="{StaticResource TextLightGrey}" />
+                            <Setter Property="BorderBrush" Value="{StaticResource ThemeSecondary}" />
+                            <Setter Property="BorderThickness" Value="1" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsIdentical}" Value="False">
+                                    <Setter Property="Background" Value="DarkOrange" />
+                                    <Setter Property="BorderBrush" Value="YellowGreen" />
+                                    <Setter Property="Foreground" Value="Black" />
+                                    <Setter Property="FontWeight" Value="Normal" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsIdentical}" Value="{x:Null}">
+                                    <Setter Property="Background" Value="Fuchsia" />
+                                    <Setter Property="BorderBrush" Value="BlanchedAlmond" />
+                                    <Setter Property="BorderThickness" Value="2" />
+                                    <Setter Property="Foreground" Value="White" />
+                                    <Setter Property="FontWeight" Value="Bold" />
+                                </DataTrigger>
+                                <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                    <Setter Property="IsSelected" Value="True" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListBox.Resources>
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseDoubleClick">
+                            <i:InvokeCommandAction Command="{Binding ShowTestCaseDiffCommand}" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </ListBox>
+                <!--  // Use ContentControl to do more funtions  -->
                 <Button Grid.Row="2" Height="24" />
             </Grid>
         </Grid>

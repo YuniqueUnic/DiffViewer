@@ -10,6 +10,7 @@
     <s:String x:Key="Identical">同一的</s:String>
     <s:String x:Key="Different">存异的</s:String>
     <s:String x:Key="About">关于</s:String>
+    <s:String x:Key="Usage">说明</s:String>
     <s:String x:Key="ThirdLibraries">所使用的第三方库</s:String>
     <s:String x:Key="SpecialThanks">特别感谢</s:String>
     <s:String x:Key="CopyrightOwner">版权所有 ©</s:String>

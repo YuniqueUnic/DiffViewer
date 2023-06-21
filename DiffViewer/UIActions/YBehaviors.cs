@@ -5,7 +5,9 @@ using System.Windows.Input;
 
 namespace DiffViewer.UIActions;
 
-
+/// <summary>
+/// Click Behavior
+/// </summary>
 class ClickBehavior : Behavior<UIElement>
 {
     protected bool IsBaseCommandExecuted = false;
@@ -28,6 +30,13 @@ class ClickBehavior : Behavior<UIElement>
         get { return (int)GetValue(ClickTimesProperty); }
         set { SetValue(ClickTimesProperty , value); }
     }
+
+    public MouseButton MouseButton
+    {
+        get { return (MouseButton)GetValue(MouseButtonProperty); }
+        set { SetValue(MouseButtonProperty , value); }
+    }
+
 
     public bool IsEnable
     {
@@ -71,6 +80,13 @@ class ClickBehavior : Behavior<UIElement>
             typeof(ClickBehavior) ,
             new PropertyMetadata(true));
 
+    // For MouseButton. 
+    public static readonly DependencyProperty MouseButtonProperty =
+        DependencyProperty.Register("MouseButton" ,
+            typeof(MouseButton) ,
+            typeof(ClickBehavior) ,
+            new PropertyMetadata(MouseButton.Left));
+
 
     #endregion 注册依赖属性
 
@@ -78,30 +94,28 @@ class ClickBehavior : Behavior<UIElement>
     protected override void OnAttached( )
     {
         base.OnAttached();
-        AssociatedObject.PreviewMouseLeftButtonDown += AssociatedObject_MouseDoubleClick;
-        AssociatedObject.PreviewMouseLeftButtonDown += ResetLocalVar;
+        AssociatedObject.MouseDown += AssociatedObject_MouseDoubleClick;
+        AssociatedObject.MouseDown += ResetLocalVar;
     }
 
     protected override void OnDetaching( )
     {
         base.OnDetaching();
-        AssociatedObject.PreviewMouseLeftButtonDown -= AssociatedObject_MouseDoubleClick;
-        AssociatedObject.PreviewMouseLeftButtonDown -= ResetLocalVar;
+        AssociatedObject.MouseDown -= AssociatedObject_MouseDoubleClick;
+        AssociatedObject.MouseDown -= ResetLocalVar;
     }
 
     protected virtual void AssociatedObject_MouseDoubleClick(object sender , MouseButtonEventArgs e)
     {
         string eventInfos = $"MouseButtonEventArgs:" +
                             $"{Environment.NewLine}Source: {(e.Source as FrameworkElement).Name}" +
-                            $"{Environment.NewLine}LeftButton: {e.LeftButton}" +
-                            $"{Environment.NewLine}MiddleButton: {e.MiddleButton}" +
-                            $"{Environment.NewLine}RightButton: {e.RightButton}" +
+                            $"{Environment.NewLine}ClickButton: {e.ChangedButton}" +
                             $"{Environment.NewLine}ClickCount: {e.ClickCount}";
 
         string commandName = CommandRelayed.GetCommandName(this) ?? "No CommandName Attached.";
 
         string commandInfos = $"{Environment.NewLine}Command: {commandName}" +
-                              $"{Environment.NewLine}CommandParameter: {CommandParameter.ToString()}";
+                              $"{Environment.NewLine}CommandParameter: {CommandParameter?.ToString()}";
 
         if( !IsEnable )
         {
@@ -114,7 +128,7 @@ class ClickBehavior : Behavior<UIElement>
             App.Logger.Error<ClickBehavior>($"Sender is null" + eventInfos , this);
             throw new NullReferenceException($"Sender is null" + eventInfos);
         }
-        if( e.ClickCount % ClickTimes == 0 )
+        if( e.ClickCount % ClickTimes == 0 && e.ChangedButton == this.MouseButton )
         {
             App.Logger.Information<ClickBehavior>(eventInfos , this);
 
@@ -134,9 +148,12 @@ class ClickBehavior : Behavior<UIElement>
     }
 }
 
+public class CopyBehavior<T> : CopyBehavior { }
+
 public class CopyBehavior : Behavior<UIElement>
 {
     #region 依赖属性
+
     public string Text
     {
         get { return (string)GetValue(TextProperty); }
@@ -148,6 +165,20 @@ public class CopyBehavior : Behavior<UIElement>
         get { return (bool)GetValue(IsEnabledProperty); }
         set { SetValue(IsEnabledProperty , value); }
     }
+
+    public int ClickTimes
+    {
+        get { return (int)GetValue(ClickTimesProperty); }
+        set { SetValue(ClickTimesProperty , value); }
+    }
+
+
+    public MouseButton MouseButton
+    {
+        get { return (MouseButton)GetValue(MouseButtonProperty); }
+        set { SetValue(MouseButtonProperty , value); }
+    }
+
     #endregion
 
     #region 注册依赖属性
@@ -166,14 +197,31 @@ public class CopyBehavior : Behavior<UIElement>
         typeof(CopyBehavior) ,
         new PropertyMetadata(true)
     );
+
+    //定义一个 鼠标点击次数 的依赖属性
+    public static readonly DependencyProperty ClickTimesProperty =
+        DependencyProperty.Register(
+            "ClickTimes" ,
+            typeof(int) ,
+            typeof(CopyBehavior) ,
+            new PropertyMetadata(2));
+
+
+    // For MouseButton. 
+    public static readonly DependencyProperty MouseButtonProperty =
+        DependencyProperty.Register("MouseButton" ,
+            typeof(MouseButton) ,
+            typeof(CopyBehavior) ,
+            new PropertyMetadata(MouseButton.Left));
+
     #endregion
 
     protected override void OnAttached( )
     {
-        AssociatedObject.MouseLeftButtonDown += CopyTextFromTextBox;
+        AssociatedObject.MouseDown += CopyTextFromTextBox;
     }
 
-    private void CopyTextFromTextBox(object sender , RoutedEventArgs e)
+    private void CopyTextFromTextBox(object sender , MouseButtonEventArgs e)
     {
 
         if( !IsEnabled )
@@ -183,14 +231,18 @@ public class CopyBehavior : Behavior<UIElement>
                                                               $"{Environment.NewLine}{Text}." , this);
             return;
         }
-        Clipboard.SetText(Text);
-        App.Logger.Information<CopyBehavior>($"Copy Text to Clipboard:" +
-                                                              $"{Environment.NewLine}{Text}" , this);
+
+        if( e.ClickCount % ClickTimes == 0 && e.ChangedButton == this.MouseButton )
+        {
+            Clipboard.SetText(Text);
+            App.Logger.Information<CopyBehavior>($"Copy Text to Clipboard:" +
+                                                                  $"{Environment.NewLine}{Text}" , this);
+        }
 
     }
 
     protected override void OnDetaching( )
     {
-        AssociatedObject.MouseLeftButtonDown -= CopyTextFromTextBox;
+        AssociatedObject.MouseDown -= CopyTextFromTextBox;
     }
 }

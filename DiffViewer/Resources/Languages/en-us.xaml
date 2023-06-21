@@ -10,6 +10,7 @@
     <s:String x:Key="Identical">Identical</s:String>
     <s:String x:Key="Different">Different</s:String>
     <s:String x:Key="About">About</s:String>
+    <s:String x:Key="Usage">Usage</s:String>
     <s:String x:Key="ThirdLibraries">This software uses open source libraries</s:String>
     <s:String x:Key="SpecialThanks">Special Thanks</s:String>
     <s:String x:Key="CopyrightOwner">CopyrightOwner ©</s:String>

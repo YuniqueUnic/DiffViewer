@@ -11,6 +11,7 @@ namespace DiffViewer.Managers;
 public class DiffDataManager
 {
     #region Fields
+
     const char m_SplitChar = '#';
     const char m_LineChar = '@';
     const char m_UnitOpChar = '^';
@@ -27,7 +28,8 @@ public class DiffDataManager
     private bool m_IsContainEndofSummary;
 
     private string _diffFilePath;
-    private string? _diffNames;
+    private string? _diffAllNames;
+    private List<string> _diffNames = new();
     private List<string> _diffResults = new();
 
     #endregion Fields
@@ -37,32 +39,15 @@ public class DiffDataManager
     #region Properties
 
     /// <summary>
+    /// All Diff TestCase with properties.
+    /// TestCase Properties: Name, IsIdentical, Raw, OldText_BaseLine, NewText_Actual, MoreInfo.
+    /// </summary>
+    public List<TestCase>? TestCases { get; private set; }
+
+    /// <summary>
     /// Get Diff Text LineCount and full Content by using FileManager.GetTextInfoAsync().
     /// </summary>
     public (int, string?) DiffInfos => FileManager.GetTextInfoAsync(_diffFilePath).Result;
-
-#if DEBUG
-
-    /// <summary>
-    /// Get Diff TestCase Names.
-    /// </summary>
-    public List<string>? DiffNames
-    {
-        get; private set;
-    }
-
-    /// <summary>
-    /// Get all Diff Compare Results.
-    /// </summary>
-    public List<string>? DiffResults
-    {
-        get { return _diffResults; }
-    }
-
-#endif 
-
-
-    public List<TestCase>? TestCases { get; private set; }
 
     /// <summary>
     /// Check whether the Diff Process is over.
@@ -92,8 +77,8 @@ public class DiffDataManager
     {
         await LoadAndProcessDiffFileAsync(_diffFilePath);
 #if DEBUG
-        DiffNames = await ExtractTestCasesNameAsync(_diffNames);
-        TestCases = DiffNames.CreateTCswithName();
+        _diffNames = await ExtractTestCasesNameAsync(_diffAllNames);
+        TestCases = _diffNames.CreateTCswithName();
         TestCases = await ExtractTestCaseDiffResultAsync(_diffResults , TestCases);
 #endif
 
@@ -104,116 +89,10 @@ public class DiffDataManager
         return this;
     }
 
-    /// <summary>
-    /// Load large Txt file by using FileStream and StreamReader.
-    /// And using StringBuilder to concat strings.
-    /// </summary>
-    /// <param name="diffFilePath"></param>
-    private async Task LoadAndProcessDiffFileAsync(string diffFilePath)
-    {
-        App.Logger.Information($"Start handling Diff File: {diffFilePath}");
-        string? location = $"{nameof(DiffDataManager)}.{nameof(HandleDiff)}";
 
-        await TasksManager.RunTaskAsync(async ( ) =>
-        {
-            try
-            {
-                StringBuilder sb = new StringBuilder();
-                int bufferSize = 4096;
-                int numPostProcessing = 0;
-                using( FileStream fs = new FileStream(diffFilePath , FileMode.Open , FileAccess.Read , FileShare.Read , bufferSize , useAsync: true) )
-                {
-                    using( StreamReader sr = new StreamReader(fs , Encoding.UTF8 , true , bufferSize) )
-                    {
-                        while( !sr.EndOfStream )
-                        {
-                            string line = sr.ReadLine();
-                            sb.AppendLine(line);
 
-                            // Get the TestCases Name Content.
-                            if( !m_IsContainEndofSummary )
-                            {
-                                if( !m_IsContainValidation )
-                                {
-                                    if( line.Contains(m_ValidationResults) ) { m_IsContainValidation = true; }
-                                }
 
-                                if( line.Contains(m_EndofSummary) )
-                                {
-                                    if( !m_IsContainValidation ) throw new Exception($"The {m_ValidationResults} have not been found! File Struct is not right!!!");
 
-                                    _diffNames = sb.ToString();
-                                    App.Logger.Information($"The {m_ValidationResults} have been found! Diff Name Content got.");
-                                    m_IsContainEndofSummary = true;
-                                    // Clear Content of StringBuilder.
-                                    sb.Clear();
-                                }
-                            }
-
-                            // Get the Diff Content for each TestCase.
-                            if( m_IsContainEndofSummary && m_IsContainValidation )
-                            {
-                                if( numPostProcessing == 1 && (line.StartsWith(m_PostProcessing) || line.Contains(m_PostProcessing)) )
-                                {
-                                    sb.Remove(sb.Length - line.Length - 2 , line.Length);
-                                    _diffResults.Add(sb.ToString());
-                                    sb.Clear();
-                                    sb.AppendLine(line);
-                                }
-                                else if( numPostProcessing == 0 && (line.StartsWith(m_PostProcessing) || line.Contains(m_PostProcessing)) )
-                                {
-                                    sb.Clear();
-                                    sb.AppendLine(line);
-                                    numPostProcessing = 1;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                //Add the last one TestCase records.
-                _diffResults.Add(sb.ToString());
-
-                IsProcessOver = true;
-                App.Logger.Information($"End of handling Diff File: {diffFilePath}");
-            }
-            catch( System.Exception )
-            {
-                App.Logger.Error($"{nameof(DiffDataManager)} LoadAndProcessDiffFile failed!");
-                throw;
-            }
-        } , location);
-
-    }
-
-    /// <summary>
-    /// Extract the TestCases Name from the Diff Names String.
-    /// </summary>
-    /// <returns></returns>
-    /// <exception cref="Exception"></exception>
-    private async Task<List<string>> ExtractTestCasesNameAsync(string diffNamesString)
-    {
-        string? location = $"{nameof(DiffDataManager)}.{nameof(ExtractTestCasesNameAsync)}";
-
-        return await TasksManager.RunTaskWithReturnAsync(( ) =>
-        {
-            CheckProcessOver();
-            List<string> testCaselist = new List<string>();
-            string[] strings = diffNamesString?.Split('\n' , StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? throw new Exception();
-
-            for( int i = 0; i < strings.Length; i++ )
-            {
-                if( strings[i].Contains(m_Completedin) )
-                {
-                    testCaselist.Add(strings[i].Substring(0 , strings[i].IndexOf(m_Completedin , StringComparison.OrdinalIgnoreCase)));
-                }
-            }
-
-            return testCaselist;
-
-        } , location , catchException: true);
-
-    }
 
     /// <summary>
     /// Extract the Diff Compare Result for each TestCase.
@@ -255,7 +134,8 @@ public class DiffDataManager
 
                 var raw = sb.ToString();
 
-                var location = $"{nameof(DiffDataManager)}.{nameof(ExtractTestCaseDiffResultAsync)}.{nameof(SplitResult)}";
+                var location = $"{nameof(DiffDataManager)}.{nameof(ExtractTestCaseDiffResultAsync)}.{nameof(SplitResult)}.{name}";
+
                 var splitedData = TasksManager.RunTaskWithReturn(( ) =>
                 {
                     return SplitResult(raw);
@@ -281,6 +161,117 @@ public class DiffDataManager
             });
             return m_testCases;
         } , location , catchException: true , throwException: false);
+
+    }
+
+    /// <summary>
+    /// Extract the TestCases Name from the Diff Names String.
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
+    private async Task<List<string>> ExtractTestCasesNameAsync(string diffNamesString)
+    {
+        string? location = $"{nameof(DiffDataManager)}.{nameof(ExtractTestCasesNameAsync)}";
+
+        return await TasksManager.RunTaskWithReturnAsync(( ) =>
+        {
+            CheckProcessOver();
+            List<string> testCaselist = new List<string>();
+            string[] strings = diffNamesString?.Split('\n' , StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? throw new Exception();
+
+            for( int i = 0; i < strings.Length; i++ )
+            {
+                if( strings[i].Contains(m_Completedin) )
+                {
+                    testCaselist.Add(strings[i].Substring(0 , strings[i].IndexOf(m_Completedin , StringComparison.OrdinalIgnoreCase)));
+                }
+            }
+
+            return testCaselist;
+
+        } , location , catchException: true);
+
+    }
+
+    /// <summary>
+    /// Load large Txt file by using FileStream and StreamReader.
+    /// And using StringBuilder to concat strings.
+    /// </summary>
+    /// <param name="diffFilePath"></param>
+    private async Task LoadAndProcessDiffFileAsync(string diffFilePath)
+    {
+        App.Logger.Information($"Start handling Diff File: {diffFilePath}");
+        string? location = $"{nameof(DiffDataManager)}.{nameof(HandleDiff)}";
+
+        await TasksManager.RunTaskAsync(async ( ) =>
+        {
+            try
+            {
+                StringBuilder sb = new StringBuilder();
+                int bufferSize = 4096;
+                int numPostProcessing = 0;
+                using( FileStream fs = new FileStream(diffFilePath , FileMode.Open , FileAccess.Read , FileShare.Read , bufferSize , useAsync: true) )
+                {
+                    using( StreamReader sr = new StreamReader(fs , Encoding.UTF8 , true , bufferSize) )
+                    {
+                        while( !sr.EndOfStream )
+                        {
+                            string line = sr.ReadLine();
+                            sb.AppendLine(line);
+
+                            // Get the TestCases Name Content.
+                            if( !m_IsContainEndofSummary )
+                            {
+                                if( !m_IsContainValidation )
+                                {
+                                    if( line.Contains(m_ValidationResults) ) { m_IsContainValidation = true; }
+                                }
+
+                                if( line.Contains(m_EndofSummary) )
+                                {
+                                    if( !m_IsContainValidation ) throw new Exception($"The {m_ValidationResults} have not been found! File Struct is not right!!!");
+
+                                    _diffAllNames = sb.ToString();
+                                    App.Logger.Information($"The {m_ValidationResults} have been found! Diff Name Content got.");
+                                    m_IsContainEndofSummary = true;
+                                    // Clear Content of StringBuilder.
+                                    sb.Clear();
+                                }
+                            }
+
+                            // Get the Diff Content for each TestCase.
+                            if( m_IsContainEndofSummary && m_IsContainValidation )
+                            {
+                                if( numPostProcessing == 1 && (line.StartsWith(m_PostProcessing) || line.Contains(m_PostProcessing)) )
+                                {
+                                    sb.Remove(sb.Length - line.Length - 2 , line.Length);
+                                    _diffResults.Add(sb.ToString());
+                                    sb.Clear();
+                                    sb.AppendLine(line);
+                                }
+                                else if( numPostProcessing == 0 && (line.StartsWith(m_PostProcessing) || line.Contains(m_PostProcessing)) )
+                                {
+                                    sb.Clear();
+                                    sb.AppendLine(line);
+                                    numPostProcessing = 1;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                //Add the last one TestCase records.
+                _diffResults.Add(sb.ToString());
+
+                IsProcessOver = true;
+                App.Logger.Information($"End of handling Diff File: {diffFilePath}");
+            }
+            catch( System.Exception )
+            {
+                App.Logger.Error($"{nameof(DiffDataManager)} LoadAndProcessDiffFile failed!");
+                throw;
+            }
+        } , location);
 
     }
 
@@ -347,7 +338,6 @@ public class DiffDataManager
     /// <param name="throwException"> true for throwing an error if IsProcessOver is false </param>
     /// <returns></returns>
     /// <exception cref="NotSupportedException"></exception>
-
     public bool CheckProcessOver(bool throwException = true)
     {
         if( !IsProcessOver )

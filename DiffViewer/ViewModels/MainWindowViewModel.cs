@@ -2,14 +2,13 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DiffViewer.Managers;
-using DiffViewer.Managers.Helper;
-using DiffViewer.Views;
+using DiffViewer.Models;
 using MvvmDialogs;
 using MvvmDialogs.FrameworkDialogs.OpenFile;
 using Serilog;
 using System;
+using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace DiffViewer.ViewModels;
@@ -18,30 +17,45 @@ public partial class MainWindowViewModel : ObservableObject
 {
     private ILogger _logger;
     private IDialogService _dialogService;
+    private IWindow _aboutWindow;
     private int m_totalLineCount;
 
-    public MainWindowViewModel(ILogger logger , IDialogService dialogService)
+    public MainWindowViewModel(ILogger logger , IDialogService dialogService , IWindow aboutWindow)
     {
         _logger = logger;
         _dialogService = dialogService;
+        _aboutWindow = aboutWindow;
         logger.Information("MainWindowViewModel created");
     }
 
     [ObservableProperty]
     string _searchText = "Search...";
-    //string _searchText = $"{App.Current.Resources.MergedDictionaries[0]["Search"]}...";
 
     [ObservableProperty]
     string _importedFileFullPath = "Import the Diff File...";
 
+    [ObservableProperty]
+    string _leftResult = string.Empty;
+
+    [ObservableProperty]
+    string _rightResult = string.Empty;
+
+
+    [ObservableProperty]
+    public ObservableCollection<TestCase> _diffTestCases;
+
+    [ObservableProperty]
+    public TestCase _selectedTestCase;
 
     #region Window UI RelayCommands
 
     #region Logic
 
     [RelayCommand]
-    public async Task ImportDiffFile( )
+    public async Task ImportDiffFile(Object doubleLeftClicked)
     {
+        if( !(bool)doubleLeftClicked ) { return; }
+
         _logger.Debug("ImportDiffFileCommand called");
 
         var settings = new OpenFileDialogSettings()
@@ -60,8 +74,9 @@ public partial class MainWindowViewModel : ObservableObject
             _logger.Information($"Imported Diff File: {ImportedFileFullPath}");
         }
 
-        await LoadDiffFile(ImportedFileFullPath);
+        if( !File.Exists(ImportedFileFullPath) ) { return; }
 
+        await LoadDiffFile(ImportedFileFullPath);
     }
 
     private async Task LoadDiffFile(string diffFilePath)
@@ -73,14 +88,35 @@ public partial class MainWindowViewModel : ObservableObject
             await Task.Delay(1000);
         }
 
-        string WriteToPath = Path.Combine(Path.GetDirectoryName(diffFilePath) , Path.GetFileNameWithoutExtension(diffFilePath));
-        FileManager.WriteToAsync(diffDataProvider.DiffInfos.Item2 , WriteToPath + "\\DiffAll_" + Path.GetFileName(diffFilePath));
+        DiffTestCases = new ObservableCollection<TestCase>(diffDataProvider.TestCases);
 
-        var a = diffDataProvider.DiffNames.Aggregate((f , s) => { return string.Join(Environment.NewLine , f , s); });
-        FileManager.WriteToAsync(a , WriteToPath + "\\DiffNames_" + Path.GetFileName(diffFilePath));
+        int a = 0;
 
-        var b = diffDataProvider.DiffResults.Aggregate((f , s) => { return string.Join(Environment.NewLine + "$".Repeat(64) + Environment.NewLine , f , s); });
-        FileManager.WriteToAsync(b , WriteToPath + "\\Results_" + Path.GetFileName(diffFilePath));
+        //string WriteToPath = Path.Combine(Path.GetDirectoryName(diffFilePath) , Path.GetFileNameWithoutExtension(diffFilePath));
+        //FileManager.WriteToAsync(diffDataProvider.DiffInfos.Item2 , WriteToPath + "\\DiffAll_" + Path.GetFileName(diffFilePath));
+
+        //var a = diffDataProvider._diffNames.Aggregate((f , s) => { return string.Join(Environment.NewLine , f , s); });
+        //FileManager.WriteToAsync(a , WriteToPath + "\\DiffNames_" + Path.GetFileName(diffFilePath));
+
+        //var b = diffDataProvider.DiffResults.Aggregate((f , s) => { return string.Join(Environment.NewLine + "$".Repeat(64) + Environment.NewLine , f , s); });
+        //FileManager.WriteToAsync(b , WriteToPath + "\\Results_" + Path.GetFileName(diffFilePath));
+    }
+
+    [RelayCommand]
+    public void TrytoSearchText( )
+    {
+        _logger.Debug("SearchCommand called");
+
+    }
+
+
+    [RelayCommand]
+    public void ShowTestCaseDiff( )
+    {
+        if( SelectedTestCase is null ) return;
+        _logger.Information($"ShowTestCaseDiff called, TestCase Selected: {SelectedTestCase.Name}");
+        LeftResult = SelectedTestCase.OldText_BaseLine ?? string.Empty;
+        RightResult = SelectedTestCase.NewText_Actual ?? string.Empty;
     }
 
 
@@ -99,9 +135,20 @@ public partial class MainWindowViewModel : ObservableObject
     public void ShowAboutWindow( )
     {
         _logger.Debug("ShowAboutWindowCommand called");
-        WeakReferenceMessenger.Default.Send(new Messages.WindowActionMessage() { Sender = this , Message = $"Show{nameof(AboutWindow)}" });
-        App.ViewModelLocator.About_Window.Show();
+        _aboutWindow.Owner = App.ViewModelLocator.Main_Window;
+        _aboutWindow.Show();
+        //App.ViewModelLocator.About_Window.Show();
     }
+
+    [RelayCommand]
+    public void ShowUsageWindow( )
+    {
+        _logger.Debug($"{nameof(ShowUsageWindow)} called");
+        _aboutWindow.Owner = App.ViewModelLocator.Main_Window;
+        _aboutWindow.Show();
+        //App.ViewModelLocator.About_Window.Show();
+    }
+
 
     /// <summary>
     /// Close Window by using WeakReferenceMessenger.

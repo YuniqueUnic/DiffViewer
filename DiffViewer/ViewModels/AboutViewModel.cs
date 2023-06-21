@@ -14,7 +14,9 @@ public partial class AboutViewModel : ObservableObject
         _logger = logger;
     }
 
-
+    /// <summary>
+    /// Set the RichTextBox Document to the About Content by using WeakReferenceMessenger.
+    /// </summary>
     [RelayCommand]
     public void LoadAboutContent( )
     {

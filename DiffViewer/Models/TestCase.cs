@@ -4,9 +4,9 @@ public class TestCase
 {
     public string? Name { get; set; }
     /// <summary>
-    /// Identical     = true
-    /// Not Identical = false
-    /// Severe Error  = null
+    /// Identical     = true   ---> No Color
+    /// Not Identical = false  ---> Red Color
+    /// Severe Error  = null   ---> Red Color + Bold
     /// </summary>
     public bool? IsIdentical { get; set; }
     public string? Raw { get; set; }

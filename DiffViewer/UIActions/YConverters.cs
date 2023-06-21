@@ -2,7 +2,9 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Markup;
+using System.Windows.Media;
 
 namespace DiffViewer.UIActions;
 
@@ -121,6 +123,8 @@ public class BoolenNullableToVisibility : MarkupExtension, IValueConverter
         // 将参数 value 强制转换为 bool? 类型。
         bool? isVisible = (bool?)value;
 
+        if( !isVisible.HasValue ) { return Visibility.Hidden; }
+
         // 根据 Reverse 属性反转布尔值。
         if( isVisible.HasValue && Reverse )
         {
@@ -163,5 +167,183 @@ public class BoolenNullableToVisibility : MarkupExtension, IValueConverter
             default:
                 throw new NotSupportedException($"Invalid visibility value {value}.");
         }
+    }
+}
+
+/// <summary>
+/// NullableBool To Color Converter
+/// Default: TrueBrush = Transparent, FalseBrush = Red, NullBrush = Red
+/// </summary>
+public class NullableBoolToColorConverter : MarkupExtension, IValueConverter
+{
+    public Brush TrueBrush { get; set; } = Brushes.Transparent;
+    public Brush FalseBrush { get; set; } = Brushes.Red;
+    public Brush NullBrush { get; set; } = Brushes.Red;
+    public object Convert(object value , Type targetType , object parameter , CultureInfo culture)
+    {
+        return value switch
+        {
+            bool a => a ? TrueBrush : FalseBrush,
+            _ => NullBrush,
+        };
+
+
+        //if( value is null )
+        //{
+        //    return Brushes.Red;
+        //}
+
+        //if( value is bool isIdentical )
+        //{
+        //    if( isIdentical == true )
+        //    {
+        //        return Brushes.Transparent;
+        //    }
+        //    else
+        //    {
+        //        return Brushes.Red;
+        //    }
+        //}
+
+        //return Brushes.Transparent;
+    }
+
+    public object ConvertBack(object value , Type targetType , object parameter , CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override object ProvideValue(IServiceProvider serviceProvider)
+    {
+        return this;
+    }
+}
+
+
+/// <summary>
+/// NullableBool To FontWeight
+/// Default: TrueFontWeight = Normal, FalseFontWeight = Normal, NullFontWeight = Bold
+/// </summary>
+public class NullableBoolToFontWeightConverter : MarkupExtension, IValueConverter
+{
+    public FontWeight TrueFontWeight { get; set; } = FontWeights.Normal;
+    public FontWeight FalseFontWeight { get; set; } = FontWeights.Normal;
+    public FontWeight NullFontWeight { get; set; } = FontWeights.Bold;
+
+
+    public object Convert(object value , Type targetType , object parameter , CultureInfo culture)
+    {
+        return value switch
+        {
+            bool a => a ? TrueFontWeight : FalseFontWeight,
+            _ => NullFontWeight,
+        };
+
+        //if( value is null )
+        //{
+        //    return NullFontWeight;
+        //}
+
+        //if( value is bool isIdentical )
+        //{
+        //    if( isIdentical == false )
+        //    {
+        //        return FalseFontWeight;
+        //    }
+        //}
+
+        //return TrueFontWeight;
+    }
+
+    public object ConvertBack(object value , Type targetType , object parameter , CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override object ProvideValue(IServiceProvider serviceProvider)
+    {
+        return this;
+    }
+}
+
+
+/// <summary>
+/// For three state Image checkbox
+/// </summary>
+public class IsCheckedToVisibilityConverter : IValueConverter
+{
+    public object Convert(object value , Type targetType , object parameter , CultureInfo culture)
+    {
+        var isChecked = value as bool?;
+
+        if( isChecked == null )
+        {
+            return parameter.ToString() == "Null" ? Visibility.Visible : Visibility.Collapsed;
+        }
+        else if( isChecked == true )
+        {
+            return parameter.ToString() == "True" ? Visibility.Visible : Visibility.Collapsed;
+        }
+        else
+        {
+            return parameter.ToString() == "False" ? Visibility.Visible : Visibility.Collapsed;
+        }
+    }
+
+    public object ConvertBack(object value , Type targetType , object parameter , CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+
+/// <summary>
+/// Work with <i:Interaction.Triggers>
+/// <i:EventTrigger EventName = "MouseDoubleClick" > can bind to ViewModel
+/// EventArgsConverter="{StaticResource MouseButtonClickToBool}"
+/// Command="{Binding Command}"
+/// PassEventArgsToCommand="True"
+/// </summary>
+public class MouseButtonEventArgsToBoolConverter : MarkupExtension, IValueConverter
+{
+    public MouseButton ClickButton { get; set; } = MouseButton.Left;
+    public bool IsReverse { get; set; } = false;
+
+    public object Convert(object value , Type targetType , object parameter , CultureInfo culture)
+    {
+
+        if( value is not MouseButtonEventArgs mouseEventArgs ) { throw new NotSupportedException(); }
+
+        var location = $"({nameof(MouseButtonEventArgsToBoolConverter)}).";
+
+        bool result = false;
+
+        if( mouseEventArgs.ChangedButton == this.ClickButton )
+        {
+            if( !IsReverse )
+            {
+                result = true;
+            }
+            else
+            {
+                result = false;
+            }
+        }
+
+        location += $"(EventName: {mouseEventArgs.RoutedEvent.Name}).(ClickButton: {this.ClickButton}).(Return bool: {result})";
+        App.Logger.Information<MouseButtonEventArgsToBoolConverter>(location , this);
+
+        return result;
+    }
+
+
+    public object ConvertBack(object value , Type targetType , object parameter , CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override object ProvideValue(IServiceProvider serviceProvider)
+    {
+        return this;
     }
 }

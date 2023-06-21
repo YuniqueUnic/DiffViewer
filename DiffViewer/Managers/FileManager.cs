@@ -10,22 +10,21 @@ class FileManager
 {
     public static bool CheckFileExists(string filePath , bool throwExpection = true)
     {
-        try
+        //try
+        //{
+        if( !File.Exists(filePath) )
         {
-            if( !File.Exists(filePath) )
-            {
-
-                App.Logger.Error($"File does not exist: `{filePath}`");
-                if( throwExpection ) { throw new FileNotFoundException($"File can't be found!: {filePath}"); }
-                return false;
-            }
-            return true;
+            App.Logger.Error($"File does not exist: `{filePath}`");
+            if( throwExpection ) { throw new FileNotFoundException($"File can't be found!: {filePath}"); }
+            return false;
         }
-        catch( Exception e )
-        {
-            App.Logger.Error(e , $"Error on checking file exists: `{filePath}`");
-            throw;
-        }
+        return true;
+        //}
+        //catch( Exception e )
+        //{
+        //    App.Logger.Error(e , $"Error on checking file exists: `{filePath}`");
+        //    throw;
+        //}
     }
 
     public static async Task<(int, string?)> GetTextInfoAsync(string filePath)

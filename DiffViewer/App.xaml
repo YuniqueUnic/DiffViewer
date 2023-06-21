@@ -8,6 +8,9 @@
         <ResourceDictionary>
             <vms:ViewModelLocator xmlns:vms="clr-namespace:DiffViewer.Services" x:Key="VMsLocator" />
             <iMy:BooleanInverterConverter x:Key="BooleanInverterConverter" />
+            <iMy:BoolenNullableToVisibility x:Key="BoolenNullableToVisibility" />
+            <iMy:IsCheckedToVisibilityConverter x:Key="IsCheckedToVisibility" />
+            <iMy:MouseButtonEventArgsToBoolConverter x:Key="MouseButtonClickToBool" ClickButton="Left" />
 
             <SolidColorBrush x:Key="ThemePrimary" Color="#5DEABE" />
             <SolidColorBrush x:Key="ThemeSecondary" Color="#39564E" />
@@ -21,12 +24,18 @@
             <SolidColorBrush x:Key="TextDarkGrey" Color="#363636" />
             <SolidColorBrush x:Key="TextGreyDeepen" Color="#FF606060" />
 
+
+
             <BitmapImage x:Key="DiffViewerIcon" UriSource="./Resources/Images/Icons/DiffViewer.png" />
             <BitmapImage x:Key="CloseIcon" UriSource="./Resources/Images/Icons/Close.png" />
             <BitmapImage x:Key="SearchIcon" UriSource="./Resources/Images/Icons/Search.png" />
             <BitmapImage x:Key="MaximizeIcon" UriSource="./Resources/Images/Icons/Maximize.png" />
             <BitmapImage x:Key="MinimizeIcon" UriSource="./Resources/Images/Icons/Minimize.png" />
             <BitmapImage x:Key="ImportIcon" UriSource="./Resources/Images/Icons/Import.png" />
+
+            <BitmapImage x:Key="PassedIcon" UriSource="./Resources/Images/Icons/PassedGreen.png" />
+            <BitmapImage x:Key="FailedIcon" UriSource="./Resources/Images/Icons/FailedPurple.png" />
+            <BitmapImage x:Key="ErrorIcon" UriSource="./Resources/Images/Icons/ErrorRed.png" />
 
 
 

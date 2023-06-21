@@ -21,12 +21,15 @@
     <None Remove="Resources\Images\Icons\Close.png" />
     <None Remove="Resources\Images\Icons\DiffViewer.png" />
     <None Remove="Resources\Images\Icons\Error.png" />
+    <None Remove="Resources\Images\Icons\ErrorRed.png" />
+    <None Remove="Resources\Images\Icons\FailedPurple.png" />
     <None Remove="Resources\Images\Icons\Import.png" />
     <None Remove="Resources\Images\Icons\Information.png" />
     <None Remove="Resources\Images\Icons\Inline.png" />
     <None Remove="Resources\Images\Icons\Maximize.png" />
     <None Remove="Resources\Images\Icons\Minimize.png" />
     <None Remove="Resources\Images\Icons\Pass.png" />
+    <None Remove="Resources\Images\Icons\PassedGreen.png" />
     <None Remove="Resources\Images\Icons\Piechart.png" />
     <None Remove="Resources\Images\Icons\Preview.png" />
     <None Remove="Resources\Images\Icons\PreviewClosed.png" />
@@ -59,6 +62,12 @@
     <Resource Include="Resources\Images\Icons\Error.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Resources\Images\Icons\ErrorRed.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Images\Icons\FailedPurple.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Resources\Images\Icons\Information.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
@@ -71,7 +80,7 @@
     <Resource Include="Resources\Images\Icons\Minimize.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resources\Images\Icons\Pass.png">
+    <Resource Include="Resources\Images\Icons\PassedGreen.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Resources\Images\Icons\Piechart.png">
@@ -117,6 +126,7 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="7.0.0" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
     <PackageReference Include="MvvmDialogs" Version="9.1.0" />
     <PackageReference Include="Serilog" Version="3.0.0" />

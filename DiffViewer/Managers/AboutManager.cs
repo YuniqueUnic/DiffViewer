@@ -207,8 +207,8 @@ internal class AboutManager
 
         }
 
-        attributes = assembly.GetCustomAttributes(typeof(AssemblyCompanyAttribute), false);
-        if (attributes.Length > 0)
+        attributes = assembly.GetCustomAttributes(typeof(AssemblyCompanyAttribute) , false);
+        if( attributes.Length > 0 )
         {
             AssemblyCompanyAttribute companyAttribute = (AssemblyCompanyAttribute)attributes[0];
             company = companyAttribute.Company;
@@ -221,25 +221,25 @@ internal class AboutManager
         _company = company;
     }
 
-    private async Task<List<OpenSourceProject>> GetNuGetProjectsAsync()
+    private async Task<List<OpenSourceProject>> GetNuGetProjectsAsync( )
     {
         List<OpenSourceProject> nuGetProjects = new();
-        Dictionary<string,string> nugetPackages=GetNuGetPackages();
+        Dictionary<string , string> nugetPackages = GetNuGetPackages();
         using var client = new HttpClient();
-        foreach (var item in nugetPackages)
+        foreach( var item in nugetPackages )
         {
             string packageName = item.Key;
             string version = item.Value;
             var url = $"https://api.nuget.org/v3/registration5-semver1/{packageName.ToLowerInvariant()}/{version}.json";
             var response = await client.GetAsync(url);
-            if (response.IsSuccessStatusCode)
+            if( response.IsSuccessStatusCode )
             {
                 var json = await response.Content.ReadAsStringAsync();
                 using var document = JsonDocument.Parse(json);
                 var catalogEntry = document.RootElement.GetProperty("catalogEntry");
                 var projectUrl = catalogEntry.GetProperty("projectUrl").GetString();
                 var projectLicense = catalogEntry.GetProperty("licenseUrl").GetString();
-                nuGetProjects.Add(new OpenSourceProject { Name=packageName, Version=version, Url=projectUrl,License=projectLicense});
+                nuGetProjects.Add(new OpenSourceProject { Name = packageName , Version = version , Url = projectUrl , License = projectLicense });
             }
             else
             {
@@ -251,15 +251,15 @@ internal class AboutManager
 
     }
 
-    private Dictionary<string, string> GetNuGetPackages()
+    private Dictionary<string , string> GetNuGetPackages( )
     {
         var context = DependencyContext.Load(Assembly.GetEntryAssembly());
         var packages = context.RuntimeLibraries.Where(library => library.Type == "package");
 
-        Dictionary<string, string> nugetPackages = new Dictionary<string, string>();
-        foreach (var package in packages)
+        Dictionary<string , string> nugetPackages = new Dictionary<string , string>();
+        foreach( var package in packages )
         {
-            nugetPackages.Add(package.Name, package.Version);
+            nugetPackages.Add(package.Name , package.Version);
             App.Logger.Information($"{package.Name} {package.Version} was in Assembly.");
         }
         return nugetPackages;

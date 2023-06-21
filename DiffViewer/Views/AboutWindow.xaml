@@ -9,7 +9,7 @@
         Title="AboutWindow"
         Width="800"
         Height="450"
-        WindowStartupLocation="CenterOwner">
+        WindowStartupLocation="CenterScreen">
     <d:Window.DataContext>
         <Binding Path="About_ViewModel" Source="{StaticResource VMsLocator}" />
     </d:Window.DataContext>
