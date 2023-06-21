@@ -1,9 +1,14 @@
 ﻿using DiffViewer.Managers.Helper;
 using DiffViewer.Models;
+using Microsoft.Extensions.DependencyModel;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Net.Http;
 using System.Reflection;
+using System.Text.Json;
+using System.Threading.Tasks;
 using System.Windows.Documents;
 using System.Windows.Navigation;
 
@@ -23,6 +28,8 @@ internal class AboutManager
     private string _softwareVersion = nameof(_softwareVersion);
     private string _copyrightOwner = nameof(_copyrightOwner);
     private string _releaseDate = nameof(_releaseDate);
+    private string _company = nameof(_company);
+
 
     private List<OpenSourceProject> _openSourceLibraries = new List<OpenSourceProject>
     {
@@ -182,6 +189,7 @@ internal class AboutManager
         string version = (assemblyName.Version ?? new Version("0.0.0.0")).ToString();
         string copyright = string.Empty;
         string releaseDate = string.Empty;
+        string company = string.Empty;
 
         object[] attributes = assembly.GetCustomAttributes(typeof(AssemblyTrademarkAttribute) , false);
         if( attributes.Length > 0 )
@@ -194,13 +202,67 @@ internal class AboutManager
         if( attributes.Length > 0 )
         {
             AssemblyInformationalVersionAttribute informationalVersionAttribute = (AssemblyInformationalVersionAttribute)attributes[0];
-            releaseDate = informationalVersionAttribute.InformationalVersion.Split('+')[0];
+            releaseDate = informationalVersionAttribute.InformationalVersion;
+            //releaseDate = informationalVersionAttribute.InformationalVersion.Split('+')[0];
+
+        }
+
+        attributes = assembly.GetCustomAttributes(typeof(AssemblyCompanyAttribute), false);
+        if (attributes.Length > 0)
+        {
+            AssemblyCompanyAttribute companyAttribute = (AssemblyCompanyAttribute)attributes[0];
+            company = companyAttribute.Company;
         }
 
         _softwareName = name;
         _softwareVersion = version;
         _copyrightOwner = copyright;
         _releaseDate = releaseDate;
+        _company = company;
+    }
+
+    private async Task<List<OpenSourceProject>> GetNuGetProjectsAsync()
+    {
+        List<OpenSourceProject> nuGetProjects = new();
+        Dictionary<string,string> nugetPackages=GetNuGetPackages();
+        using var client = new HttpClient();
+        foreach (var item in nugetPackages)
+        {
+            string packageName = item.Key;
+            string version = item.Value;
+            var url = $"https://api.nuget.org/v3/registration5-semver1/{packageName.ToLowerInvariant()}/{version}.json";
+            var response = await client.GetAsync(url);
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                using var document = JsonDocument.Parse(json);
+                var catalogEntry = document.RootElement.GetProperty("catalogEntry");
+                var projectUrl = catalogEntry.GetProperty("projectUrl").GetString();
+                var projectLicense = catalogEntry.GetProperty("licenseUrl").GetString();
+                nuGetProjects.Add(new OpenSourceProject { Name=packageName, Version=version, Url=projectUrl,License=projectLicense});
+            }
+            else
+            {
+                App.Logger.Error($"{packageName} {version} can't found.");
+            }
+        }
+
+        return nuGetProjects;
+
+    }
+
+    private Dictionary<string, string> GetNuGetPackages()
+    {
+        var context = DependencyContext.Load(Assembly.GetEntryAssembly());
+        var packages = context.RuntimeLibraries.Where(library => library.Type == "package");
+
+        Dictionary<string, string> nugetPackages = new Dictionary<string, string>();
+        foreach (var package in packages)
+        {
+            nugetPackages.Add(package.Name, package.Version);
+            App.Logger.Information($"{package.Name} {package.Version} was in Assembly.");
+        }
+        return nugetPackages;
     }
 
     private string GetStringFromAppResources(string resourcekey)
