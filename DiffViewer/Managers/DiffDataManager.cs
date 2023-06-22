@@ -91,9 +91,6 @@ public class DiffDataManager
 
 
 
-
-
-
     /// <summary>
     /// Extract the Diff Compare Result for each TestCase.
     /// Update the TestCase Diff Result.
@@ -328,9 +325,33 @@ public class DiffDataManager
             }
         }
 
+        if( baseLineLines.Count.Equals(actualLines.Count) )
+        {
+            for( int i = 0; i < baseLineLines.Count; i++ )
+            {
+                baseLineLines[i] = baseLineLines[i].TrimStart(m_PlusChar);
+                actualLines[i] = actualLines[i].TrimStart(m_MinusChar);
+            }
+        }
+        else
+        {
+            for( int i = 0; i < baseLineLines.Count; i++ )
+            {
+                baseLineLines[i] = baseLineLines[i].TrimStart(m_PlusChar);
+            }
+
+            for( int i = 0; i < actualLines.Count; i++ )
+            {
+                actualLines[i] = actualLines[i].TrimStart(m_MinusChar);
+            }
+        }
+
+
         // Concat list and return
         return (string.Join("\n" , baseLineLines), string.Join("\n" , actualLines));
     }
+
+
 
     /// <summary>
     /// Check if the Diff Data handled over.

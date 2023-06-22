@@ -18,7 +18,8 @@
         dialogMVVM:DialogServiceViews.IsRegistered="True"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None">
-    <!--  xmlns:diffplex="clr-namespace:DiffPlex.Wpf.Controls;assembly=DiffPlex.Wpf"  -->
+    <!--  dialogMVVM:DialogServiceViews.IsRegistered="True"  -->
+
     <d:Window.DataContext>
         <Binding Path="MainWindow_ViewModel" Source="{StaticResource VMsLocator}" />
     </d:Window.DataContext>
@@ -270,25 +271,10 @@
                           SelectedItem="{Binding SelectedTestCase}"
                           SelectionChanged="ListView_SelectionChanged"
                           SelectionMode="Single"
-                          ItemsSource="{Binding DiffTestCases, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+                          ItemsSource="{Binding DiffTestCases, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                     <ListBox.Resources>
                         <Style TargetType="{x:Type ListView}">
                             <Setter Property="Background" Value="{StaticResource TextLightGrey}" />
-                            <!--<Setter Property="FocusVisualStyle">
-                                <Setter.Value>
-                                    <Style>
-                                        <Setter Property="Control.Template">
-                                            <Setter.Value>
-                                                <ControlTemplate>
-                                                    <Rectangle Fill="{StaticResource ThemePrimaryAccent}"
-                                                               Stroke="Blue"
-                                                               StrokeThickness="1" />
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Setter.Value>
-                            </Setter>-->
                             <Setter Property="ItemTemplate">
                                 <Setter.Value>
                                     <DataTemplate>
@@ -344,6 +330,7 @@
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                 </ListView>
+
                 <!--  // Use ContentControl to do more funtions  -->
                 <Button Grid.Row="2" Height="24" />
             </Grid>
