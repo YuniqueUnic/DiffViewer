@@ -37,7 +37,7 @@ internal class AboutManager
         new OpenSourceProject { Name = "Microsoft.Extensions.DependencyInjection", Version = "7.0.0", License = MIT, Url = "https://github.com/Microsoft/XamlBehaviorsWpf" },
         new OpenSourceProject { Name = "Microsoft.Xaml.Behaviors.Wpf", Version = "1.1.39", License = MIT, Url = "https://github.com/Microsoft/XamlBehaviorsWpf" },
         new OpenSourceProject { Name = "MvvmDialogs", Version = "9.1.0", License = Apache2, Url = "https://github.com/FantasticFiasco/mvvm-dialogs" },
-        new OpenSourceProject { Name = "Serilog", Version = "3.0.0", License = Apache2, Url = "https://serilog.net/" },
+        new OpenSourceProject { Name = "Serilog", Version = "3.0.1", License = Apache2, Url = "https://serilog.net/" },
         new OpenSourceProject { Name = "Serilog.Sinks.Console", Version = "4.1.0", License = Apache2, Url = "https://github.com/serilog/serilog-sinks-console" },
         new OpenSourceProject { Name = "Serilog.Sinks.File", Version = "5.0.0", License = Apache2, Url = "https://serilog.net/" }
     };

@@ -1,6 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using DiffViewer.Messages;
+using DiffViewer.Models;
+using System;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace DiffViewer.Views;
 
@@ -21,12 +24,7 @@ public partial class MainWindow : Window
 
     private void App_LanguageChanged(object? sender , LanguageChangedEventArgs e)
     {
-        SearchTextBox.Text = SearchTextBox.Text switch
-        {
-            "Search..." => "搜索...",
-            "搜索..." => "Search...",
-            _ => SearchTextBox.Text,
-        };
+        //UpdateSearchTextLanguage();
     }
 
     /// <summary>
@@ -74,19 +72,74 @@ public partial class MainWindow : Window
         this.DragMove();
     }
 
-    private void SearchTextBox_GotFocus(object sender , RoutedEventArgs e)
+    private void ListView_SelectionChanged(object sender , System.Windows.Controls.SelectionChangedEventArgs e)
     {
-        if( SearchTextBox.Text == OnlySearchTextBox.Text + "..." )
+        TestCase Add = new();
+        TestCase Remove = new();
+        try
         {
-            SearchTextBox.Text = "";
+            Add = e.AddedItems[0] as TestCase;
+            Remove = e.RemovedItems[0] as TestCase;
         }
+        catch( Exception )
+        {
+
+        }
+
+        App.Logger.Information($"ListBox_SelectionChanged.From({Remove?.Name}).To({Add?.Name})");
+        if( sender is ListBox listbox )
+        {
+            if( listbox.SelectedItem != null )
+            {
+                listbox.Dispatcher.BeginInvoke((Action)delegate
+                {
+                    listbox.UpdateLayout();
+                    listbox.ScrollIntoView(listbox.SelectedItem);
+                });
+            }
+        }
+
     }
 
-    private void SearchTextBox_LostFocus(object sender , RoutedEventArgs e)
-    {
-        if( SearchTextBox.Text == "" )
-        {
-            SearchTextBox.Text = OnlySearchTextBox.Text + "...";
-        }
-    }
+    //private void UpdateSearchTextLanguage( )
+    //{
+    //    SearchTextBox.Text = SearchTextBox.Text switch
+    //    {
+    //        "Search..." => "搜索...",
+    //        "搜索..." => "Search...",
+    //        _ => SearchTextBox.Text,
+    //    };
+    //}
+
+    //private void SearchTextBox_GotFocus(object sender , RoutedEventArgs e)
+    //{
+    //    if( SearchTextBox.Text == OnlySearchTextBox.Text + "..." )
+    //    {
+    //        SearchTextBox.Text = "";
+    //    }
+    //}
+
+    //private void SearchTextBox_LostFocus(object sender , RoutedEventArgs e)
+    //{
+    //    if( SearchTextBox.Text == "" )
+    //    {
+    //        SearchTextBox.Text = OnlySearchTextBox.Text + "...";
+    //    }
+    //}
+
+    //private void DiffViewer_ScrollChanged( )
+    //{
+    //    new TextBoxBase(diffPlexDiffViewer).
+    //    diffPlexDiffViewer.SetHeaderAsOldToNew();
+    //    //object sender, ScrollChangedEventArgs e
+    //    //var scrollViewerToUpdate = sender == this.OldDiffRichTextBox ? new TextBoxBase[] { this.NewDiffRichTextBox } :
+    //    //                                       sender == this.NewDiffRichTextBox ? new TextBoxBase[] { this.OldDiffRichTextBox } :
+    //    //                                       new TextBoxBase[0];
+
+    //    //scrollViewerToUpdate.ToList().ForEach(textToSync =>
+    //    //{
+    //    //    textToSync.ScrollToVerticalOffset(e.VerticalOffset);
+    //    //    textToSync.ScrollToHorizontalOffset(e.HorizontalOffset);
+    //    //});
+    //}
 }

@@ -1,6 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using DiffPlex;
+using DiffPlex.DiffBuilder;
+using DiffPlex.DiffBuilder.Model;
 using DiffViewer.Managers;
 using DiffViewer.Models;
 using MvvmDialogs;
@@ -29,30 +32,54 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    string _searchText = "Search...";
-
-    [ObservableProperty]
-    string _importedFileFullPath = "Import the Diff File...";
-
-    [ObservableProperty]
-    string _leftResult = string.Empty;
-
-    [ObservableProperty]
-    string _rightResult = string.Empty;
-
+    public TestCaseShare _testCaseShare = new();
 
     [ObservableProperty]
     public ObservableCollection<TestCase> _diffTestCases;
 
     [ObservableProperty]
+    string _searchText = "Search...";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TestCaseShare))]
+    string _importedFileFullPath = "Import the Diff File...";
+
+    [ObservableProperty]
+    bool _isSideBySide = false;
+
+    [ObservableProperty]
+    string _OldResult = string.Empty;
+
+    [ObservableProperty]
+    string _NewResult = string.Empty;
+
+    [ObservableProperty]
+    [Obsolete]
+    public int _selectedIndex = 0;
+
+    [ObservableProperty]
+    string _selectedTestCaseName;
+
+    [ObservableProperty]
     public TestCase _selectedTestCase;
+
+    [ObservableProperty]
+    public SideBySideDiffModel _diffModel;
+
+    [Obsolete("Too large memory consume.")]
+    private void Compare( )
+    {
+        var diffBuilder = new SideBySideDiffBuilder(new Differ());
+        DiffModel = diffBuilder.BuildDiffModel(OldResult ?? string.Empty , NewResult ?? string.Empty);
+    }
+
 
     #region Window UI RelayCommands
 
     #region Logic
 
     [RelayCommand]
-    public async Task ImportDiffFile(Object doubleLeftClicked)
+    public async Task ImportDiffFile(object doubleLeftClicked)
     {
         if( !(bool)doubleLeftClicked ) { return; }
 
@@ -70,13 +97,14 @@ public partial class MainWindowViewModel : ObservableObject
 
         if( success == true )
         {
+            TestCaseShare.Time = new FileInfo(settings.FileName).LastWriteTime.ToString();
+
             ImportedFileFullPath = settings.FileName;
+
             _logger.Information($"Imported Diff File: {ImportedFileFullPath}");
+
+            await LoadDiffFile(ImportedFileFullPath);
         }
-
-        if( !File.Exists(ImportedFileFullPath) ) { return; }
-
-        await LoadDiffFile(ImportedFileFullPath);
     }
 
     private async Task LoadDiffFile(string diffFilePath)
@@ -109,16 +137,15 @@ public partial class MainWindowViewModel : ObservableObject
 
     }
 
-
     [RelayCommand]
     public void ShowTestCaseDiff( )
     {
         if( SelectedTestCase is null ) return;
         _logger.Information($"ShowTestCaseDiff called, TestCase Selected: {SelectedTestCase.Name}");
-        LeftResult = SelectedTestCase.OldText_BaseLine ?? string.Empty;
-        RightResult = SelectedTestCase.NewText_Actual ?? string.Empty;
+        OldResult = SelectedTestCase.OldText_BaseLine ?? string.Empty;
+        NewResult = SelectedTestCase.NewText_Actual ?? string.Empty;
+        SelectedTestCaseName = SelectedTestCase.Name;
     }
-
 
     #endregion Logic
 
@@ -148,7 +175,6 @@ public partial class MainWindowViewModel : ObservableObject
         _aboutWindow.Show();
         //App.ViewModelLocator.About_Window.Show();
     }
-
 
     /// <summary>
     /// Close Window by using WeakReferenceMessenger.

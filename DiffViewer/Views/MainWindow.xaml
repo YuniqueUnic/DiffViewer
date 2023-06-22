@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         xmlns:dialogMVVM="https://github.com/fantasticfiasco/mvvm-dialogs"
+        xmlns:diffPlex="clr-namespace:DiffPlex.Wpf.Controls;assembly=DiffPlex.Wpf"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:iMy="clr-namespace:DiffViewer.UIActions"
         xmlns:local="clr-namespace:DiffViewer"
@@ -17,7 +18,7 @@
         dialogMVVM:DialogServiceViews.IsRegistered="True"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None">
-
+    <!--  xmlns:diffplex="clr-namespace:DiffPlex.Wpf.Controls;assembly=DiffPlex.Wpf"  -->
     <d:Window.DataContext>
         <Binding Path="MainWindow_ViewModel" Source="{StaticResource VMsLocator}" />
     </d:Window.DataContext>
@@ -104,7 +105,7 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="3*" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="7*" />
                 </Grid.ColumnDefinitions>
                 <!--  Grid.Column="0"  -->
@@ -146,11 +147,51 @@
                                   Command="{Binding ShowAboutWindowCommand}" />
                     </MenuItem>
                 </Menu>
-                <TextBox Name="OnlySearchTextBox"
+                <Menu Name="TestCaseMoreInfoMenu"
+                      Grid.Column="1"
+                      Margin="4,2"
+                      VerticalAlignment="Center"
+                      Foreground="{StaticResource TextDark}"
+                      FontSize="14">
+                    <Menu.Resources>
+                        <Style x:Key="InfosMenuItemStyle" TargetType="MenuItem">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="MenuItem">
+                                        <StackPanel Margin="0,1" Orientation="Horizontal">
+                                            <TextBlock MinWidth="54" Text="{TemplateBinding Header}" />
+                                            <TextBox MinWidth="64"
+                                                     Margin="4,0"
+                                                     Text="{TemplateBinding Tag}" />
+                                        </StackPanel>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Menu.Resources>
+                    <MenuItem BorderBrush="{StaticResource ThemeWarningSecondary}"
+                              BorderThickness="1"
+                              Header="TestInfos">
+                        <MenuItem Style="{StaticResource InfosMenuItemStyle}"
+                                  Header="Media"
+                                  Tag="{Binding TestCaseShare.Media}" />
+                        <MenuItem Style="{StaticResource InfosMenuItemStyle}"
+                                  Header="Area"
+                                  Tag="{Binding TestCaseShare.Area}" />
+                        <MenuItem Style="{StaticResource InfosMenuItemStyle}"
+                                  Header="Version"
+                                  Tag="{Binding TestCaseShare.Version}" />
+                        <MenuItem Style="{StaticResource InfosMenuItemStyle}"
+                                  Header="Time"
+                                  IsEnabled="False"
+                                  Opacity="0.64"
+                                  Tag="{Binding TestCaseShare.Time}" />
+                    </MenuItem>
+                </Menu>
+                <!--<TextBox Name="OnlySearchTextBox"
                          Grid.Column="1"
                          Visibility="Hidden"
                          Text="{DynamicResource Search}" />
-
                 <TextBox Name="SearchTextBox"
                          Style="{StaticResource LeftIconTextBoxStyle}"
                          Grid.Column="1"
@@ -170,7 +211,7 @@
                                     Command="{Binding TrytoSearchTextCommand}"
                                     CommandParameter="{Binding SearchText}" />
                     </TextBox.InputBindings>
-                </TextBox>
+                </TextBox>-->
                 <StackPanel Grid.Column="2"
                             Margin="4,2"
                             HorizontalAlignment="Left"
@@ -198,11 +239,11 @@
                                FontSize="12"
                                ToolTip="{Binding RelativeSource={RelativeSource self}, Path=Text}"
                                Text="{Binding ImportedFileFullPath}">
-                        <i:Interaction.Behaviors>
+                        <!--<i:Interaction.Behaviors>
                             <iMy:CopyBehavior ClickTimes="2"
                                               MouseButton="Right"
                                               Text="{Binding ElementName=ImportTextBlock, Path=Text}" />
-                        </i:Interaction.Behaviors>
+                        </i:Interaction.Behaviors>-->
                     </TextBlock>
                 </StackPanel>
             </Grid>
@@ -210,39 +251,44 @@
         </DockPanel>
         <Grid Name="MainFunctionGrid" Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*" />
-                <ColumnDefinition Width="5" />
                 <ColumnDefinition Width="*" MinWidth="48" />
                 <ColumnDefinition Width="5" />
                 <ColumnDefinition Width="3*" />
             </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" Text="{Binding LeftResult}" />
-            <GridSplitter Grid.Column="1"
-                          Width="5"
-                          HorizontalAlignment="Stretch"
-                          ShowsPreview="True" />
-            <GridSplitter Grid.Column="3"
-                          Width="5"
-                          HorizontalAlignment="Stretch"
-                          ShowsPreview="True" />
-            <TextBox Grid.Column="4" Text="{Binding RightResult}" />
             <Grid Name="CenterGrid"
                   Grid.Row="0"
-                  Grid.Column="2">
+                  Grid.Column="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="8*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-
-                <ListBox Grid.Row="1"
-                         ScrollViewer.CanContentScroll="True"
-                         ScrollViewer.PanningMode="VerticalFirst"
-                         SelectedItem="{Binding SelectedTestCase}"
-                         ItemsSource="{Binding DiffTestCases, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <!--  SelectedItem="{Binding SelectedTestCase}"  -->
+                <ListView Grid.Row="1"
+                          ScrollViewer.CanContentScroll="True"
+                          ScrollViewer.PanningMode="VerticalFirst"
+                          SelectedItem="{Binding SelectedTestCase}"
+                          SelectionChanged="ListView_SelectionChanged"
+                          SelectionMode="Single"
+                          ItemsSource="{Binding DiffTestCases, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
                     <ListBox.Resources>
-                        <Style TargetType="{x:Type ListBox}">
+                        <Style TargetType="{x:Type ListView}">
                             <Setter Property="Background" Value="{StaticResource TextLightGrey}" />
+                            <!--<Setter Property="FocusVisualStyle">
+                                <Setter.Value>
+                                    <Style>
+                                        <Setter Property="Control.Template">
+                                            <Setter.Value>
+                                                <ControlTemplate>
+                                                    <Rectangle Fill="{StaticResource ThemePrimaryAccent}"
+                                                               Stroke="Blue"
+                                                               StrokeThickness="1" />
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </Setter.Value>
+                            </Setter>-->
                             <Setter Property="ItemTemplate">
                                 <Setter.Value>
                                     <DataTemplate>
@@ -265,7 +311,7 @@
                                 </Setter.Value>
                             </Setter>
                         </Style>
-                        <Style TargetType="{x:Type ListBoxItem}">
+                        <Style TargetType="{x:Type ListViewItem}">
                             <Setter Property="Background" Value="{StaticResource TextLightGrey}" />
                             <Setter Property="BorderBrush" Value="{StaticResource ThemeSecondary}" />
                             <Setter Property="BorderThickness" Value="1" />
@@ -273,8 +319,6 @@
                                 <DataTrigger Binding="{Binding IsIdentical}" Value="False">
                                     <Setter Property="Background" Value="DarkOrange" />
                                     <Setter Property="BorderBrush" Value="YellowGreen" />
-                                    <Setter Property="Foreground" Value="Black" />
-                                    <Setter Property="FontWeight" Value="Normal" />
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding IsIdentical}" Value="{x:Null}">
                                     <Setter Property="Background" Value="Fuchsia" />
@@ -286,6 +330,11 @@
                                 <Trigger Property="IsKeyboardFocusWithin" Value="True">
                                     <Setter Property="IsSelected" Value="True" />
                                 </Trigger>
+                                <Trigger Property="Selector.IsSelected" Value="True">
+                                    <Setter Property="Foreground" Value="{StaticResource ThemeWarningSecondary}" />
+                                    <Setter Property="FontWeight" Value="Heavy" />
+                                    <Setter Property="FontStyle" Value="Italic" />
+                                </Trigger>
                             </Style.Triggers>
                         </Style>
                     </ListBox.Resources>
@@ -294,10 +343,26 @@
                             <i:InvokeCommandAction Command="{Binding ShowTestCaseDiffCommand}" />
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
-                </ListBox>
+                </ListView>
                 <!--  // Use ContentControl to do more funtions  -->
                 <Button Grid.Row="2" Height="24" />
             </Grid>
+            <GridSplitter Grid.Row="0"
+                          Grid.Column="1"
+                          Width="5"
+                          HorizontalAlignment="Stretch"
+                          ShowsPreview="True" />
+            <diffPlex:DiffViewer Name="diffPlexDiffViewer"
+                                 Grid.Row="0"
+                                 Grid.Column="2"
+                                 IsSideBySide="{Binding IsSideBySide}"
+                                 LinesContext="2"
+                                 NewText="{Binding OldResult}"
+                                 NewTextHeader="+ Baseline"
+                                 OldText="{Binding NewResult}"
+                                 OldTextHeader="{Binding SelectedTestCaseName, StringFormat='{}{0} - Actual'}"
+                                 TextSearch.Text="{Binding SearchText}"
+                                 IsCommandBarVisible="True" />
         </Grid>
     </Grid>
 </Window>

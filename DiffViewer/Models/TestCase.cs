@@ -22,4 +22,3 @@ public class TestCaseShare
     public string? Version { get; set; }
     public string? Time { get; set; }
 }
-

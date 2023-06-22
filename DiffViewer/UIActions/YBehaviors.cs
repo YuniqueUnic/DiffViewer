@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xaml.Behaviors;
 using System;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace DiffViewer.UIActions;
@@ -148,8 +149,6 @@ class ClickBehavior : Behavior<UIElement>
     }
 }
 
-public class CopyBehavior<T> : CopyBehavior { }
-
 public class CopyBehavior : Behavior<UIElement>
 {
     #region 依赖属性
@@ -244,5 +243,35 @@ public class CopyBehavior : Behavior<UIElement>
     protected override void OnDetaching( )
     {
         AssociatedObject.MouseDown -= CopyTextFromTextBox;
+    }
+}
+
+public class AutoScrollBehavior : Behavior<ListBox>
+{
+    protected override void OnAttached( )
+    {
+        base.OnAttached();
+        this.AssociatedObject.SelectionChanged += new SelectionChangedEventHandler(AssociatedObject_SelectionChanged);
+    }
+    void AssociatedObject_SelectionChanged(object sender , SelectionChangedEventArgs e)
+    {
+        if( sender is ListBox )
+        {
+            ListBox listbox = (sender as ListBox);
+            if( listbox.SelectedItem != null )
+            {
+                listbox.Dispatcher.BeginInvoke((Action)delegate
+                {
+                    listbox.UpdateLayout();
+                    listbox.ScrollIntoView(listbox.SelectedItem);
+                });
+            }
+        }
+    }
+    protected override void OnDetaching( )
+    {
+        base.OnDetaching();
+        this.AssociatedObject.SelectionChanged -=
+            new SelectionChangedEventHandler(AssociatedObject_SelectionChanged);
     }
 }
