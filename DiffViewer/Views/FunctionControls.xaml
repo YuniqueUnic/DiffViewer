@@ -8,12 +8,69 @@
              Background="White"
              d:DesignHeight="450"
              d:DesignWidth="800">
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="3*" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
 
+    <d:UserControl.DataContext>
+        <Binding Path="MainWindow_ViewModel" Source="{StaticResource VMsLocator}" />
+    </d:UserControl.DataContext>
+
+    <Grid Name="FunctionBaseGrid"
+          Margin="4,4,0,2"
+          SizeChanged="Grid_SizeChanged">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="3*" />
+        </Grid.ColumnDefinitions>
+        <Button Name="ExportButton"
+                Style="{StaticResource IconButtonStyle}"
+                Grid.Column="0"
+                Background="Transparent"
+                ToolTip="{DynamicResource Export}">
+            <Image Style="{StaticResource IconImageStyle}" Source="{StaticResource ExportIcon}" />
+        </Button>
+        <Button Name="OpenRawButton"
+                Style="{StaticResource IconButtonStyle}"
+                Grid.Column="1"
+                Background="Transparent"
+                ToolTip="{DynamicResource Raw}"
+                Command="{Binding ShowSelectedTestCaseRawDataCommand}">
+            <Image Style="{StaticResource IconImageStyle}" Source="{StaticResource PreviewIcon}" />
+        </Button>
+        <Grid Name="ResultsRectangleGrid"
+              Grid.Column="2"
+              MinWidth="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Name="PassColumn" Width="Auto" />
+                <ColumnDefinition Name="FailColumn" Width="Auto" />
+                <ColumnDefinition Name="ErrorColumn" Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Name="PassedRect"
+                       Grid.Column="0"
+                       Height="20"
+                       Background="{StaticResource ThemePrimary}"
+                       Tag="{Binding TestCasesState[0]}"
+                       Text="{Binding TestCasesState[0]}" />
+            <TextBlock Name="FailedRect"
+                       Grid.Column="1"
+                       Height="20"
+                       Background="{StaticResource ThemeWarning}"
+                       Opacity="0.64"
+                       Tag="{Binding TestCasesState[1]}"
+                       Text="{Binding TestCasesState[1]}" />
+            <TextBlock Name="SevereErrorRect"
+                       Grid.Column="2"
+                       Height="20"
+                       Background="Red"
+                       Opacity="0.7"
+                       Tag="{Binding TestCasesState[2]}"
+                       Text="{Binding TestCasesState[2]}" />
+        </Grid>
+        <!--<Button Name="OpenPieChartButton"
+                Style="{StaticResource IconButtonStyle}"
+                Grid.Column="3"
+                Background="Transparent"
+                ToolTip="{DynamicResource PieChart}">
+            <Image Style="{StaticResource IconImageStyle}" Source="{StaticResource PieChartIcon}" />
+        </Button>-->
     </Grid>
 </UserControl>

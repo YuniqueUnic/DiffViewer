@@ -5,13 +5,16 @@ using DiffPlex;
 using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
 using DiffViewer.Managers;
+using DiffViewer.Messages;
 using DiffViewer.Models;
+using DiffViewer.Views;
 using MvvmDialogs;
 using MvvmDialogs.FrameworkDialogs.OpenFile;
 using Serilog;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DiffViewer.ViewModels;
@@ -21,20 +24,43 @@ public partial class MainWindowViewModel : ObservableObject
     private ILogger _logger;
     private IDialogService _dialogService;
     private IWindow _aboutWindow;
+    private IWindow _rawDataWindow;
     private int m_totalLineCount;
 
-    public MainWindowViewModel(ILogger logger , IDialogService dialogService , IWindow aboutWindow)
+    public MainWindowViewModel(ILogger logger , IDialogService dialogService , params IWindow[] iWindows)
     {
         _logger = logger;
         _dialogService = dialogService;
-        _aboutWindow = aboutWindow;
+        for( int i = 0; i < iWindows.Length; i++ )
+        {
+            _ = iWindows[i] switch
+            {
+                AboutWindow => _aboutWindow = iWindows[i],
+                RawDataWindow => _rawDataWindow = iWindows[i],
+                _ => throw new NotImplementedException(),
+            };
+        }
+
         logger.Information("MainWindowViewModel created");
     }
 
     [ObservableProperty]
     public TestCaseShare _testCaseShare = new();
 
+
     [ObservableProperty]
+    public int[] _testCasesState;
+    partial void OnTestCasesStateChanged(int[] value)
+    {
+        WeakReferenceMessenger.Default.Send<ShowBarchartMessage>(new ShowBarchartMessage()
+        {
+            Sender = this ,
+            Message = "UpdateBarChart" ,
+        });
+    }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TestCasesState))]
     public ObservableCollection<TestCase> _diffTestCases;
 
     [ObservableProperty]
@@ -53,9 +79,11 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     string _NewResult = string.Empty;
 
+    public int CurrentSelectedIndex = -1;
+
     [ObservableProperty]
-    [Obsolete]
     public int _selectedIndex = 0;
+    partial void OnSelectedIndexChanging(int oldValue , int newValue) { if( newValue != -1 ) { CurrentSelectedIndex = newValue; } }
 
     [ObservableProperty]
     string _selectedTestCaseName;
@@ -116,9 +144,11 @@ public partial class MainWindowViewModel : ObservableObject
             await Task.Delay(1000);
         }
 
+        TestCasesState = diffDataProvider.TestCases.GroupBy(t => t.IsIdentical).Select(g => g.Count()).ToArray();
+
         DiffTestCases = new ObservableCollection<TestCase>(diffDataProvider.TestCases);
 
-        int a = 0;
+
 
         //string WriteToPath = Path.Combine(Path.GetDirectoryName(diffFilePath) , Path.GetFileNameWithoutExtension(diffFilePath));
         //FileManager.WriteToAsync(diffDataProvider.DiffInfos.Item2 , WriteToPath + "\\DiffAll_" + Path.GetFileName(diffFilePath));
@@ -131,20 +161,19 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    public void TrytoSearchText( )
+    public void DoubleToSelectTestCase( )
     {
-        _logger.Debug("SearchCommand called");
-
+        _logger.Debug($"DoubleToSelectTestCaseCommand called,  TestCase Selected: {SelectedTestCase.Name}");
+        ShowTestCaseDiff(SelectedTestCase);
     }
 
-    [RelayCommand]
-    public void ShowTestCaseDiff( )
+    public void ShowTestCaseDiff(TestCase testCase)
     {
-        if( SelectedTestCase is null ) return;
-        _logger.Information($"ShowTestCaseDiff called, TestCase Selected: {SelectedTestCase.Name}");
-        OldResult = SelectedTestCase.OldText_BaseLine ?? string.Empty;
-        NewResult = SelectedTestCase.NewText_Actual ?? string.Empty;
-        SelectedTestCaseName = SelectedTestCase.Name;
+        if( testCase is null ) return;
+        _logger.Information($"ShowTestCaseDiff called, TestCase shows: {testCase.Name}");
+        OldResult = testCase.OldText_BaseLine ?? string.Empty;
+        NewResult = testCase.NewText_Actual ?? string.Empty;
+        SelectedTestCaseName = testCase.Name;
     }
 
     #endregion Logic
@@ -165,6 +194,18 @@ public partial class MainWindowViewModel : ObservableObject
         _aboutWindow.Owner = App.ViewModelLocator.Main_Window;
         _aboutWindow.Show();
         //App.ViewModelLocator.About_Window.Show();
+    }
+
+    [RelayCommand]
+    public void ShowSelectedTestCaseRawData( )
+    {
+        _logger.Debug("ShowSelectedTestCaseRawDataCommand called");
+        if( DiffTestCases is null ) return;
+        if( CurrentSelectedIndex < 0 || DiffTestCases[CurrentSelectedIndex] is null ) return;
+
+        _rawDataWindow.Owner = App.ViewModelLocator.Main_Window;
+        _rawDataWindow.DataContext = DiffTestCases[CurrentSelectedIndex];
+        _rawDataWindow.Show();
     }
 
     [RelayCommand]

@@ -41,6 +41,7 @@ public class ViewModelLocator
 
 
 
+
     /// <summary>
     /// Init IOC Container
     /// </summary>
@@ -79,7 +80,15 @@ public class ViewModelLocator
         // register VM services
         services.AddTransient<AboutViewModel>();
         services.AddTransient<MainWindowViewModel>();
-        services.AddTransient<IWindow , AboutWindow>(sp => new AboutWindow { DataContext = About_ViewModel });
+
+        //services.AddTransient<IWindow , RawDataWindow>();
+        //services.AddTransient<IWindow , AboutWindow>(sp => new AboutWindow { DataContext = About_ViewModel });
+        //IWindow[] windows = new IWindow[] { About_Window , RawData_Window };
+
+        services.AddTransient<IWindow[]>(sp =>
+        new IWindow[] { new AboutWindow { DataContext = About_ViewModel } ,
+                        new RawDataWindow() });
+
         services.AddSingleton<MainWindow>(sp => new MainWindow { DataContext = MainWindow_ViewModel });
 
         //var a = services.BuildServiceProvider();
@@ -98,6 +107,8 @@ public class ViewModelLocator
 
     public MainWindow Main_Window => Services.GetRequiredService<MainWindow>();
 
-    public AboutWindow About_Window => Services.GetRequiredService<AboutWindow>();
-
+    /// <summary>
+    /// Get all IWindow instances
+    /// </summary>
+    public IWindow[] ITransientWindowsCollection => Services.GetRequiredService<IWindow[]>();
 }

@@ -32,6 +32,11 @@
             <BitmapImage x:Key="MaximizeIcon" UriSource="./Resources/Images/Icons/Maximize.png" />
             <BitmapImage x:Key="MinimizeIcon" UriSource="./Resources/Images/Icons/Minimize.png" />
             <BitmapImage x:Key="ImportIcon" UriSource="./Resources/Images/Icons/Import.png" />
+            <BitmapImage x:Key="ExportIcon" UriSource="./Resources/Images/Icons/Export.png" />
+            <BitmapImage x:Key="OpenFolderIcon" UriSource="./Resources/Images/Icons/OpenFolder.png" />
+            <BitmapImage x:Key="PieChartIcon" UriSource="./Resources/Images/Icons/Piechart.png" />
+            <BitmapImage x:Key="InformationIcon" UriSource="./Resources/Images/Icons/Information.png" />
+            <BitmapImage x:Key="PreviewIcon" UriSource="./Resources/Images/Icons/Preview.png" />
 
             <BitmapImage x:Key="PassedIcon" UriSource="./Resources/Images/Icons/PassedGreen.png" />
             <BitmapImage x:Key="FailedIcon" UriSource="./Resources/Images/Icons/FailedPurple.png" />
@@ -44,14 +49,6 @@
                 <Setter Property="Height" Value="20" />
                 <Setter Property="BorderBrush" Value="Transparent" />
                 <Setter Property="BorderThickness" Value="0" />
-                <Style.Triggers>
-                    <Trigger Property="IsEnabled" Value="False">
-                        <Setter Property="Opacity" Value="0.5" />
-                    </Trigger>
-                    <Trigger Property="IsPressed" Value="True">
-                        <Setter Property="Background" Value="{StaticResource ThemeWarningSecondary}" />
-                    </Trigger>
-                </Style.Triggers>
             </Style>
 
             <Style x:Key="NormalMenuItemStyle" TargetType="MenuItem">

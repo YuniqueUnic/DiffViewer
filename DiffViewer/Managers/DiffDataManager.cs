@@ -1,4 +1,6 @@
-﻿using DiffViewer.Models;
+﻿using DiffPlex;
+using DiffPlex.Model;
+using DiffViewer.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -297,7 +299,6 @@ public class DiffDataManager
             {
                 minusIndices.Add(i);
             }
-
         }
 
 
@@ -325,6 +326,8 @@ public class DiffDataManager
             }
         }
 
+        // Trim the char(s) + of each line of BaseLine
+        // Trim the char(s) - of each line of Actual
         if( baseLineLines.Count.Equals(actualLines.Count) )
         {
             for( int i = 0; i < baseLineLines.Count; i++ )
@@ -353,6 +356,7 @@ public class DiffDataManager
 
 
 
+
     /// <summary>
     /// Check if the Diff Data handled over.
     /// </summary>
@@ -371,6 +375,55 @@ public class DiffDataManager
             return false;
         }
         return true;
+    }
+
+}
+
+internal sealed class DiffPlexDiffEngine : IDiffer
+{
+    public DiffResult CreateCharacterDiffs(string oldText , string newText , bool ignoreWhitespace)
+    {
+        throw new NotImplementedException();
+    }
+
+    public DiffResult CreateCharacterDiffs(string oldText , string newText , bool ignoreWhitespace , bool ignoreCase)
+    {
+        throw new NotImplementedException();
+    }
+
+    public DiffResult CreateCustomDiffs(string oldText , string newText , bool ignoreWhiteSpace , Func<string , string[]> chunker)
+    {
+        throw new NotImplementedException();
+    }
+
+    public DiffResult CreateCustomDiffs(string oldText , string newText , bool ignoreWhiteSpace , bool ignoreCase , Func<string , string[]> chunker)
+    {
+        throw new NotImplementedException();
+    }
+
+    public DiffResult CreateDiffs(string oldText , string newText , bool ignoreWhiteSpace , bool ignoreCase , IChunker chunker)
+    {
+        throw new NotImplementedException();
+    }
+
+    public DiffResult CreateLineDiffs(string oldText , string newText , bool ignoreWhitespace)
+    {
+        throw new NotImplementedException();
+    }
+
+    public DiffResult CreateLineDiffs(string oldText , string newText , bool ignoreWhitespace , bool ignoreCase)
+    {
+        throw new NotImplementedException();
+    }
+
+    public DiffResult CreateWordDiffs(string oldText , string newText , bool ignoreWhitespace , char[] separators)
+    {
+        throw new NotImplementedException();
+    }
+
+    public DiffResult CreateWordDiffs(string oldText , string newText , bool ignoreWhitespace , bool ignoreCase , char[] separators)
+    {
+        throw new NotImplementedException();
     }
 
 }

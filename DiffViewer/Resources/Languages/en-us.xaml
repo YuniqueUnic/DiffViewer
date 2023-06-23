@@ -25,4 +25,5 @@
     <s:String x:Key="Languages">Languages</s:String>
     <s:String x:Key="Slogan">Born from fun, fun for the future.</s:String>
     <s:String x:Key="Copy">Copy</s:String>
+    <s:String x:Key="PieChart">PieChart</s:String>
 </ResourceDictionary>

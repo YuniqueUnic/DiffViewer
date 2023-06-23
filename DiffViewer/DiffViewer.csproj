@@ -22,12 +22,14 @@
     <None Remove="Resources\Images\Icons\DiffViewer.png" />
     <None Remove="Resources\Images\Icons\Error.png" />
     <None Remove="Resources\Images\Icons\ErrorRed.png" />
+    <None Remove="Resources\Images\Icons\Export.png" />
     <None Remove="Resources\Images\Icons\FailedPurple.png" />
     <None Remove="Resources\Images\Icons\Import.png" />
     <None Remove="Resources\Images\Icons\Information.png" />
     <None Remove="Resources\Images\Icons\Inline.png" />
     <None Remove="Resources\Images\Icons\Maximize.png" />
     <None Remove="Resources\Images\Icons\Minimize.png" />
+    <None Remove="Resources\Images\Icons\OpenFolder.png" />
     <None Remove="Resources\Images\Icons\Pass.png" />
     <None Remove="Resources\Images\Icons\PassedGreen.png" />
     <None Remove="Resources\Images\Icons\Piechart.png" />
@@ -65,6 +67,9 @@
     <Resource Include="Resources\Images\Icons\ErrorRed.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Resources\Images\Icons\Export.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Resources\Images\Icons\FailedPurple.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
@@ -78,6 +83,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Resources\Images\Icons\Minimize.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Images\Icons\OpenFolder.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Resources\Images\Icons\PassedGreen.png">

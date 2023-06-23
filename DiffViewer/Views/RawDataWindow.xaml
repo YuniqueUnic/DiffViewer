@@ -1,0 +1,26 @@
+﻿<Window x:Class="DiffViewer.Views.RawDataWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        xmlns:local="clr-namespace:DiffViewer.Views"
+        Title="{Binding Name, StringFormat='{}{0} &lt;---> Raw'}"
+        Width="600"
+        Height="400"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.ContextMenu>
+            <ContextMenu>
+                <MenuItem Header="{DynamicResource Copy}" Command="ApplicationCommands.Copy" />
+            </ContextMenu>
+        </Grid.ContextMenu>
+        <TextBox Name="RawTextBox"
+                 FontSize="12"
+                 IsReadOnly="True"
+                 PreviewMouseWheel="RawTextBox_PreviewMouseWheel"
+                 ScrollViewer.CanContentScroll="True"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 Text="{Binding Raw}" />
+    </Grid>
+</Window>

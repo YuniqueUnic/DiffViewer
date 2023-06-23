@@ -8,7 +8,7 @@
         xmlns:diffPlex="clr-namespace:DiffPlex.Wpf.Controls;assembly=DiffPlex.Wpf"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:iMy="clr-namespace:DiffViewer.UIActions"
-        xmlns:local="clr-namespace:DiffViewer"
+        xmlns:local="clr-namespace:DiffViewer.Views"
         Title="{DynamicResource DiffViewer}"
         Width="800"
         Height="450"
@@ -266,11 +266,13 @@
                 </Grid.RowDefinitions>
                 <!--  SelectedItem="{Binding SelectedTestCase}"  -->
                 <ListView Grid.Row="1"
+                          VerticalAlignment="Top"
                           ScrollViewer.CanContentScroll="True"
                           ScrollViewer.PanningMode="VerticalFirst"
                           SelectedItem="{Binding SelectedTestCase}"
                           SelectionChanged="ListView_SelectionChanged"
                           SelectionMode="Single"
+                          SelectedIndex="{Binding SelectedIndex}"
                           ItemsSource="{Binding DiffTestCases, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                     <ListBox.Resources>
                         <Style TargetType="{x:Type ListView}">
@@ -326,13 +328,13 @@
                     </ListBox.Resources>
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="MouseDoubleClick">
-                            <i:InvokeCommandAction Command="{Binding ShowTestCaseDiffCommand}" />
+                            <i:InvokeCommandAction Command="{Binding DoubleToSelectTestCaseCommand}" />
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                 </ListView>
 
                 <!--  // Use ContentControl to do more funtions  -->
-                <Button Grid.Row="2" Height="24" />
+                <local:FunctionControls Grid.Row="2" Height="24" />
             </Grid>
             <GridSplitter Grid.Row="0"
                           Grid.Column="1"
