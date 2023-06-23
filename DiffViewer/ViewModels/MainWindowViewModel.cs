@@ -5,14 +5,19 @@ using DiffPlex;
 using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
 using DiffViewer.Managers;
+using DiffViewer.Managers.Helper;
 using DiffViewer.Messages;
 using DiffViewer.Models;
 using DiffViewer.Views;
 using MvvmDialogs;
+using MvvmDialogs.FrameworkDialogs.MessageBox;
 using MvvmDialogs.FrameworkDialogs.OpenFile;
+using MvvmDialogs.FrameworkDialogs.SaveFile;
 using Serilog;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,6 +31,8 @@ public partial class MainWindowViewModel : ObservableObject
     private IWindow _aboutWindow;
     private IWindow _rawDataWindow;
     private int m_totalLineCount;
+    private string m_ExportFileFullPath;
+    private IEnumerable<IGrouping<bool? , TestCase>> m_GroupedTestCases;
 
     public MainWindowViewModel(ILogger logger , IDialogService dialogService , params IWindow[] iWindows)
     {
@@ -49,7 +56,7 @@ public partial class MainWindowViewModel : ObservableObject
 
 
     [ObservableProperty]
-    public int[] _testCasesState;
+    public int[] _testCasesState = new int[3];
     partial void OnTestCasesStateChanged(int[] value)
     {
         WeakReferenceMessenger.Default.Send<ShowBarchartMessage>(new ShowBarchartMessage()
@@ -144,7 +151,24 @@ public partial class MainWindowViewModel : ObservableObject
             await Task.Delay(1000);
         }
 
-        TestCasesState = diffDataProvider.TestCases.GroupBy(t => t.IsIdentical).Select(g => g.Count()).ToArray();
+
+        m_GroupedTestCases = diffDataProvider.TestCases.GroupBy(t => t.IsIdentical);
+
+        // TestCasesState[0] = identicalCount;
+        TestCasesState[0] = m_GroupedTestCases
+                             .Where(g => g.Key.HasValue && g.Key.Value)
+                             .Sum(g => g.Count());
+
+        // TestCasesState[1] = nonIdenticalCount;
+        TestCasesState[1] = m_GroupedTestCases
+                                .Where(g => g.Key.HasValue && !g.Key.Value)
+                                .Sum(g => g.Count());
+
+        // TestCasesState[2] = errorCount;
+        TestCasesState[2] = m_GroupedTestCases
+                         .Where(g => !g.Key.HasValue)
+                         .Sum(g => g.Count());
+
 
         DiffTestCases = new ObservableCollection<TestCase>(diffDataProvider.TestCases);
 
@@ -160,6 +184,7 @@ public partial class MainWindowViewModel : ObservableObject
         //FileManager.WriteToAsync(b , WriteToPath + "\\Results_" + Path.GetFileName(diffFilePath));
     }
 
+
     [RelayCommand]
     public void DoubleToSelectTestCase( )
     {
@@ -173,8 +198,243 @@ public partial class MainWindowViewModel : ObservableObject
         _logger.Information($"ShowTestCaseDiff called, TestCase shows: {testCase.Name}");
         OldResult = testCase.OldText_BaseLine ?? string.Empty;
         NewResult = testCase.NewText_Actual ?? string.Empty;
-        SelectedTestCaseName = testCase.Name;
+        SelectedTestCaseName = testCase.Name ?? string.Empty;
     }
+
+
+
+
+    [RelayCommand]
+    public async Task ExportPassedExcel( )
+    {
+        _logger.Information($"({nameof(ExportFailNullLst)} Called)");
+
+        var settings = new SaveFileDialogSettings()
+        {
+            Title = $"{App.Current.Resources.MergedDictionaries[0]["ExportPassDescription"]}" ,
+            Filter = "Excel (*.xlsx)|*.xlsx|CSV (*.csv)|*.csv|All (*.*)|*.*" ,
+            InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) ,
+            CheckPathExists = true ,
+            AddExtension = true ,
+            FileName = "OTE_" + ImportedFileFullPath.GetFileName(withoutExt: true) + DateTime.Now.ToString("MM_dd_yy_HH") ,
+            DefaultExt = "xlsx" ,
+
+        };
+
+        bool? success = _dialogService.ShowSaveFileDialog(this , settings);
+
+        if( success == true )
+        {
+            m_ExportFileFullPath = settings.FileName;
+
+            await ExportPassedExcelAsync(m_ExportFileFullPath , m_GroupedTestCases);
+        }
+    }
+
+    private async Task ExportPassedExcelAsync(string m_ExportFileFullPath , IEnumerable<IGrouping<bool? , TestCase>> m_GroupedTestCases)
+    {
+        if( m_GroupedTestCases is null ) { return; }
+
+        var location = $"({nameof(ExportFailNullLstAsync)} Called).(Export File Full Path: {m_ExportFileFullPath})";
+
+        await TasksManager.RunTaskAsync(async ( ) =>
+        {
+            await m_GroupedTestCases.Where(g => g.Key != true)
+                                  .SelectMany(g => g)
+                                  .Select(t => t.Name)
+                                  .WriteStringsToAsync(m_ExportFileFullPath);
+
+        } , location , catchException: true);
+
+        MessageBoxSettings messageBoxSettings = new()
+        {
+            Button = System.Windows.MessageBoxButton.YesNo ,
+            Caption = App.Current.Resources.MergedDictionaries[0]["SucceedExport"].ToString() ?? "Succeed to Export" ,
+            Icon = System.Windows.MessageBoxImage.Information ,
+            DefaultResult = System.Windows.MessageBoxResult.Yes ,
+            Options = System.Windows.MessageBoxOptions.None ,
+            MessageBoxText = App.Current.Resources.MergedDictionaries[0]["ExportFailNullDescription"].ToString()
+                             + Environment.NewLine
+                             + Environment.NewLine
+                             + m_ExportFileFullPath
+                             + Environment.NewLine
+                             + App.Current.Resources.MergedDictionaries[0]["ClickYesToOpen"].ToString()
+                             ?? $"Yes to open the directory of it." ,
+        };
+
+        System.Windows.MessageBoxResult msgResult = _dialogService.ShowMessageBox(this , messageBoxSettings);
+
+        if( msgResult == System.Windows.MessageBoxResult.Yes )
+        {
+            try
+            {
+                Process.Start("explorer.exe" , $"/select,\"{m_ExportFileFullPath}\"");
+                _logger.Information($"Explorer.exe launched to show the file: {m_ExportFileFullPath}.");
+            }
+            catch( Exception ex )
+            {
+                _logger.Error($"Error On lauching the explorer.exe to show the file: {m_ExportFileFullPath}." +
+                              $"{Environment.NewLine}Exception: {ex.Message}");
+                throw;
+            }
+        }
+
+    }
+
+
+    [RelayCommand]
+    public async Task ExportFailNullLst( )
+    {
+        _logger.Information($"({nameof(ExportFailNullLst)} Called)");
+
+        var settings = new SaveFileDialogSettings()
+        {
+            Title = $"{App.Current.Resources.MergedDictionaries[0]["ExportFailNullDescription"]}" ,
+            Filter = "Lst File (*.lst)|*.lst|All (*.*)|*.*" ,
+            InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) ,
+            FileName = ImportedFileFullPath.GetFileName(withoutExt: true) + DateTime.Now.ToString("MM_dd_yy_HH") ,
+            DefaultExt = "lst" ,
+            CheckPathExists = true ,
+            AddExtension = true ,
+        };
+
+        bool? success = _dialogService.ShowSaveFileDialog(this , settings);
+
+        if( success == true )
+        {
+            m_ExportFileFullPath = settings.FileName;
+
+            await ExportFailNullLstAsync(m_ExportFileFullPath , m_GroupedTestCases);
+        }
+    }
+
+    private async Task ExportFailNullLstAsync(string exportFileFullPath , IEnumerable<IGrouping<bool? , TestCase>> groupedTestCases)
+    {
+        if( groupedTestCases is null ) { return; }
+
+        var location = $"({nameof(ExportFailNullLstAsync)} Called).(Export File Full Path: {exportFileFullPath})";
+
+        await TasksManager.RunTaskAsync(async ( ) =>
+        {
+            await groupedTestCases.Where(g => g.Key != true)
+                                  .SelectMany(g => g)
+                                  .Select(t => t.Name)
+                                  .WriteStringsToAsync(exportFileFullPath);
+
+        } , location , catchException: true);
+
+        MessageBoxSettings messageBoxSettings = new()
+        {
+            Button = System.Windows.MessageBoxButton.YesNo ,
+            Caption = App.Current.Resources.MergedDictionaries[0]["SucceedExport"].ToString() ?? "Succeed to Export" ,
+            Icon = System.Windows.MessageBoxImage.Information ,
+            DefaultResult = System.Windows.MessageBoxResult.Yes ,
+            Options = System.Windows.MessageBoxOptions.None ,
+            MessageBoxText = App.Current.Resources.MergedDictionaries[0]["ExportFailNullDescription"].ToString()
+                             + Environment.NewLine
+                             + Environment.NewLine
+                             + exportFileFullPath
+                             + Environment.NewLine
+                             + App.Current.Resources.MergedDictionaries[0]["ClickYesToOpen"].ToString()
+                             ?? $"Yes to open the directory of it." ,
+        };
+
+        System.Windows.MessageBoxResult msgResult = _dialogService.ShowMessageBox(this , messageBoxSettings);
+
+        if( msgResult == System.Windows.MessageBoxResult.Yes )
+        {
+            try
+            {
+                Process.Start("explorer.exe" , $"/select,\"{exportFileFullPath}\"");
+                _logger.Information($"Explorer.exe launched to show the file: {exportFileFullPath}.");
+            }
+            catch( Exception ex )
+            {
+                _logger.Error($"Error On lauching the explorer.exe to show the file: {exportFileFullPath}." +
+                              $"{Environment.NewLine}Exception: {ex.Message}");
+                throw;
+            }
+        }
+
+    }
+
+
+    //Refactoring
+    private async Task ShowSaveDialog(string title , string filter , string defaultExt , string initialDirectory , string fileName , Func<IGrouping<bool? , TestCase> , bool> filterPredicate)
+    {
+        _logger.Information($"({nameof(ShowSaveDialog)} Called)");
+
+        var settings = new SaveFileDialogSettings()
+        {
+            Title = title ,
+            Filter = filter ,
+            InitialDirectory = initialDirectory ,
+            CheckPathExists = true ,
+            AddExtension = true ,
+            FileName = fileName ,
+            DefaultExt = defaultExt
+        };
+
+        bool? success = _dialogService.ShowSaveFileDialog(this , settings);
+
+        if( success == true )
+        {
+            m_ExportFileFullPath = settings.FileName;
+
+            await ExportToFileAsync(m_ExportFileFullPath , m_GroupedTestCases , filterPredicate);
+        }
+    }
+
+    private async Task ExportToFileAsync(string exportFileFullPath , IEnumerable<IGrouping<bool? , TestCase>> groupedTestCases , Func<IGrouping<bool? , TestCase> , bool> filterPredicate)
+    {
+        if( groupedTestCases is null ) { return; }
+
+        var location = $"({nameof(ExportToFileAsync)} Called).(Export File Full Path: {exportFileFullPath})";
+
+        await TasksManager.RunTaskAsync(async ( ) =>
+        {
+            await groupedTestCases.Where(filterPredicate)
+                                  .SelectMany(g => g)
+                                  .Select(t => t.Name)
+                                  .WriteStringsToAsync(exportFileFullPath);
+
+        } , location , catchException: true);
+
+        MessageBoxSettings messageBoxSettings = new()
+        {
+            Button = System.Windows.MessageBoxButton.YesNo ,
+            Caption = App.Current.Resources.MergedDictionaries[0]["SucceedExport"].ToString() ?? "Succeed to Export" ,
+            Icon = System.Windows.MessageBoxImage.Information ,
+            DefaultResult = System.Windows.MessageBoxResult.Yes ,
+            Options = System.Windows.MessageBoxOptions.None ,
+            MessageBoxText = App.Current.Resources.MergedDictionaries[0]["ExportFailNullDescription"].ToString()
+                             + Environment.NewLine
+                             + Environment.NewLine
+                             + exportFileFullPath
+                             + Environment.NewLine
+                             + App.Current.Resources.MergedDictionaries[0]["ClickYesToOpen"].ToString()
+                             ?? $"Yes to open the directory of it." ,
+        };
+
+        System.Windows.MessageBoxResult msgResult = _dialogService.ShowMessageBox(this , messageBoxSettings);
+
+        if( msgResult == System.Windows.MessageBoxResult.Yes )
+        {
+            try
+            {
+                Process.Start("explorer.exe" , $"/select,\"{exportFileFullPath}\"");
+                _logger.Information($"Explorer.exe launched to show the file: {exportFileFullPath}.");
+            }
+            catch( Exception ex )
+            {
+                _logger.Error($"Error On lauching the explorer.exe to show the file: {exportFileFullPath}." +
+                              $"{Environment.NewLine}Exception: {ex.Message}");
+                throw;
+            }
+        }
+
+    }
+
 
     #endregion Logic
 

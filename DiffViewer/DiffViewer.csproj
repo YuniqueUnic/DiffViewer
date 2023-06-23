@@ -22,8 +22,10 @@
     <None Remove="Resources\Images\Icons\DiffViewer.png" />
     <None Remove="Resources\Images\Icons\Error.png" />
     <None Remove="Resources\Images\Icons\ErrorRed.png" />
+    <None Remove="Resources\Images\Icons\Excel.png" />
     <None Remove="Resources\Images\Icons\Export.png" />
     <None Remove="Resources\Images\Icons\FailedPurple.png" />
+    <None Remove="Resources\Images\Icons\FailNull.png" />
     <None Remove="Resources\Images\Icons\Import.png" />
     <None Remove="Resources\Images\Icons\Information.png" />
     <None Remove="Resources\Images\Icons\Inline.png" />
@@ -67,10 +69,16 @@
     <Resource Include="Resources\Images\Icons\ErrorRed.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Resources\Images\Icons\Excel.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Resources\Images\Icons\Export.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Resources\Images\Icons\FailedPurple.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Images\Icons\FailNull.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Resources\Images\Icons\Information.png">

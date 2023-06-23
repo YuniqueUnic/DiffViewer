@@ -1,4 +1,9 @@
-﻿using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace DiffViewer.Managers.Helper;
 
@@ -33,4 +38,19 @@ public static class DataObjectsHelper
     {
         return string.IsNullOrWhiteSpace(value);
     }
+
+    public static async Task WriteStringsToAsync<T>(this IEnumerable<T> strings , string path , bool isTurnNullToNewLine = true) where T : class?
+    {
+        var query = isTurnNullToNewLine
+                                     ? strings.Select(s => s?.ToString() ?? Environment.NewLine)
+                                     : strings.Where(s => s != null).Select(s => s!.ToString());
+
+        await File.WriteAllLinesAsync(path , query).ConfigureAwait(false);
+    }
+
+    public static string GetFileName(this string fileFullPath , bool withoutExt = false)
+    {
+        return withoutExt ? Path.GetFileNameWithoutExtension(fileFullPath) : Path.GetFileName(fileFullPath);
+    }
+
 }

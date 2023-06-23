@@ -10,8 +10,6 @@ class FileManager
 {
     public static bool CheckFileExists(string filePath , bool throwExpection = true)
     {
-        //try
-        //{
         if( !File.Exists(filePath) )
         {
             App.Logger.Error($"File does not exist: `{filePath}`");
@@ -19,12 +17,6 @@ class FileManager
             return false;
         }
         return true;
-        //}
-        //catch( Exception e )
-        //{
-        //    App.Logger.Error(e , $"Error on checking file exists: `{filePath}`");
-        //    throw;
-        //}
     }
 
     public static async Task<(int, string?)> GetTextInfoAsync(string filePath)
@@ -93,6 +85,7 @@ class FileManager
     {
         return System.IO.Path.GetFileName(path);
     }
+
     public static string GetFileContent(string path)
     {
         return System.IO.File.ReadAllText(path);

@@ -4,6 +4,13 @@
     <s:String x:Key="DiffViewer">Diff分析</s:String>
     <s:String x:Key="Import">导入</s:String>
     <s:String x:Key="Export">导出</s:String>
+    <s:String x:Key="ExportPass">导出 Identical</s:String>
+    <s:String x:Key="ExportPassDescription">导出 Identical TestCases 为 Excel</s:String>
+    <s:String x:Key="ExportFailNull">导出 Non-Identical</s:String>
+    <s:String x:Key="ExportFailNullDescription">导出 Non-Identical TestCases 为 Hytest 运行的 .Lst 文件</s:String>
+    <s:String x:Key="SucceedExport">导出成功</s:String>
+    <s:String x:Key="FailedExport">导出失败</s:String>
+    <s:String x:Key="ClickYesToOpen">点击 是(Y) 打开文件所在位置.</s:String>
     <s:String x:Key="Raw">原始数据</s:String>
     <s:String x:Key="Baseline">参考值</s:String>
     <s:String x:Key="Actual">实际值</s:String>

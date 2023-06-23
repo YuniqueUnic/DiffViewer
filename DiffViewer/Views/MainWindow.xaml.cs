@@ -69,7 +69,15 @@ public partial class MainWindow : Window
     /// <param name="e"></param>
     private void TopToolBar_MouseLeftButtonDown(object sender , System.Windows.Input.MouseButtonEventArgs e)
     {
+
+        if( e.ClickCount == 2 )
+        {
+            this.WindowState = this.WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+        }
+
         this.DragMove();
+
+        e.Handled = true;
     }
 
     private void ListView_SelectionChanged(object sender , System.Windows.Controls.SelectionChangedEventArgs e)

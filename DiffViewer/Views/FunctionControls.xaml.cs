@@ -45,7 +45,7 @@ public partial class FunctionControls : UserControl
         double severeErrorCount = GetCount(SevereErrorRect);
         double totalCount = passCount + failedCount + severeErrorCount;
 
-        double widthUnit = (ActualWidth - ExportButton.ActualWidth - OpenRawButton.ActualWidth) / totalCount;
+        double widthUnit = (ActualWidth - ExportMenu.ActualWidth - OpenRawButton.ActualWidth) / totalCount;
 
         PassedRect.Width = widthUnit * passCount;
         FailedRect.Width = widthUnit * failedCount;
