@@ -397,7 +397,6 @@ public partial class MainWindowViewModel : ObservableObject
         if( CurrentSelectedIndex < 0 || DiffTestCases[CurrentSelectedIndex] is null ) return;
 
         _rawDataWindow.Owner = App.ViewModelLocator.Main_Window;
-        //_rawDataWindow.DataContext = DiffTestCases[CurrentSelectedIndex];
         WeakReferenceMessenger.Default.Send(new DiffViewer.Messages.SetRichTextBoxDocumentMessage()
         {
             Sender = this ,
