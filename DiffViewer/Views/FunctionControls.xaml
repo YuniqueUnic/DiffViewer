@@ -58,9 +58,9 @@
               Grid.Column="2"
               MinWidth="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Name="PassColumn" Width="Auto" />
-                <ColumnDefinition Name="FailColumn" Width="Auto" />
-                <ColumnDefinition Name="ErrorColumn" Width="Auto" />
+                <ColumnDefinition Name="PassColumn" Width="*" />
+                <ColumnDefinition Name="FailColumn" Width="*" />
+                <ColumnDefinition Name="ErrorColumn" Width="*" />
             </Grid.ColumnDefinitions>
             <TextBlock Name="PassedRect"
                        Grid.Column="0"

@@ -13,7 +13,7 @@
             <iMy:BoolenNullableToVisibility x:Key="BoolenNullableToVisibility" />
             <iMy:IsCheckedToVisibilityConverter x:Key="IsCheckedToVisibility" />
             <iMy:MouseButtonEventArgsToBoolConverter x:Key="MouseButtonClickToBool" ClickButton="Left" />
-
+            <iMy:IndexAndTextToBackgroundConverter x:Key="IndexAndTextToBackground" />
 
             <!--  Theme Colors  -->
             <SolidColorBrush x:Key="ThemePrimary" Color="#5DEABE" />

@@ -1,8 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using DiffPlex;
-using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
 using DiffViewer.Managers;
 using DiffViewer.Managers.Helper;
@@ -67,8 +65,11 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TestCasesState))]
-    public ObservableCollection<TestCase> _diffTestCases;
+    [NotifyPropertyChangedFor(nameof(TestCasesState) , nameof(TestCasesIndexes))]
+    public ObservableCollection<TestCase> _diffTestCases = new ObservableCollection<TestCase>();
+
+    public IEnumerable<int> TestCasesIndexes => Enumerable.Range(1 , DiffTestCases.Count);
+
 
     [ObservableProperty]
     string _searchText = "Search...";
@@ -86,10 +87,11 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     string _NewResult = string.Empty;
 
-    public int CurrentSelectedIndex = -1;
+    [ObservableProperty]
+    public int _currentSelectedIndex = -1;
 
     [ObservableProperty]
-    public int _selectedIndex = 0;
+    public int _selectedIndex = -1;
     partial void OnSelectedIndexChanging(int oldValue , int newValue) { if( newValue != -1 ) { CurrentSelectedIndex = newValue; } }
 
     [ObservableProperty]
@@ -101,12 +103,12 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     public SideBySideDiffModel _diffModel;
 
-    [Obsolete("Too large memory consume.")]
-    private void Compare( )
-    {
-        var diffBuilder = new SideBySideDiffBuilder(new Differ());
-        DiffModel = diffBuilder.BuildDiffModel(OldResult ?? string.Empty , NewResult ?? string.Empty);
-    }
+    //[Obsolete("Too large memory consume.")]
+    //private void Compare( )
+    //{
+    //    var diffBuilder = new SideBySideDiffBuilder(new Differ());
+    //    DiffModel = diffBuilder.BuildDiffModel(OldResult ?? string.Empty , NewResult ?? string.Empty);
+    //}
 
 
     #region Window UI RelayCommands
@@ -188,6 +190,7 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     public void DoubleToSelectTestCase( )
     {
+        if( SelectedTestCase is null ) return;
         _logger.Debug($"DoubleToSelectTestCaseCommand called,  TestCase Selected: {SelectedTestCase.Name}");
         ShowTestCaseDiff(SelectedTestCase);
     }
@@ -203,81 +206,31 @@ public partial class MainWindowViewModel : ObservableObject
 
 
 
-
     [RelayCommand]
     public async Task ExportPassedExcel( )
     {
-        _logger.Information($"({nameof(ExportFailNullLst)} Called)");
 
-        var settings = new SaveFileDialogSettings()
+        _logger.Information($"({nameof(ExportPassedExcel)} Called)");
+
+        string title = $"{App.Current.Resources.MergedDictionaries[0]["ExportPassDescription"]}";
+        string filter = "Excel (*.xlsx)|*.xlsx|CSV (*.csv)|*.csv|All (*.*)|*.*";
+        string defaultExt = "xlsx";
+        string initialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
+        //string initialFileName = "OTE_" + ImportedFileFullPath.GetFileName(withoutExt: true) + "_" + DateTime.Now.ToString("MM_dd_yy_HH");
+
+        string initialFileNameWithMoreInfo = ConcatMoreInfoToFileName(ImportedFileFullPath.GetFileName(withoutExt: true) , appendTimeNow: true);
+
+        Action action = async ( ) =>
         {
-            Title = $"{App.Current.Resources.MergedDictionaries[0]["ExportPassDescription"]}" ,
-            Filter = "Excel (*.xlsx)|*.xlsx|CSV (*.csv)|*.csv|All (*.*)|*.*" ,
-            InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) ,
-            CheckPathExists = true ,
-            AddExtension = true ,
-            FileName = "OTE_" + ImportedFileFullPath.GetFileName(withoutExt: true) + DateTime.Now.ToString("MM_dd_yy_HH") ,
-            DefaultExt = "xlsx" ,
-
+            string msgBoxText = App.Current.Resources.MergedDictionaries[0]["ExportPassDescription"].ToString() ?? "Export Identical excel successfully.";
+            await ExportToFileAsync(m_ExportFileFullPath ,
+                                    m_GroupedTestCases ,
+                                    g => g.Key == true ,
+                                    msgBoxText);
         };
 
-        bool? success = _dialogService.ShowSaveFileDialog(this , settings);
-
-        if( success == true )
-        {
-            m_ExportFileFullPath = settings.FileName;
-
-            await ExportPassedExcelAsync(m_ExportFileFullPath , m_GroupedTestCases);
-        }
-    }
-
-    private async Task ExportPassedExcelAsync(string m_ExportFileFullPath , IEnumerable<IGrouping<bool? , TestCase>> m_GroupedTestCases)
-    {
-        if( m_GroupedTestCases is null ) { return; }
-
-        var location = $"({nameof(ExportFailNullLstAsync)} Called).(Export File Full Path: {m_ExportFileFullPath})";
-
-        await TasksManager.RunTaskAsync(async ( ) =>
-        {
-            await m_GroupedTestCases.Where(g => g.Key != true)
-                                  .SelectMany(g => g)
-                                  .Select(t => t.Name)
-                                  .WriteStringsToAsync(m_ExportFileFullPath);
-
-        } , location , catchException: true);
-
-        MessageBoxSettings messageBoxSettings = new()
-        {
-            Button = System.Windows.MessageBoxButton.YesNo ,
-            Caption = App.Current.Resources.MergedDictionaries[0]["SucceedExport"].ToString() ?? "Succeed to Export" ,
-            Icon = System.Windows.MessageBoxImage.Information ,
-            DefaultResult = System.Windows.MessageBoxResult.Yes ,
-            Options = System.Windows.MessageBoxOptions.None ,
-            MessageBoxText = App.Current.Resources.MergedDictionaries[0]["ExportFailNullDescription"].ToString()
-                             + Environment.NewLine
-                             + Environment.NewLine
-                             + m_ExportFileFullPath
-                             + Environment.NewLine
-                             + App.Current.Resources.MergedDictionaries[0]["ClickYesToOpen"].ToString()
-                             ?? $"Yes to open the directory of it." ,
-        };
-
-        System.Windows.MessageBoxResult msgResult = _dialogService.ShowMessageBox(this , messageBoxSettings);
-
-        if( msgResult == System.Windows.MessageBoxResult.Yes )
-        {
-            try
-            {
-                Process.Start("explorer.exe" , $"/select,\"{m_ExportFileFullPath}\"");
-                _logger.Information($"Explorer.exe launched to show the file: {m_ExportFileFullPath}.");
-            }
-            catch( Exception ex )
-            {
-                _logger.Error($"Error On lauching the explorer.exe to show the file: {m_ExportFileFullPath}." +
-                              $"{Environment.NewLine}Exception: {ex.Message}");
-                throw;
-            }
-        }
+        await ShowSaveDialog(title , filter , defaultExt , initialDirectory , initialFileNameWithMoreInfo , action);
 
     }
 
@@ -285,82 +238,50 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     public async Task ExportFailNullLst( )
     {
+
         _logger.Information($"({nameof(ExportFailNullLst)} Called)");
 
-        var settings = new SaveFileDialogSettings()
+        string title = $"{App.Current.Resources.MergedDictionaries[0]["ExportFailNullDescription"]}";
+        string filter = "Lst File (*.lst)|*.lst|All (*.*)|*.*";
+        string defaultExt = "lst";
+        string initialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
+        //string initialFileName = ImportedFileFullPath.GetFileName(withoutExt: true) + "_" + DateTime.Now.ToString("MM_dd_yy_HH");
+
+        string initialFileNameWithMoreInfo = ConcatMoreInfoToFileName(ImportedFileFullPath.GetFileName(withoutExt: true) , appendTimeNow: true);
+
+        Action action = async ( ) =>
         {
-            Title = $"{App.Current.Resources.MergedDictionaries[0]["ExportFailNullDescription"]}" ,
-            Filter = "Lst File (*.lst)|*.lst|All (*.*)|*.*" ,
-            InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) ,
-            FileName = ImportedFileFullPath.GetFileName(withoutExt: true) + DateTime.Now.ToString("MM_dd_yy_HH") ,
-            DefaultExt = "lst" ,
-            CheckPathExists = true ,
-            AddExtension = true ,
+            string msgBoxText = App.Current.Resources.MergedDictionaries[0]["ExportFailNullDescription"].ToString() ?? "Export Non-Identical .lst successfully.";
+            await ExportToFileAsync(m_ExportFileFullPath ,
+                                    m_GroupedTestCases ,
+                                    g => g.Key != true ,
+                                    msgBoxText);
         };
 
-        bool? success = _dialogService.ShowSaveFileDialog(this , settings);
+        await ShowSaveDialog(title , filter , defaultExt , initialDirectory , initialFileNameWithMoreInfo , action);
 
-        if( success == true )
-        {
-            m_ExportFileFullPath = settings.FileName;
-
-            await ExportFailNullLstAsync(m_ExportFileFullPath , m_GroupedTestCases);
-        }
     }
 
-    private async Task ExportFailNullLstAsync(string exportFileFullPath , IEnumerable<IGrouping<bool? , TestCase>> groupedTestCases)
+
+
+    #region Refactoring export function ★☆★☆★
+
+    public string ConcatMoreInfoToFileName(string fileNameWithoutExt , bool appendTimeNow = true)
     {
-        if( groupedTestCases is null ) { return; }
+        if( TestCaseShare.Version is not null && !TestCaseShare.Version.IsNullOrWhiteSpaceOrEmpty() ) { fileNameWithoutExt += $"_{TestCaseShare.Version}"; }
 
-        var location = $"({nameof(ExportFailNullLstAsync)} Called).(Export File Full Path: {exportFileFullPath})";
+        if( TestCaseShare.Media is not null && !TestCaseShare.Media.IsNullOrWhiteSpaceOrEmpty() ) { fileNameWithoutExt += $"_{TestCaseShare.Media}"; }
 
-        await TasksManager.RunTaskAsync(async ( ) =>
-        {
-            await groupedTestCases.Where(g => g.Key != true)
-                                  .SelectMany(g => g)
-                                  .Select(t => t.Name)
-                                  .WriteStringsToAsync(exportFileFullPath);
+        if( TestCaseShare.Area is not null && !TestCaseShare.Area.IsNullOrWhiteSpaceOrEmpty() ) { fileNameWithoutExt += $"_{TestCaseShare.Area}"; }
 
-        } , location , catchException: true);
+        if( appendTimeNow ) { fileNameWithoutExt += $"_{DateTime.Now.ToString("MM_dd_yy_HH")}"; }
 
-        MessageBoxSettings messageBoxSettings = new()
-        {
-            Button = System.Windows.MessageBoxButton.YesNo ,
-            Caption = App.Current.Resources.MergedDictionaries[0]["SucceedExport"].ToString() ?? "Succeed to Export" ,
-            Icon = System.Windows.MessageBoxImage.Information ,
-            DefaultResult = System.Windows.MessageBoxResult.Yes ,
-            Options = System.Windows.MessageBoxOptions.None ,
-            MessageBoxText = App.Current.Resources.MergedDictionaries[0]["ExportFailNullDescription"].ToString()
-                             + Environment.NewLine
-                             + Environment.NewLine
-                             + exportFileFullPath
-                             + Environment.NewLine
-                             + App.Current.Resources.MergedDictionaries[0]["ClickYesToOpen"].ToString()
-                             ?? $"Yes to open the directory of it." ,
-        };
-
-        System.Windows.MessageBoxResult msgResult = _dialogService.ShowMessageBox(this , messageBoxSettings);
-
-        if( msgResult == System.Windows.MessageBoxResult.Yes )
-        {
-            try
-            {
-                Process.Start("explorer.exe" , $"/select,\"{exportFileFullPath}\"");
-                _logger.Information($"Explorer.exe launched to show the file: {exportFileFullPath}.");
-            }
-            catch( Exception ex )
-            {
-                _logger.Error($"Error On lauching the explorer.exe to show the file: {exportFileFullPath}." +
-                              $"{Environment.NewLine}Exception: {ex.Message}");
-                throw;
-            }
-        }
-
+        return fileNameWithoutExt;
     }
-
 
     //Refactoring
-    private async Task ShowSaveDialog(string title , string filter , string defaultExt , string initialDirectory , string fileName , Func<IGrouping<bool? , TestCase> , bool> filterPredicate)
+    private async Task ShowSaveDialog(string title , string filter , string defaultExt , string initialDirectory , string initialFileName , Action action)
     {
         _logger.Information($"({nameof(ShowSaveDialog)} Called)");
 
@@ -371,7 +292,7 @@ public partial class MainWindowViewModel : ObservableObject
             InitialDirectory = initialDirectory ,
             CheckPathExists = true ,
             AddExtension = true ,
-            FileName = fileName ,
+            FileName = initialFileName ,
             DefaultExt = defaultExt
         };
 
@@ -381,11 +302,16 @@ public partial class MainWindowViewModel : ObservableObject
         {
             m_ExportFileFullPath = settings.FileName;
 
-            await ExportToFileAsync(m_ExportFileFullPath , m_GroupedTestCases , filterPredicate);
+            var location = $"({nameof(ShowSaveDialog)} Called).(Export File Full Path: {m_ExportFileFullPath})";
+
+            await TasksManager.RunTaskAsync(action , location);
+
+            //await ExportToFileAsync(m_ExportFileFullPath , m_GroupedTestCases , filterPredicate);
         }
     }
 
-    private async Task ExportToFileAsync(string exportFileFullPath , IEnumerable<IGrouping<bool? , TestCase>> groupedTestCases , Func<IGrouping<bool? , TestCase> , bool> filterPredicate)
+    private async Task ExportToFileAsync(string exportFileFullPath , IEnumerable<IGrouping<bool? , TestCase>> groupedTestCases ,
+                                         Func<IGrouping<bool? , TestCase> , bool> filterPredicate , string msgboxCustomText)
     {
         if( groupedTestCases is null ) { return; }
 
@@ -407,7 +333,7 @@ public partial class MainWindowViewModel : ObservableObject
             Icon = System.Windows.MessageBoxImage.Information ,
             DefaultResult = System.Windows.MessageBoxResult.Yes ,
             Options = System.Windows.MessageBoxOptions.None ,
-            MessageBoxText = App.Current.Resources.MergedDictionaries[0]["ExportFailNullDescription"].ToString()
+            MessageBoxText = msgboxCustomText
                              + Environment.NewLine
                              + Environment.NewLine
                              + exportFileFullPath
@@ -416,24 +342,31 @@ public partial class MainWindowViewModel : ObservableObject
                              ?? $"Yes to open the directory of it." ,
         };
 
-        System.Windows.MessageBoxResult msgResult = _dialogService.ShowMessageBox(this , messageBoxSettings);
-
-        if( msgResult == System.Windows.MessageBoxResult.Yes )
+        // Update UI Elements on the UI Thread
+        App.Current.Dispatcher.Invoke(( ) =>
         {
-            try
+            System.Windows.MessageBoxResult msgResult = _dialogService.ShowMessageBox(this , messageBoxSettings);
+
+            if( msgResult == System.Windows.MessageBoxResult.Yes )
             {
-                Process.Start("explorer.exe" , $"/select,\"{exportFileFullPath}\"");
-                _logger.Information($"Explorer.exe launched to show the file: {exportFileFullPath}.");
+                try
+                {
+                    Process.Start("explorer.exe" , $"/select,\"{exportFileFullPath}\"");
+                    _logger.Information($"Explorer.exe launched to show the file: {exportFileFullPath}.");
+                }
+                catch( Exception ex )
+                {
+                    _logger.Error($"Error On lauching the explorer.exe to show the file: {exportFileFullPath}." +
+                                  $"{Environment.NewLine}Exception: {ex.Message}");
+                    throw;
+                }
             }
-            catch( Exception ex )
-            {
-                _logger.Error($"Error On lauching the explorer.exe to show the file: {exportFileFullPath}." +
-                              $"{Environment.NewLine}Exception: {ex.Message}");
-                throw;
-            }
-        }
+        });
 
     }
+
+    #endregion Refactoring export function ★☆★☆★
+
 
 
     #endregion Logic
@@ -464,7 +397,13 @@ public partial class MainWindowViewModel : ObservableObject
         if( CurrentSelectedIndex < 0 || DiffTestCases[CurrentSelectedIndex] is null ) return;
 
         _rawDataWindow.Owner = App.ViewModelLocator.Main_Window;
-        _rawDataWindow.DataContext = DiffTestCases[CurrentSelectedIndex];
+        //_rawDataWindow.DataContext = DiffTestCases[CurrentSelectedIndex];
+        WeakReferenceMessenger.Default.Send(new DiffViewer.Messages.SetRichTextBoxDocumentMessage()
+        {
+            Sender = this ,
+            Message = "LoadRawContent" ,
+            ObjReplied = DiffTestCases[CurrentSelectedIndex] ,
+        });
         _rawDataWindow.Show();
     }
 
@@ -474,7 +413,6 @@ public partial class MainWindowViewModel : ObservableObject
         _logger.Debug($"{nameof(ShowUsageWindow)} called");
         _aboutWindow.Owner = App.ViewModelLocator.Main_Window;
         _aboutWindow.Show();
-        //App.ViewModelLocator.About_Window.Show();
     }
 
     /// <summary>

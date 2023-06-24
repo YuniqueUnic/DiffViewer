@@ -4,18 +4,72 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:local="clr-namespace:DiffViewer.Views"
         Title="{Binding Name, StringFormat='{}{0} &lt;---> Raw'}"
         Width="600"
         Height="400"
         WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <d:FlowDocument x:Key="SampleDocument">
+            <d:FlowDocument.Blocks>
+                <d:Paragraph>
+                    <d:Run Text="Hello, world!" />
+                </d:Paragraph>
+                <d:Paragraph>
+                    <d:Run Text="Hello, world! 5785, 578,5495" />
+                </d:Paragraph>
+                <d:Paragraph>
+                    <d:Run Text="This is a sample text." />
+                </d:Paragraph>
+            </d:FlowDocument.Blocks>
+        </d:FlowDocument>
+    </Window.Resources>
     <Grid>
-        <Grid.ContextMenu>
-            <ContextMenu>
-                <MenuItem Header="{DynamicResource Copy}" Command="ApplicationCommands.Copy" />
-            </ContextMenu>
-        </Grid.ContextMenu>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*" MinWidth="5" />
+            <ColumnDefinition Width="5" />
+            <ColumnDefinition Width="1*" MinWidth="5" />
+        </Grid.ColumnDefinitions>
+
+        <FlowDocumentReader x:Name="RawRichFlowDocumentReader"
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            d:Document="{StaticResource SampleDocument}"
+                            BorderBrush="Transparent"
+                            FontSize="12"
+                            FontStyle="Normal"
+                            IsFindEnabled="True"
+                            MouseWheel="RawRichFlowDocumentReader_PreviewMouseWheel"
+                            SnapsToDevicePixels="True"
+                            ViewingMode="Scroll"
+                            VirtualizingPanel.CacheLengthUnit="Item"
+                            VirtualizingPanel.IsContainerVirtualizable="True"
+                            VirtualizingPanel.IsVirtualizing="True"
+                            VirtualizingPanel.ScrollUnit="Item"
+                            VirtualizingPanel.VirtualizationMode="Recycling"
+                            Zoom="2"
+                            ZoomIncrement="1.5">
+            <FlowDocumentReader.Resources>
+                <Style TargetType="TextElement">
+                    <Setter Property="Typography.Variants" Value="Normal" />
+                    <Setter Property="Typography.NumeralStyle" Value="Lining" />
+                    <Setter Property="Typography.StandardLigatures" Value="True" />
+                </Style>
+            </FlowDocumentReader.Resources>
+        </FlowDocumentReader>
+        <GridSplitter Grid.Row="0"
+                      Grid.Column="1"
+                      Width="5"
+                      Margin="2,0,0,0"
+                      HorizontalAlignment="Stretch"
+                      Background="{StaticResource ThemeSecondary}"
+                      BorderThickness="1"
+                      Opacity="0.18"
+                      ShowsPreview="True" />
         <TextBox Name="RawTextBox"
+                 Grid.Row="0"
+                 Grid.Column="2"
                  FontSize="12"
                  IsReadOnly="True"
                  PreviewMouseWheel="RawTextBox_PreviewMouseWheel"

@@ -93,7 +93,6 @@ public partial class MainWindow : Window
         {
 
         }
-
         App.Logger.Information($"ListBox_SelectionChanged.From({Remove?.Name}).To({Add?.Name})");
         if( sender is ListBox listbox )
         {

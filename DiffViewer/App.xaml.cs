@@ -2,7 +2,9 @@
 using DiffViewer.Services;
 using Serilog;
 using System;
+using System.Globalization;
 using System.IO;
+using System.Threading;
 using System.Windows;
 
 namespace DiffViewer;
@@ -43,8 +45,25 @@ public partial class App : Application
     /// <param name="e"></param>
     protected void OnLanguageChanged(object sender , LanguageChangedEventArgs e)
     {
+        SwitchLanguageCulture(e);
         LoadLanguage(e);
     }
+
+    /// <summary>
+    /// Set language for application.
+    /// </summary>
+    /// <param name="language"></param>
+    public static void SwitchLanguageCulture(LanguageChangedEventArgs e)
+    {
+        string language = e.NewLangugae ?? "en-us";
+        // Create a CultureInfo instance for the specified culture.
+        CultureInfo culture = new CultureInfo(language);
+
+        // Set current culture for all threads.
+        Thread.CurrentThread.CurrentCulture = culture;
+        Thread.CurrentThread.CurrentUICulture = culture;
+    }
+
 
     /// <summary>
     /// Load language file and change language.
@@ -87,15 +106,9 @@ public partial class App : Application
             logger.Information($"Language changed from {e.OldLanguage} to {e.NewLangugae} successfully.");
         }
 
-        //try
-        //{
-        //    LanguageChanged?.Invoke(nameof(LanguageChanged) , new() { NewLangugae = e.NewLangugae , OldLanguage = e.OldLanguage });
-        //}
-        //catch( Exception ex )
-        //{
-        //    logger.Warning(ex , $"Failed to invoke language changed event.");
-        //}
     }
+
+
 }
 public class LanguageChangedEventArgs : EventArgs
 {

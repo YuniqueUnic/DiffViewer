@@ -41,15 +41,26 @@ public partial class FunctionControls : UserControl
     private void UpdateBarChart( )
     {
         double passCount = GetCount(PassedRect);
-        double failedCount = GetCount(FailedRect);
-        double severeErrorCount = GetCount(SevereErrorRect);
-        double totalCount = passCount + failedCount + severeErrorCount;
+        double failCount = GetCount(FailedRect);
+        double errorCount = GetCount(SevereErrorRect);
+        double totalCount = passCount + failCount + errorCount;
 
-        double widthUnit = (ActualWidth - ExportMenu.ActualWidth - OpenRawButton.ActualWidth) / totalCount;
+        double restWidth = ActualWidth - ExportMenu.ActualWidth - OpenRawButton.ActualWidth;
+        double widthUnit = restWidth / totalCount;
 
-        PassedRect.Width = widthUnit * passCount;
-        FailedRect.Width = widthUnit * failedCount;
-        SevereErrorRect.Width = widthUnit * severeErrorCount;
+        if( double.IsInfinity(widthUnit) )
+        {
+            passCount = failCount = errorCount = 1;
+            widthUnit = restWidth / 3;
+        }
+
+        this.PassColumn.Width = new(widthUnit * passCount);
+        this.FailColumn.Width = new(widthUnit * failCount);
+        this.ErrorColumn.Width = new(widthUnit * errorCount);
+
+        //PassedRect.Width = widthUnit * passCount;
+        //FailedRect.Width = widthUnit * failedCount;
+        //SevereErrorRect.Width = widthUnit * severeErrorCount;
     }
 
     private double GetCount(FrameworkElement element)

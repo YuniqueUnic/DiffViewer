@@ -21,7 +21,8 @@
         </Grid.RowDefinitions>
         <FlowDocumentReader x:Name="AboutContentRichFlowDocumentReader"
                             BorderBrush="Transparent"
-                            FontSize="14">
+                            FontSize="14"
+                            Zoom="1.2">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="Loaded">
                     <i:InvokeCommandAction Command="{Binding LoadAboutContentCommand}" />

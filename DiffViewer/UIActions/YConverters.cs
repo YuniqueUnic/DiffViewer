@@ -347,3 +347,33 @@ public class MouseButtonEventArgsToBoolConverter : MarkupExtension, IValueConver
         return this;
     }
 }
+
+/// <summary>
+/// For ListView SelectedItem Background
+/// </summary>
+public class IndexAndTextToBackgroundConverter : MarkupExtension, IMultiValueConverter
+{
+    System.Windows.Media.SolidColorBrush EqualBrush { get; set; } = (SolidColorBrush)App.Current.FindResource("ThemePrimary") ?? Brushes.LightSeaGreen;
+    System.Windows.Media.SolidColorBrush NotEqualBrush { get; set; } = Brushes.Transparent;
+
+    public object Convert(object[] values , Type targetType , object parameter , CultureInfo culture)
+    {
+
+        if( values.Length == 2 && values[0] is int index && values[1] is string text )
+        {
+            return index + 1 == int.Parse(text) ? EqualBrush : NotEqualBrush;
+        }
+
+        return NotEqualBrush;
+    }
+
+    public object[] ConvertBack(object value , Type[] targetTypes , object parameter , CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override object ProvideValue(IServiceProvider serviceProvider)
+    {
+        return this;
+    }
+}
