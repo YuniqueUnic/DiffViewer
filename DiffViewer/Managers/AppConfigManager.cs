@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using DiffViewer.Models;
+using System.Collections.Generic;
 
 namespace DiffViewer.Managers;
 
@@ -12,7 +13,12 @@ class AppConfigManager
         {
             if( !_appLanguage.Equals(value) )
             {
-                App.LanguageChanged?.Invoke(nameof(AppConfigManager) , new() { OldLanguage = _appLanguage , NewLangugae = value });
+                App.LanguageChanged?.Invoke(nameof(AppConfigManager) , new()
+                {
+                    OldLanguage = _appLanguage ,
+                    NewLangugae = value
+                });
+
                 _appLanguage = value;
             }
         }
@@ -23,6 +29,8 @@ class AppConfigManager
          { "zh-cn", "中文 (简体)" },
          { "en-us", "English (US)" },
     };
+
+    public static VSTSAccessInfo AccessCode = new();
 
     public static void SwitchLanguageTo(string lang)
     {
@@ -36,3 +44,4 @@ class AppConfigManager
         }
     }
 }
+

@@ -56,7 +56,8 @@
         </Button>
         <Grid Name="ResultsRectangleGrid"
               Grid.Column="2"
-              MinWidth="0">
+              MinWidth="0"
+              ToolTip="{DynamicResource BarChart}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Name="PassColumn" Width="*" />
                 <ColumnDefinition Name="FailColumn" Width="*" />

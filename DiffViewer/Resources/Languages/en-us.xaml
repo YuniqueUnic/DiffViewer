@@ -32,5 +32,13 @@
     <s:String x:Key="Languages">Languages</s:String>
     <s:String x:Key="Slogan">Born from fun, fun for the future.</s:String>
     <s:String x:Key="Copy">Copy</s:String>
-    <s:String x:Key="PieChart">PieChart</s:String>
+    <s:String x:Key="Barchart">Barchart</s:String>
+    <s:String x:Key="VSTSSettingWindow">VSTS Setting Window</s:String>
+    <s:String x:Key="Cookie">Cookie</s:String>
+    <s:String x:Key="Token">Token</s:String>
+    <s:String x:Key="Url">Url</s:String>
+    <s:String x:Key="VSTSSetting">VSTS Setting</s:String>
+    <s:String x:Key="Save">Save</s:String>
+    <s:String x:Key="ErrorAccessCodeInfo">Token or cookie must be filled in</s:String>
+    <s:String x:Key="PassAccessCodeInfo">Token or cookie was filled in</s:String>
 </ResourceDictionary>

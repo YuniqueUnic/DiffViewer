@@ -26,8 +26,11 @@ public partial class MainWindowViewModel : ObservableObject
 {
     private ILogger _logger;
     private IDialogService _dialogService;
+
     private IWindow _aboutWindow;
     private IWindow _rawDataWindow;
+    private IWindow _vstsSettingWindow;
+
     private int m_totalLineCount;
     private string m_ExportFileFullPath;
     private IEnumerable<IGrouping<bool? , TestCase>> m_GroupedTestCases;
@@ -42,6 +45,7 @@ public partial class MainWindowViewModel : ObservableObject
             {
                 AboutWindow => _aboutWindow = iWindows[i],
                 RawDataWindow => _rawDataWindow = iWindows[i],
+                VSTSSettingWindow => _vstsSettingWindow = iWindows[i],
                 _ => throw new NotImplementedException(),
             };
         }
@@ -373,21 +377,6 @@ public partial class MainWindowViewModel : ObservableObject
 
     #region UI
 
-    [RelayCommand]
-    public void SwitchLanguage(string lang)
-    {
-        _logger.Debug("SwitchLanguageCommand called");
-        AppConfigManager.SwitchLanguageTo(lang);
-    }
-
-    [RelayCommand]
-    public void ShowAboutWindow( )
-    {
-        _logger.Debug("ShowAboutWindowCommand called");
-        _aboutWindow.Owner = App.ViewModelLocator.Main_Window;
-        _aboutWindow.Show();
-        //App.ViewModelLocator.About_Window.Show();
-    }
 
     [RelayCommand]
     public void ShowSelectedTestCaseRawData( )
@@ -404,6 +393,30 @@ public partial class MainWindowViewModel : ObservableObject
             ObjReplied = DiffTestCases[CurrentSelectedIndex] ,
         });
         _rawDataWindow.Show();
+    }
+
+    [RelayCommand]
+    public void SwitchLanguage(string lang)
+    {
+        _logger.Debug("SwitchLanguageCommand called");
+        AppConfigManager.SwitchLanguageTo(lang);
+    }
+
+    [RelayCommand]
+    public void ShowVSTSSettingWindow( )
+    {
+        _logger.Debug("ShowVSTSSettingWindow called");
+        _vstsSettingWindow.Owner = App.ViewModelLocator.Main_Window;
+        _vstsSettingWindow.Show();
+    }
+
+    [RelayCommand]
+    public void ShowAboutWindow( )
+    {
+        _logger.Debug("ShowAboutWindowCommand called");
+        _aboutWindow.Owner = App.ViewModelLocator.Main_Window;
+        _aboutWindow.Show();
+        //App.ViewModelLocator.About_Window.Show();
     }
 
     [RelayCommand]

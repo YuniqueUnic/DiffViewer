@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using DiffViewer.Managers;
 using Serilog;
 
-namespace VSTSDataProvider.ViewModels;
+namespace DiffViewer.ViewModels;
 
 public partial class AboutViewModel : ObservableObject
 {

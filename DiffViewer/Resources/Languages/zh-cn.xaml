@@ -32,5 +32,13 @@
     <s:String x:Key="Languages">语言</s:String>
     <s:String x:Key="Slogan">生来有趣, 乐游未来.</s:String>
     <s:String x:Key="Copy">复制</s:String>
-    <s:String x:Key="PieChart">饼状图</s:String>
+    <s:String x:Key="Barchart">条形图</s:String>
+    <s:String x:Key="VSTSSettingWindow">VSTS 设置窗口</s:String>
+    <s:String x:Key="Cookie">Cookie</s:String>
+    <s:String x:Key="Token">令牌</s:String>
+    <s:String x:Key="Url">链接</s:String>
+    <s:String x:Key="VSTSSetting">VSTS 设置</s:String>
+    <s:String x:Key="Save">保存</s:String>
+    <s:String x:Key="ErrorAccessCodeInfo">Token 或者 Cookie 必须填入</s:String>
+    <s:String x:Key="PassAccessCodeInfo">Token 或者 Cookie 已被填入</s:String>
 </ResourceDictionary>

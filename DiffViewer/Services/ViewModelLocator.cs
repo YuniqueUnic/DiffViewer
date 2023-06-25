@@ -1,15 +1,11 @@
 ﻿using DiffViewer.Managers;
-using DiffViewer.ViewModels;
-using DiffViewer.Views;
 using Microsoft.Extensions.DependencyInjection;
 using MvvmDialogs;
 using Serilog;
 using Serilog.Events;
 using System;
-using VSTSDataProvider.ViewModels;
 
 namespace DiffViewer.Services;
-
 
 public class ViewModelLocator
 {
@@ -51,6 +47,7 @@ public class ViewModelLocator
         // create IOC Container
         var services = new ServiceCollection();
 
+        // register application services
         services.AddSingleton<ILogger>(_ =>
         {
             return new LoggerConfiguration()
@@ -77,23 +74,21 @@ public class ViewModelLocator
         });
         services.AddSingleton<IDialogService>(_ => { return new DialogService(); });
         services.AddSingleton<AppConfigManager>();
+
         // register VM services
-        services.AddTransient<AboutViewModel>();
-        services.AddTransient<MainWindowViewModel>();
+        services.AddTransient<ViewModels.AboutViewModel>();
+        services.AddTransient<ViewModels.VSTSSettingViewModel>();
+        services.AddTransient<ViewModels.MainWindowViewModel>();
 
-        //services.AddTransient<IWindow , RawDataWindow>();
-        //services.AddTransient<IWindow , AboutWindow>(sp => new AboutWindow { DataContext = About_ViewModel });
-        //IWindow[] windows = new IWindow[] { About_Window , RawData_Window };
+        // register View services
+        services.AddTransient<IWindow[]>(sp => new IWindow[]
+        {
+            new Views.AboutWindow { DataContext = About_ViewModel } ,
+            new Views.RawDataWindow(),
+            new Views.VSTSSettingWindow{ DataContext = VSTSSetting_ViewModel} ,
+        });
 
-        services.AddTransient<IWindow[]>(sp =>
-        new IWindow[] { new AboutWindow { DataContext = About_ViewModel } ,
-                        new RawDataWindow() });
-
-        services.AddSingleton<MainWindow>(sp => new MainWindow { DataContext = MainWindow_ViewModel });
-
-        //var a = services.BuildServiceProvider();
-        //Console.WriteLine(a.GetRequiredService<AboutViewModel>().loggerAbout.Equals(a.GetRequiredService<MainWindowViewModel>().logger1));
-        //int ab = 0;
+        services.AddSingleton<Views.MainWindow>(sp => new Views.MainWindow { DataContext = MainWindow_ViewModel });
 
         // return IOC Container
         return services.BuildServiceProvider();
@@ -101,14 +96,24 @@ public class ViewModelLocator
 
     public ILogger Logger => Services.GetRequiredService<ILogger>();
 
-    public MainWindowViewModel MainWindow_ViewModel => Services.GetRequiredService<MainWindowViewModel>();
 
-    public AboutViewModel About_ViewModel => Services.GetRequiredService<AboutViewModel>();
+    #region ViewModels
 
-    public MainWindow Main_Window => Services.GetRequiredService<MainWindow>();
+    public ViewModels.MainWindowViewModel MainWindow_ViewModel => Services.GetRequiredService<ViewModels.MainWindowViewModel>();
+    public ViewModels.AboutViewModel About_ViewModel => Services.GetRequiredService<ViewModels.AboutViewModel>();
+    public ViewModels.VSTSSettingViewModel VSTSSetting_ViewModel => Services.GetRequiredService<ViewModels.VSTSSettingViewModel>();
+
+    #endregion ViewModels
+
+
+    #region Views
+
+    public Views.MainWindow Main_Window => Services.GetRequiredService<Views.MainWindow>();
 
     /// <summary>
     /// Get all IWindow instances
     /// </summary>
     public IWindow[] ITransientWindowsCollection => Services.GetRequiredService<IWindow[]>();
+
+    #endregion Views
 }

@@ -126,7 +126,9 @@
                         <MenuItem.Icon>
                             <Image Style="{StaticResource IconImageStyle}" Source="{StaticResource DiffViewerIcon}" />
                         </MenuItem.Icon>
-
+                        <MenuItem Style="{StaticResource NormalMenuItemStyle}"
+                                  Header="{DynamicResource VSTSSetting}"
+                                  Command="{Binding ShowVSTSSettingWindowCommand}" />
                         <MenuItem Style="{StaticResource NormalMenuItemStyle}"
                                   Header="{DynamicResource Usage}"
                                   Command="{Binding ShowUsageWindowCommand}" />

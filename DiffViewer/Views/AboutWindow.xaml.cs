@@ -5,7 +5,6 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
-using VSTSDataProvider.ViewModels;
 
 namespace DiffViewer.Views
 {
@@ -27,7 +26,7 @@ namespace DiffViewer.Views
 
         private void App_LanguageChanged(object? sender , LanguageChangedEventArgs e)
         {
-            (this.DataContext as AboutViewModel).LoadAboutContent();
+            (this.DataContext as ViewModels.AboutViewModel).LoadAboutContent();
         }
 
         /// <summary>
