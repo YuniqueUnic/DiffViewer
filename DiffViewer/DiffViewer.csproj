@@ -145,4 +145,10 @@
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="VSTSDataProvider">
+      <HintPath>..\..\HysysToolModels\VSTSDataProvider\bin\Release\net6.0-windows\VSTSDataProvider.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

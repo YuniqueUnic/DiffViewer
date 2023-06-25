@@ -33,7 +33,7 @@ public partial class RawDataWindow : Window, IWindow
         // Set the RichText Content
         WeakReferenceMessenger.Default.Register<SetRichTextBoxDocumentMessage>(this , (o , m) =>
         {
-            if( m is null || m.Message != "LoadRawContent" || m.ObjReplied is not TestCase tc ) return;
+            if( m is null || m.Message != "LoadRawContent" || m.ObjReplied is not DiffTestCase tc ) return;
             this.DataContext = tc;
             RawRichFlowDocumentReader.Document = FlowDocumentManager.CreateFlowDocument(tc.Raw ?? string.Empty);
             App.Logger.Information<SetRichTextBoxDocumentMessage>($"Show {tc.Name} Raw data window Done" , m);

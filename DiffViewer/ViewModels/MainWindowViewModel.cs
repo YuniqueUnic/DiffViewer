@@ -31,9 +31,8 @@ public partial class MainWindowViewModel : ObservableObject
     private IWindow _rawDataWindow;
     private IWindow _vstsSettingWindow;
 
-    private int m_totalLineCount;
     private string m_ExportFileFullPath;
-    private IEnumerable<IGrouping<bool? , TestCase>> m_GroupedTestCases;
+    private IEnumerable<IGrouping<bool? , DiffTestCase>> m_GroupedTestCases;
 
     public MainWindowViewModel(ILogger logger , IDialogService dialogService , params IWindow[] iWindows)
     {
@@ -70,7 +69,7 @@ public partial class MainWindowViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TestCasesState) , nameof(TestCasesIndexes))]
-    public ObservableCollection<TestCase> _diffTestCases = new ObservableCollection<TestCase>();
+    public ObservableCollection<DiffTestCase> _diffTestCases = new ObservableCollection<DiffTestCase>();
 
     public IEnumerable<int> TestCasesIndexes => Enumerable.Range(1 , DiffTestCases.Count);
 
@@ -102,7 +101,7 @@ public partial class MainWindowViewModel : ObservableObject
     string _selectedTestCaseName;
 
     [ObservableProperty]
-    public TestCase _selectedTestCase;
+    public DiffTestCase _selectedTestCase;
 
     [ObservableProperty]
     public SideBySideDiffModel _diffModel;
@@ -176,7 +175,7 @@ public partial class MainWindowViewModel : ObservableObject
                          .Sum(g => g.Count());
 
 
-        DiffTestCases = new ObservableCollection<TestCase>(diffDataProvider.TestCases);
+        DiffTestCases = new ObservableCollection<DiffTestCase>(diffDataProvider.TestCases);
 
 
 
@@ -199,7 +198,7 @@ public partial class MainWindowViewModel : ObservableObject
         ShowTestCaseDiff(SelectedTestCase);
     }
 
-    public void ShowTestCaseDiff(TestCase testCase)
+    public void ShowTestCaseDiff(DiffTestCase testCase)
     {
         if( testCase is null ) return;
         _logger.Information($"ShowTestCaseDiff called, TestCase shows: {testCase.Name}");
@@ -314,8 +313,8 @@ public partial class MainWindowViewModel : ObservableObject
         }
     }
 
-    private async Task ExportToFileAsync(string exportFileFullPath , IEnumerable<IGrouping<bool? , TestCase>> groupedTestCases ,
-                                         Func<IGrouping<bool? , TestCase> , bool> filterPredicate , string msgboxCustomText)
+    private async Task ExportToFileAsync(string exportFileFullPath , IEnumerable<IGrouping<bool? , DiffTestCase>> groupedTestCases ,
+                                         Func<IGrouping<bool? , DiffTestCase> , bool> filterPredicate , string msgboxCustomText)
     {
         if( groupedTestCases is null ) { return; }
 

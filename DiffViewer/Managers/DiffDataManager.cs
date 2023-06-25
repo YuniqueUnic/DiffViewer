@@ -44,7 +44,7 @@ public class DiffDataManager
     /// All Diff TestCase with properties.
     /// TestCase Properties: Name, IsIdentical, Raw, OldText_BaseLine, NewText_Actual, MoreInfo.
     /// </summary>
-    public List<TestCase>? TestCases { get; private set; }
+    public List<DiffTestCase>? TestCases { get; private set; }
 
     /// <summary>
     /// Get Diff Text LineCount and full Content by using FileManager.GetTextInfoAsync().
@@ -105,14 +105,14 @@ public class DiffDataManager
     /// <param name="diffTCResultList"></param>
     /// <param name="testCases"></param>
     /// <returns></returns>
-    private async Task<List<TestCase>> ExtractTestCaseDiffResultAsync(List<string> diffTCResultList , List<TestCase> testCases)
+    private async Task<List<DiffTestCase>> ExtractTestCaseDiffResultAsync(List<string> diffTCResultList , List<DiffTestCase> testCases)
     {
         CheckProcessOver();
         var location = $"{nameof(DiffDataManager)}.{nameof(ExtractTestCaseDiffResultAsync)}";
 
         return await TasksManager.RunTaskWithReturnAsync(( ) =>
         {
-            List<TestCase> m_testCases = testCases;
+            List<DiffTestCase> m_testCases = testCases;
 
             diffTCResultList.ForEach((s) =>
             {

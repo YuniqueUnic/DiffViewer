@@ -1,6 +1,7 @@
 ﻿using DiffPlex.DiffBuilder.Model;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -29,7 +30,7 @@ public class SideBySideDiffModelVisualizer
         typeof(SideBySideDiffModelVisualizer) ,
         new PropertyMetadata(null , new PropertyChangedCallback(VorherChanged)));
 
-    private static void VorherChanged(DependencyObject dep , DependencyPropertyChangedEventArgs e)
+    private static async void VorherChanged(DependencyObject dep , DependencyPropertyChangedEventArgs e)
     {
         var richTextBox = (RichTextBox)dep;
         var diff = (SideBySideDiffModel)e.NewValue;
@@ -37,7 +38,7 @@ public class SideBySideDiffModelVisualizer
         var zippedDiffs = Enumerable.Zip(diff.OldText.Lines , diff.NewText.Lines ,
             (oldLine , newLine) => new OldNew<DiffPiece> { Old = oldLine , New = newLine }).ToList();
 
-        ShowDiffs(richTextBox , zippedDiffs , line => line.Old , piece => piece.Old);
+        await ShowDiffs(richTextBox , zippedDiffs , line => line.Old , piece => piece.Old);
     }
 
     public static SideBySideDiffModel GetNachher(DependencyObject obj)
@@ -62,46 +63,50 @@ public class SideBySideDiffModelVisualizer
         var zippedDiffs = Enumerable.Zip(diff.OldText.Lines , diff.NewText.Lines ,
             (oldLine , newLine) => new OldNew<DiffPiece> { Old = oldLine , New = newLine }).ToList();
 
-        ShowDiffs(richTextBox , zippedDiffs , line => line.New , piece => piece.New);
+        await ShowDiffs(richTextBox , zippedDiffs , line => line.New , piece => piece.New);
     }
 
 
-    private static void ShowDiffs(RichTextBox diffBox , System.Collections.Generic.List<OldNew<DiffPiece>> lines , Func<OldNew<DiffPiece> , DiffPiece> lineSelector , Func<OldNew<DiffPiece> , DiffPiece> pieceSelector)
+    private static async Task ShowDiffs(RichTextBox diffBox , System.Collections.Generic.List<OldNew<DiffPiece>> lines , Func<OldNew<DiffPiece> , DiffPiece> lineSelector , Func<OldNew<DiffPiece> , DiffPiece> pieceSelector)
     {
-        diffBox.Document.Blocks.Clear();
-        foreach( var line in lines )
+        await Task.Run(( ) =>
         {
-            var synchroLineLength = Math.Max(line.Old.Text?.Length ?? 0 , line.New.Text?.Length ?? 0);
-            var lineSubPieces = Enumerable.Zip(line.Old.SubPieces , line.New.SubPieces ,
-                (oldPiece , newPiece) => new OldNew<DiffPiece> { Old = oldPiece , New = newPiece , Length = Math.Max(oldPiece.Text?.Length ?? 0 , newPiece.Text?.Length ?? 0) });
-
-            var oldNewLine = lineSelector(line);
-            switch( oldNewLine.Type )
+            diffBox.Document.Blocks.Clear();
+            foreach( var line in lines )
             {
-                case ChangeType.Unchanged: AppendParagraph(diffBox , oldNewLine.Text ?? string.Empty); break;
-                case ChangeType.Imaginary: AppendParagraph(diffBox , new string(BreakingSpace , synchroLineLength) , Brushes.Gray , Brushes.LightCyan); break;
-                case ChangeType.Inserted: AppendParagraph(diffBox , oldNewLine.Text ?? string.Empty , Brushes.LightGreen); break;
-                case ChangeType.Deleted: AppendParagraph(diffBox , oldNewLine.Text ?? string.Empty , Brushes.OrangeRed); break;
-                case ChangeType.Modified:
-                    var paragraph = AppendParagraph(diffBox , string.Empty);
-                    foreach( var subPiece in lineSubPieces )
-                    {
-                        var oldNewPiece = pieceSelector(subPiece);
-                        switch( oldNewPiece.Type )
+                var synchroLineLength = Math.Max(line.Old.Text?.Length ?? 0 , line.New.Text?.Length ?? 0);
+                var lineSubPieces = Enumerable.Zip(line.Old.SubPieces , line.New.SubPieces ,
+                    (oldPiece , newPiece) => new OldNew<DiffPiece> { Old = oldPiece , New = newPiece , Length = Math.Max(oldPiece.Text?.Length ?? 0 , newPiece.Text?.Length ?? 0) });
+
+                var oldNewLine = lineSelector(line);
+                switch( oldNewLine.Type )
+                {
+                    case ChangeType.Unchanged: AppendParagraph(diffBox , oldNewLine.Text ?? string.Empty); break;
+                    case ChangeType.Imaginary: AppendParagraph(diffBox , new string(BreakingSpace , synchroLineLength) , Brushes.Gray , Brushes.LightCyan); break;
+                    case ChangeType.Inserted: AppendParagraph(diffBox , oldNewLine.Text ?? string.Empty , Brushes.LightGreen); break;
+                    case ChangeType.Deleted: AppendParagraph(diffBox , oldNewLine.Text ?? string.Empty , Brushes.OrangeRed); break;
+                    case ChangeType.Modified:
+                        var paragraph = AppendParagraph(diffBox , string.Empty);
+                        foreach( var subPiece in lineSubPieces )
                         {
-                            case ChangeType.Unchanged: paragraph.Inlines.Add(NewRun(oldNewPiece.Text ?? string.Empty , Brushes.Yellow)); break;
-                            case ChangeType.Imaginary: paragraph.Inlines.Add(NewRun(oldNewPiece.Text ?? string.Empty)); break;
-                            case ChangeType.Inserted: paragraph.Inlines.Add(NewRun(oldNewPiece.Text ?? string.Empty , Brushes.LightGreen)); break;
-                            case ChangeType.Deleted: paragraph.Inlines.Add(NewRun(oldNewPiece.Text ?? string.Empty , Brushes.OrangeRed)); break;
-                            case ChangeType.Modified: paragraph.Inlines.Add(NewRun(oldNewPiece.Text ?? string.Empty , Brushes.Yellow)); break;
-                            default: throw new ArgumentException();
+                            var oldNewPiece = pieceSelector(subPiece);
+                            switch( oldNewPiece.Type )
+                            {
+                                case ChangeType.Unchanged: paragraph.Inlines.Add(NewRun(oldNewPiece.Text ?? string.Empty , Brushes.Yellow)); break;
+                                case ChangeType.Imaginary: paragraph.Inlines.Add(NewRun(oldNewPiece.Text ?? string.Empty)); break;
+                                case ChangeType.Inserted: paragraph.Inlines.Add(NewRun(oldNewPiece.Text ?? string.Empty , Brushes.LightGreen)); break;
+                                case ChangeType.Deleted: paragraph.Inlines.Add(NewRun(oldNewPiece.Text ?? string.Empty , Brushes.OrangeRed)); break;
+                                case ChangeType.Modified: paragraph.Inlines.Add(NewRun(oldNewPiece.Text ?? string.Empty , Brushes.Yellow)); break;
+                                default: throw new ArgumentException();
+                            }
+                            paragraph.Inlines.Add(NewRun(new string(BreakingSpace , subPiece.Length - (oldNewPiece.Text ?? string.Empty).Length) , Brushes.Gray , Brushes.LightCyan));
                         }
-                        paragraph.Inlines.Add(NewRun(new string(BreakingSpace , subPiece.Length - (oldNewPiece.Text ?? string.Empty).Length) , Brushes.Gray , Brushes.LightCyan));
-                    }
-                    break;
-                default: throw new ArgumentException();
+                        break;
+                    default: throw new ArgumentException();
+                }
+
             }
-        }
+        });
     }
 
 

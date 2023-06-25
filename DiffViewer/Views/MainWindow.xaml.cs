@@ -82,12 +82,12 @@ public partial class MainWindow : Window
 
     private void ListView_SelectionChanged(object sender , System.Windows.Controls.SelectionChangedEventArgs e)
     {
-        TestCase Add = new();
-        TestCase Remove = new();
+        DiffTestCase Add = new();
+        DiffTestCase Remove = new();
         try
         {
-            Add = e.AddedItems[0] as TestCase;
-            Remove = e.RemovedItems[0] as TestCase;
+            Add = e.AddedItems[0] as DiffTestCase;
+            Remove = e.RemovedItems[0] as DiffTestCase;
         }
         catch( Exception )
         {

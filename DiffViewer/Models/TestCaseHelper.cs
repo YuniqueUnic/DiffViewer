@@ -12,7 +12,7 @@ public static class TestCaseHelper
     public const string sSevereError3 = "No dump file";
     public const string sPostProcessingString = "Post Processing...";
 
-    static void IsNullTestCase(TestCase testCase)
+    static void IsNullTestCase(DiffTestCase testCase)
     {
         if( testCase is null )
         {
@@ -26,7 +26,7 @@ public static class TestCaseHelper
     /// </summary>
     /// <param name="testCase"></param>
     /// <param name="raw"></param>
-    public static TestCase SetRaw(this TestCase testCase , string raw)
+    public static DiffTestCase SetRaw(this DiffTestCase testCase , string raw)
     {
         IsNullTestCase(testCase);
         testCase.Raw = raw;
@@ -38,7 +38,7 @@ public static class TestCaseHelper
     /// </summary>
     /// <param name="testCase"></param>
     /// <param name="newText"></param>
-    public static TestCase SetNewText(this TestCase testCase , string newText)
+    public static DiffTestCase SetNewText(this DiffTestCase testCase , string newText)
     {
         IsNullTestCase(testCase);
         testCase.NewText_Actual = newText;
@@ -50,7 +50,7 @@ public static class TestCaseHelper
     /// </summary>
     /// <param name="testCase"></param>
     /// <param name="oldText"></param>
-    public static TestCase SetOldText(this TestCase testCase , string oldText)
+    public static DiffTestCase SetOldText(this DiffTestCase testCase , string oldText)
     {
         IsNullTestCase(testCase);
         testCase.OldText_BaseLine = oldText;
@@ -65,7 +65,7 @@ public static class TestCaseHelper
     /// </summary>
     /// <param name="testCase"></param>
     /// <param name="identicalText"></param>
-    public static TestCase SetIdentical(this TestCase testCase , string identicalText)
+    public static DiffTestCase SetIdentical(this DiffTestCase testCase , string identicalText)
     {
         IsNullTestCase(testCase);
         if( identicalText.EndsWith(sIdentical) || identicalText.Contains(sIdentical) )
@@ -88,7 +88,7 @@ public static class TestCaseHelper
     /// </summary>
     /// <param name="testCase"></param>
     /// <param name="testCaseShare"></param>
-    public static void SetMoreInfo(this TestCase testCase , TestCaseShare testCaseShare)
+    public static void SetMoreInfo(this DiffTestCase testCase , TestCaseShare testCaseShare)
     {
         testCase.MoreInfo = testCaseShare;
     }
@@ -98,7 +98,7 @@ public static class TestCaseHelper
     /// </summary>
     /// <param name="list"></param>
     /// <param name="testCaseShare"></param>
-    public static void SetMoreInfo(this List<TestCase> list , TestCaseShare testCaseShare)
+    public static void SetMoreInfo(this List<DiffTestCase> list , TestCaseShare testCaseShare)
     {
         Parallel.ForEach(list , (testCase) =>
         {
@@ -111,7 +111,7 @@ public static class TestCaseHelper
     /// </summary>
     /// <param name="testCase"></param>
     /// <returns></returns>    
-    public static int GetVersionTested(this TestCase testCase)
+    public static int GetVersionTested(this DiffTestCase testCase)
     {
         IsNullTestCase(testCase);
         return int.TryParse(testCase.MoreInfo?.Version , out var version) ? version : -1;
@@ -122,7 +122,7 @@ public static class TestCaseHelper
     /// </summary>
     /// <param name="testCase"></param>
     /// <returns></returns>
-    public static int GetMediaTested(this TestCase testCase)
+    public static int GetMediaTested(this DiffTestCase testCase)
     {
         IsNullTestCase(testCase);
         return int.TryParse(testCase.MoreInfo?.Media , out var media) ? media : -1;
@@ -133,7 +133,7 @@ public static class TestCaseHelper
     /// </summary>
     /// <param name="testCase"></param>
     /// <returns></returns>
-    public static DateTime GetDateTested(this TestCase testCase)
+    public static DateTime GetDateTested(this DiffTestCase testCase)
     {
         IsNullTestCase(testCase);
         return DateTime.TryParse(testCase.MoreInfo?.Time , out var dateTested) ? dateTested : DateTime.MinValue;
@@ -146,12 +146,12 @@ public static class TestCaseHelper
     /// </summary>
     /// <param name="list"></param>
     /// <returns></returns>
-    public static List<TestCase> CreateTCswithName(this List<string> list)
+    public static List<DiffTestCase> CreateTCswithName(this List<string> list)
     {
-        List<TestCase> tcList = new List<TestCase>();
+        List<DiffTestCase> tcList = new List<DiffTestCase>();
         for( int i = 0; i < list.Count; i++ )
         {
-            tcList.Add(new TestCase() { Name = list[i] });
+            tcList.Add(new DiffTestCase() { Name = list[i] });
         }
         return tcList;
     }
