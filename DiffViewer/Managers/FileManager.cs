@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VSTSDataProvider.Common;
 
 namespace DiffViewer.Managers;
 
@@ -89,5 +90,12 @@ class FileManager
     public static string GetFileContent(string path)
     {
         return System.IO.File.ReadAllText(path);
+    }
+
+    public static async Task<ExcelOperatorResult> ExportToExcel<T>(string fileFullPath , T TObj , string sheetName = "Sheet")
+    {
+        ExcelOperator excelOperator = new ExcelOperator(fileFullPath , autoSetExcelType: true);
+        ExcelOperatorResult excelOperatorResult = await excelOperator.SetSheetName(sheetName).ExportAsync<T>(TObj);
+        return excelOperatorResult;
     }
 }

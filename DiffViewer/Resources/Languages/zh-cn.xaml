@@ -41,4 +41,5 @@
     <s:String x:Key="Save">保 存</s:String>
     <s:String x:Key="ErrorAccessCodeInfo">Token 或者 Cookie 必须填入</s:String>
     <s:String x:Key="PassAccessCodeInfo">Token 或者 Cookie 已被填入</s:String>
+    <s:String x:Key="PleaseSetUriFirst">请先设置 VSTS URL</s:String>
 </ResourceDictionary>

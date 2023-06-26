@@ -31,11 +31,18 @@
                 </MenuItem.Header>
                 <MenuItem Header="{DynamicResource ExportPass}"
                           ToolTip="{DynamicResource ExportPassDescription}"
-                          Command="{Binding ExportPassedExcelCommand}">
+                          Command="{Binding ExportPassedScriptsToExcelCommand}">
                     <MenuItem.Icon>
                         <Image Style="{StaticResource IconImageStyle}" Source="{StaticResource ExcelIcon}" />
                     </MenuItem.Icon>
                 </MenuItem>
+                <!--<MenuItem Header="{DynamicResource ExportPass}"
+                          ToolTip="{DynamicResource ExportPassLstDescription}"
+                          Command="{Binding ExportPassedLstCommand}">
+                    <MenuItem.Icon>
+                        <Image Style="{StaticResource IconImageStyle}" Source="{StaticResource PassedIcon}" />
+                    </MenuItem.Icon>
+                </MenuItem>-->
                 <MenuItem Header="{DynamicResource ExportFailNull}"
                           ToolTip="{DynamicResource ExportFailNullDescription}"
                           Command="{Binding ExportFailNullLstCommand}">

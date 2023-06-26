@@ -26,7 +26,7 @@ public class TestCaseShare
 
 public class OTETestCase
 {
-    public int Index { get; set; } = -1;
+    public int Index { get; private set; } = -1;
     public int TestCaseId { get; set; } = -1;
     public string? Title { get; set; }
     public string? TestStep { get; set; } = string.Empty;
@@ -39,7 +39,9 @@ public class OTETestCase
     public string? Comment { get; set; } = string.Empty;
     public string? Defects { get; set; } = string.Empty;
     public string? RunBy { get; set; }
-
     // Just for Diff Viewer
-    public string? ScriptName { get; set; }
+    public string? ScriptName { get; private set; }
+
+    public void SetIndex(int index) => Index = index;
+    public void SetScriptName(string scriptName) => ScriptName = scriptName;
 }

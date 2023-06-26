@@ -4,7 +4,7 @@
     <s:String x:Key="DiffViewer">DiffViewer</s:String>
     <s:String x:Key="Import">Import</s:String>
     <s:String x:Key="Export">Export</s:String>
-    <s:String x:Key="ExportPass">Export Pass</s:String>
+    <s:String x:Key="ExportPass">Export Identical</s:String>
     <s:String x:Key="ExportPassDescription">Export Identical TestCases to Excel</s:String>
     <s:String x:Key="ExportFailNull">Export Non-Identical</s:String>
     <s:String x:Key="ExportFailNullDescription">Export Non-Identical TestCases to Hytest .Lst</s:String>
@@ -41,4 +41,5 @@
     <s:String x:Key="Save">Save</s:String>
     <s:String x:Key="ErrorAccessCodeInfo">Token or cookie must be filled in</s:String>
     <s:String x:Key="PassAccessCodeInfo">Token or cookie was filled in</s:String>
+    <s:String x:Key="PleaseSetUriFirst">Please set the VSTS URL first</s:String>
 </ResourceDictionary>
