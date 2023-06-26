@@ -1,4 +1,5 @@
 ﻿using DiffViewer.Managers;
+using DiffViewer.Managers.Helper;
 using DiffViewer.Services;
 using Serilog;
 using System;
@@ -14,6 +15,7 @@ namespace DiffViewer;
 /// </summary>
 public partial class App : Application
 {
+
     public static EventHandler<LanguageChangedEventArgs> LanguageChanged;
 
     /// <summary>
@@ -24,17 +26,48 @@ public partial class App : Application
     public App( )
     {
         InitializeComponent();
+
         LanguageChanged += OnLanguageChanged;
 
-        ShowWindows();
+        // Build ViewModelLocator IOC
+        ViewModelLocator = (App.Current.FindResource("VMsLocator") as ViewModelLocator) ?? new();
 
-        AppConfigManager.SwitchLanguageTo("zh-cn");
+        LoadAppConfiguration();
+
+        LoadLanguageFromConfig();
+
+        ShowWindows();
+    }
+
+
+    internal static void LoadAppConfiguration( )
+    {
+        if( !File.Exists(AppConfigManager.ConfigPath) )
+        {
+            AppConfigManager.SaveConfigToFile(AppConfigManager.ConfigPath);
+        }
+
+        AppConfigManager.LoadConfigFromFile(AppConfigManager.ConfigPath);
+        Logger.Information("AppConfig was successfully Loaded. File Path: {filePath}" , AppConfigManager.ConfigPath);
+    }
+
+    internal static void SaveAppConfiguration( )
+    {
+        AppConfigManager.SaveConfigToFile(AppConfigManager.ConfigPath);
+        Logger.Information("AppConfig was successfully saved. File Path: {filePath}" , AppConfigManager.ConfigPath);
+    }
+
+    internal void LoadLanguageFromConfig( )
+    {
+        string lang = AppConfigManager.AppLanguage.IsNullOrWhiteSpaceOrEmpty() ? "en-us" : AppConfigManager.AppLanguage;
+
+        AppConfigManager.SwitchLanguageTo(lang);
+
+        LanguageChanged.Invoke(this , new() { OldLanguage = "" , NewLangugae = lang });
     }
 
     private void ShowWindows( )
     {
-        ViewModelLocator = (App.Current.FindResource("VMsLocator") as ViewModelLocator) ?? new();
-
         ViewModelLocator.Main_Window.Show();
     }
 
@@ -63,7 +96,6 @@ public partial class App : Application
         Thread.CurrentThread.CurrentCulture = culture;
         Thread.CurrentThread.CurrentUICulture = culture;
     }
-
 
     /// <summary>
     /// Load language file and change language.
@@ -108,7 +140,15 @@ public partial class App : Application
 
     }
 
-
+    /// <summary>
+    /// Save App Config before app shutdown
+    /// </summary>
+    /// <param name="e"></param>
+    protected override void OnExit(ExitEventArgs e)
+    {
+        SaveAppConfiguration();
+        base.OnExit(e);
+    }
 }
 public class LanguageChangedEventArgs : EventArgs
 {

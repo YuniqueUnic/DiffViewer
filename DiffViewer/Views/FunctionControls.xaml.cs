@@ -23,7 +23,7 @@ public partial class FunctionControls : UserControl
     private void RegisteMessengers( )
     {
         // Set the RichText Content
-        WeakReferenceMessenger.Default.Register<ShowBarchartMessage>(this , (o , m) =>
+        WeakReferenceMessenger.Default.Register<UpdateBarChartMessage>(this , (o , m) =>
         {
             if( m is null || m.Sender != this.DataContext ) return;
             if( m.Message == "UpdateBarChart" )

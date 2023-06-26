@@ -266,8 +266,24 @@
                     Padding="4"
                     d:Content="Save"
                     FontSize="10"
+                    FontStretch="SemiExpanded"
+                    FontWeight="DemiBold"
                     Command="{Binding SaveAccessCodeCommand}"
-                    Content="{DynamicResource Save}" />
+                    Content="{DynamicResource Save}">
+                <Button.Resources>
+                    <Style TargetType="Button">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SucceedSave}" Value="False">
+                                <Setter Property="Background" Value="{StaticResource ThemeWarningSecondary}" />
+                                <Setter Property="Foreground" Value="{StaticResource TextLightGrey}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding SucceedSave}" Value="True">
+                                <Setter Property="Background" Value="{StaticResource ThemePrimary}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Resources>
+            </Button>
         </Grid>
     </Grid>
 </Window>

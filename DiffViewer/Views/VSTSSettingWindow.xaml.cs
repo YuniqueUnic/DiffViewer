@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using DiffViewer.Messages;
+using DiffViewer.ViewModels;
 using MvvmDialogs;
 using System.ComponentModel;
 using System.Windows;
@@ -28,18 +29,17 @@ public partial class VSTSSettingWindow : Window, IWindow
     private void RegisteMessengers( )
     {
         // Set the RichText Content
-        WeakReferenceMessenger.Default.Register<SetRichTextBoxDocumentMessage>(this , (o , m) =>
+        WeakReferenceMessenger.Default.Register<RefreshAccessInfoMessage>(this , (o , m) =>
         {
-            //if( m is null || m.Message != "LoadRawContent" || m.ObjReplied is not TestCase tc ) return;
-            //this.DataContext = tc;
-            ////RawRichFlowDocumentReader.Document = FlowDocumentManager.CreateFlowDocument(tc.Raw ?? string.Empty);
-            App.Logger.Information<SetRichTextBoxDocumentMessage>($"Show VSTS Setting window Done with msg: {m.Message}" , m);
+            if( m is null || m.Message != "RefreshAccessInfos" ) return;
+            (this.DataContext as VSTSSettingViewModel)?.RefreshAccessInfos();
+            App.Logger.Information<RefreshAccessInfoMessage>($"Refresh Access Infos Message Done: {m.Message}" , m);
         });
     }
 
+
     protected override void OnClosing(CancelEventArgs e)
     {
-        //base.OnClosing(e);
         this.Visibility = Visibility.Hidden;
         e.Cancel = true;
     }

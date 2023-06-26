@@ -17,7 +17,11 @@ class SetRichTextBoxDocumentMessage : Models.RequestMsg
 
 }
 
-class ShowBarchartMessage : Models.RequestMsg
+class RefreshAccessInfoMessage : Models.RequestMsg
+{
+
+}
+class UpdateBarChartMessage : Models.RequestMsg
 {
 
 }

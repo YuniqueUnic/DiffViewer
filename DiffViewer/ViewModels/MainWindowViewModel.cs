@@ -60,7 +60,7 @@ public partial class MainWindowViewModel : ObservableObject
     public int[] _testCasesState = new int[3];
     partial void OnTestCasesStateChanged(int[] value)
     {
-        WeakReferenceMessenger.Default.Send<ShowBarchartMessage>(new ShowBarchartMessage()
+        WeakReferenceMessenger.Default.Send<UpdateBarChartMessage>(new UpdateBarChartMessage()
         {
             Sender = this ,
             Message = "UpdateBarChart" ,
@@ -405,6 +405,11 @@ public partial class MainWindowViewModel : ObservableObject
     public void ShowVSTSSettingWindow( )
     {
         _logger.Debug("ShowVSTSSettingWindow called");
+        WeakReferenceMessenger.Default.Send(new DiffViewer.Messages.RefreshAccessInfoMessage()
+        {
+            Sender = this ,
+            Message = "RefreshAccessInfos" ,
+        });
         _vstsSettingWindow.Owner = App.ViewModelLocator.Main_Window;
         _vstsSettingWindow.Show();
     }
@@ -433,6 +438,7 @@ public partial class MainWindowViewModel : ObservableObject
     public void CloseWindow( )
     {
         _logger.Debug("CloseWindowCommand called");
+        App.SaveAppConfiguration();
         WeakReferenceMessenger.Default.Send(new Messages.WindowActionMessage() { Sender = this , Message = "Close" });
     }
 
