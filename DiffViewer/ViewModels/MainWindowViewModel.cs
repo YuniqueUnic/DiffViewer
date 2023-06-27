@@ -287,7 +287,7 @@ public partial class MainWindowViewModel : ObservableObject
     {
         _logger.Information($"({nameof(ExportPassToExcelLogicAsync)} Called)");
 
-        string title = $"{App.Current.Resources.MergedDictionaries[0]["ExportPassDescription"]}";
+        string title = $"{App.Current.Resources.MergedDictionaries[0]["ExportPassToExcelDescription"]}";
         string filter = "Excel (*.xlsx)|*.xlsx|CSV (*.csv)|*.csv|All (*.*)|*.*";
         string defaultExt = "xlsx";
         string initialDirectory = LeastExportDirctory;
@@ -306,7 +306,7 @@ public partial class MainWindowViewModel : ObservableObject
             if( result.SucceedDone )
             {
                 _messageBoxCaption = App.Current.Resources.MergedDictionaries[0]["SucceedExport"].ToString() ?? "Export Result"; ;
-                _msgBoxText = (App.Current.Resources.MergedDictionaries[0]["ExportPassDescription"].ToString() ?? "Export Identical to excel successfully.")
+                _msgBoxText = (App.Current.Resources.MergedDictionaries[0]["ExportPassToExcelDescription"].ToString() ?? "Export Identical to excel successfully.")
                             + Environment.NewLine
                             + Environment.NewLine
                             + m_ExportFileFullPath
@@ -339,9 +339,9 @@ public partial class MainWindowViewModel : ObservableObject
 
         _logger.Information($"({nameof(ExportPassedLst)} Called)");
 
-        string title = $"{App.Current.Resources.MergedDictionaries[0]["ExportPassDescription"]}";
-        string filter = "Excel (*.xlsx)|*.xlsx|CSV (*.csv)|*.csv|All (*.*)|*.*";
-        string defaultExt = "xlsx";
+        string title = $"{App.Current.Resources.MergedDictionaries[0]["ExportPassToLstDescription"]}";
+        string filter = "Lst File (*.lst)|*.lst|Excel (*.xlsx)|*.xlsx|CSV (*.csv)|*.csv|All (*.*)|*.*";
+        string defaultExt = "lst";
         string initialDirectory = LeastExportDirctory;
 
         //string initialFileName = "OTE_" + ImportedFileFullPath.GetFileName(withoutExt: true) + "_" + DateTime.Now.ToString("MM_dd_yy_HH");
@@ -364,7 +364,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         Action action = async ( ) =>
         {
-            string msgBoxText = App.Current.Resources.MergedDictionaries[0]["ExportPassDescription"].ToString() ?? "Export Identical excel successfully.";
+            string msgBoxText = App.Current.Resources.MergedDictionaries[0]["ExportPassToLstDescription"].ToString() ?? "Export Identical excel successfully.";
 
             await ExportToFileAsync(m_ExportFileFullPath ,
                                     msgBoxText ,

@@ -4,9 +4,11 @@
     <s:String x:Key="DiffViewer">DiffViewer</s:String>
     <s:String x:Key="Import">Import</s:String>
     <s:String x:Key="Export">Export</s:String>
-    <s:String x:Key="ExportPass">Export Identical</s:String>
-    <s:String x:Key="ExportPassDescription">Export Identical TestCases to Excel</s:String>
-    <s:String x:Key="ExportFailNull">Export Non-Identical</s:String>
+    <s:String x:Key="ExportPassToExcel">Export Identical to Excel</s:String>
+    <s:String x:Key="ExportPassToExcelDescription">Export Identical TestCases to Excel</s:String>
+    <s:String x:Key="ExportPassToLst">Export Identical to Lst</s:String>
+    <s:String x:Key="ExportPassToLstDescription">Export Identical TestCases to Hytest .Lst</s:String>
+    <s:String x:Key="ExportFailNull">Export Non-Identical to Lst</s:String>
     <s:String x:Key="ExportFailNullDescription">Export Non-Identical TestCases to Hytest .Lst</s:String>
     <s:String x:Key="SucceedExport">Export Successfully</s:String>
     <s:String x:Key="FailedExport">Failed to Export</s:String>
