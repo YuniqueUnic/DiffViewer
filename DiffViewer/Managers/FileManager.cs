@@ -92,7 +92,7 @@ class FileManager
         return System.IO.File.ReadAllText(path);
     }
 
-    public static async Task<ExcelOperatorResult> ExportToExcel<T>(string fileFullPath , T TObj , string sheetName = "Sheet")
+    public static async Task<ExcelOperatorResult> ExportToExcelAsync<T>(string fileFullPath , T TObj , string sheetName = "Sheet")
     {
         ExcelOperator excelOperator = new ExcelOperator(fileFullPath , autoSetExcelType: true);
         ExcelOperatorResult excelOperatorResult = await excelOperator.SetSheetName(sheetName).ExportAsync<T>(TObj);

@@ -33,7 +33,7 @@ public partial class MainWindowViewModel : ObservableObject
     private IWindow _vstsSettingWindow;
 
     private string m_ExportFileFullPath;
-    public string LeastExportDirctory
+    public string LatestExportDirctory
     {
         get
         {
@@ -128,6 +128,16 @@ public partial class MainWindowViewModel : ObservableObject
     //    var diffBuilder = new SideBySideDiffBuilder(new Differ());
     //    DiffModel = diffBuilder.BuildDiffModel(OldResult ?? string.Empty , NewResult ?? string.Empty);
     //}
+
+
+    /// <summary>
+    /// End of handling => True
+    /// In progress     => null
+    /// Start to handle => False
+    /// </summary>
+    [ObservableProperty]
+    public bool? _isVSTSDataHandleOver = false;
+
 
 
     #region Window UI RelayCommands
@@ -239,43 +249,101 @@ public partial class MainWindowViewModel : ObservableObject
             return;
         }
 
-
-        if( m_GroupedTestCases is null )
+        if ( m_GroupedTestCases is null )
         {
             _logger.Warning("No Diff data got.");
             return;
         }
 
         _logger.Information("Start trying to Get OTE TestCases from VSTS.");
-        await GetOTETestCasesAsync();
 
+        await GetOTETestCasesAsync(() => { IsVSTSDataHandleOver = null; }); 
+       
+
+        //IEnumerable<string?> nonIdenticalScripts = m_GroupedTestCases.Where(g => g.Key != true)
+        //                                                       .SelectMany(g => g)
+        //                                                       .Select(t => t.Name);
+
+        //_logger.Information("Start trying to export Passed OTE TestCases to Excel.");
+        //LogResultExceptNonIdenticalScripts(nonIdenticalScripts, OTETestCases);
 
         IEnumerable<string?> passedScripts = m_GroupedTestCases.Where(g => g.Key == true)
                                                                .SelectMany(g => g)
                                                                .Select(t => t.Name);
 
         _logger.Information("Start trying to export Passed OTE TestCases to Excel.");
-        LogResultForPassedScripts(passedScripts , OTETestCases);
+        LogResultForPassedScripts(passedScripts, OTETestCases);
 
         await ExportPassToExcelLogicAsync();
+
+        IsVSTSDataHandleOver = true;
     }
 
-    public async Task GetOTETestCasesAsync( )
+    public async Task GetOTETestCasesAsync(Action afterPreLoadDataAction=null)
     {
-        var OTETCs = await VSTSDataManager.GET_OTETestCasesAsync(AppConfigManager.AccessCode);
+        var OTETCs = await VSTSDataManager.GET_OTETestCasesAsync(AppConfigManager.AccessCode, afterPreLoadDataAction);
         OTETestCases = OTETCs;
     }
 
+    // LogResultExceptNonIdenticalScripts is better than LogResultForPassedScripts normally, but for different situation, it may have different performance.
+    // 1. Set all scripts except the Failed to Passed first.
+    // 2. Set the string.Empty for non-identical scripts.
+    public bool LogResultExceptNonIdenticalScripts(IEnumerable<string?> nonIdenticalScripts, ConcurrentBag<OTETestCase> oTETestCases)
+    {
+        bool success = false;
+
+        oTETestCases.AsParallel().ForAll(tc => {if (tc.Outcome != "Failed"){tc.Outcome = "Passed";}});
+
+        foreach (string scriptName in nonIdenticalScripts)
+        {
+            const string scpEx = @".scp";
+            const string hysysPrefix = @"hytest: ";
+            string lowerScriptName = scriptName.ToLowerInvariant().Trim();
+
+            OTETestCase matchingTestCase = oTETestCases.FirstOrDefault(t =>
+            {
+                bool isMatch = t.GetScriptName().ToLowerInvariant().Replace(scpEx, string.Empty).Trim().Equals(lowerScriptName);
+                if (isMatch) { return true; }
+                return t.Title.ToLowerInvariant().Replace(hysysPrefix, string.Empty).Trim().Equals(lowerScriptName);
+            });
+
+            if (matchingTestCase is not null)
+            {
+                //matchingTestCase.Outcome = "Passed";
+                matchingTestCase.Outcome = string.Empty;
+                success = true;
+            }
+        }
+
+        return success;
+    }
+
+    // Since the script name or test case name will have a spelling or alias, it will not correctly distinguish between all incoming scripts.
+    // try to use logresultexceptnonidentialscripts
+    // 1. Set all scripts except the Failed to Passed first.
+    // 2. Set the string.Empty for non-identical scripts.
+    // LogResultExceptNonIdenticalScripts is better than LogResultForPassedScripts normally, but for different situation, it may have different performance.
     public bool LogResultForPassedScripts(IEnumerable<string?> passedScripts , ConcurrentBag<OTETestCase> oTETestCases)
     {
         bool success = false;
 
         foreach( string scriptName in passedScripts )
         {
-            OTETestCase matchingTestCase = oTETestCases.FirstOrDefault(t => t.ScriptName.Equals(scriptName));
-            if( matchingTestCase != null )
+            const string scpEx = @".scp";
+            const string hysysPrefix = @"hytest: ";
+            string lowerScriptName = scriptName.ToLowerInvariant().Trim();
+
+            OTETestCase matchingTestCase = oTETestCases.FirstOrDefault(t =>
+            {
+                bool isMatch = t.GetScriptName().ToLowerInvariant().Replace(scpEx, string.Empty).Trim().Equals(lowerScriptName);
+                if (isMatch) { return true; }
+                return t.Title.ToLowerInvariant().Replace(hysysPrefix, string.Empty).Trim().Equals(lowerScriptName);
+            });
+
+            if ( matchingTestCase is not null )
             {
                 matchingTestCase.Outcome = "Passed";
+                //matchingTestCase.Outcome = "Modify😀";
                 success = true;
             }
         }
@@ -290,14 +358,14 @@ public partial class MainWindowViewModel : ObservableObject
         string title = $"{App.Current.Resources.MergedDictionaries[0]["ExportPassToExcelDescription"]}";
         string filter = "Excel (*.xlsx)|*.xlsx|CSV (*.csv)|*.csv|All (*.*)|*.*";
         string defaultExt = "xlsx";
-        string initialDirectory = LeastExportDirctory;
+        string initialDirectory = LatestExportDirctory;
 
         string initialFileNameWithMoreInfo = ConcatMoreInfoToFileName("OTE_" + ImportedFileFullPath.GetFileName(withoutExt: true) , appendTimeNow: true);
 
         Action action = async ( ) =>
         {
             _logger.Information($"Start to Export Excel to {m_ExportFileFullPath}.");
-            var result = await FileManager.ExportToExcel(m_ExportFileFullPath , OTETestCases);
+            var result = await FileManager.ExportToExcelAsync<ConcurrentBag<OTETestCase>>(m_ExportFileFullPath , OTETestCases);
 
             // Show Export Result MessageBox 
             string _messageBoxCaption;
@@ -342,7 +410,7 @@ public partial class MainWindowViewModel : ObservableObject
         string title = $"{App.Current.Resources.MergedDictionaries[0]["ExportPassToLstDescription"]}";
         string filter = "Lst File (*.lst)|*.lst|Excel (*.xlsx)|*.xlsx|CSV (*.csv)|*.csv|All (*.*)|*.*";
         string defaultExt = "lst";
-        string initialDirectory = LeastExportDirctory;
+        string initialDirectory = LatestExportDirctory;
 
         //string initialFileName = "OTE_" + ImportedFileFullPath.GetFileName(withoutExt: true) + "_" + DateTime.Now.ToString("MM_dd_yy_HH");
 
@@ -386,7 +454,7 @@ public partial class MainWindowViewModel : ObservableObject
         string title = $"{App.Current.Resources.MergedDictionaries[0]["ExportFailNullDescription"]}";
         string filter = "Lst File (*.lst)|*.lst|All (*.*)|*.*";
         string defaultExt = "lst";
-        string initialDirectory = LeastExportDirctory;
+        string initialDirectory = LatestExportDirctory;
 
         //string initialFileName = ImportedFileFullPath.GetFileName(withoutExt: true) + "_" + DateTime.Now.ToString("MM_dd_yy_HH");
 
