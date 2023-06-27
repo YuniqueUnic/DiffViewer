@@ -89,7 +89,7 @@ public class DiffDataManager
 #endif
 
 #if !DEBUG
-        TestCases = (await ExtractTestCasesNameAsync(_diffNames)).CreateTCswithName();
+        TestCases = (await ExtractTestCasesNameAsync(_diffAllNames)).CreateTCswithName();
         TestCases = await ExtractTestCaseDiffResultAsync(_diffResults , TestCases);
 #endif
         return this;
