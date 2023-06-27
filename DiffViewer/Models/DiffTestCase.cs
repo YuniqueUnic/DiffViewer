@@ -22,26 +22,3 @@ public class TestCaseShare
     public string? Version { get; set; }
     public string? Time { get; set; }
 }
-
-
-public class OTETestCase
-{
-    public int Index { get; private set; } = -1;
-    public int TestCaseId { get; set; } = -1;
-    public string? Title { get; set; }
-    public string? TestStep { get; set; } = string.Empty;
-    public string? StepAction { get; set; } = string.Empty;
-    public string? StepExpected { get; set; } = string.Empty;
-    public int TestPointId { get; set; } = -1;
-    public string? Configuration { get; set; }
-    public string? AssignedTo { get; set; }
-    public string? Outcome { get; set; }
-    public string? Comment { get; set; } = string.Empty;
-    public string? Defects { get; set; } = string.Empty;
-    public string? RunBy { get; set; }
-    // Just for Diff Viewer
-    public string? ScriptName { get; private set; }
-
-    public void SetIndex(int index) => Index = index;
-    public void SetScriptName(string scriptName) => ScriptName = scriptName;
-}

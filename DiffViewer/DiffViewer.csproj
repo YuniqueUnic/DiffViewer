@@ -147,7 +147,8 @@
 
   <ItemGroup>
     <Reference Include="VSTSDataProvider">
-      <HintPath>..\..\HysysToolModels\VSTSDataProvider\bin\Release\net6.0-windows\VSTSDataProvider.dll</HintPath>
+      <HintPath>F:\VSCodeDepository\Dotnet6\BetaProjects\Works\Credhat-HysysToolModels\VSTSDataProvider\bin\Release\net6.0-windows\VSTSDataProvider.dll</HintPath>
+      <Private>True</Private>
     </Reference>
   </ItemGroup>
 

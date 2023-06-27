@@ -94,7 +94,7 @@ public class VSTSDataManager
     /// </summary>
     /// <returns></returns>
     /// <exception cref="ArgumentException"></exception>
-    public static async Task<ConcurrentBag<OTETestCase>> GET_OTETestCasesAsync(VSTSAccessInfo accessInfo)
+    public static async Task<ConcurrentBag<OTETestCase>> GET_OTETestCasesAsync(VSTSAccessInfo accessInfo,Action afterPreLoadDataAction=null)
     {
         var preLoadDataResults = await PredLoadVSTSDataAsync(accessInfo);
 
@@ -106,6 +106,8 @@ public class VSTSDataManager
         }
         else if( preLoadDataResults.Item2 is not null )
         {
+            if (afterPreLoadDataAction is not null){ afterPreLoadDataAction();} 
+
             App.Logger.Information("Pre-Load Data Over, Start to Merge VSTS Data Models to OTETestCase...");
 
             ConcurrentBag<OTETestCase> oteTestCases = await MergeModelstoOTETestCaseByAsync(preLoadDataResults.Item2.ExeRootObject , preLoadDataResults.Item2.QueryRootObject);
