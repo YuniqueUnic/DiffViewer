@@ -1,10 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DiffViewer.Models;
+
+public class ScriptInfo
+{
+    public string? ScriptName { get; set; }
+    public string? ScriptArea { get; set; }
+}
+
+public class ScriptTestCasesMatchResult
+{
+    public bool AllMatch { get; set; }
+    public IEnumerable<ScriptInfo>? ScriptsMatched { get { return TestCasesMatched?.Select(x => new ScriptInfo { ScriptName = x.GetScriptName() }).Distinct(); } }
+    public IEnumerable<ScriptInfo>? ScriptsNotMatched { get; set; }
+    public IEnumerable<OTETestCase>? TestCasesMatched { get; set; }
+    public IEnumerable<OTETestCase>? TestCasesNotMatched { get; set; }
+}
 
 public class OTETestCase
 {
@@ -21,11 +33,11 @@ public class OTETestCase
     public string? Comment { get; set; } = string.Empty;
     public string? Defects { get; set; } = string.Empty;
     public string? RunBy { get; set; }
-    // Just for Diff Viewer
     private string? ScriptName { get; set; }
 
     public void SetIndex(int index) => Index = index;
-    public int GetIndex() => Index;
+    public int GetIndex( ) => Index;
     public void SetScriptName(string scriptName) => ScriptName = scriptName;
-    public string? GetScriptName() => ScriptName;
+    public string? GetScriptName( ) => ScriptName;
 }
+

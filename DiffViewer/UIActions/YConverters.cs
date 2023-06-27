@@ -377,3 +377,59 @@ public class IndexAndTextToBackgroundConverter : MarkupExtension, IMultiValueCon
         return this;
     }
 }
+
+
+[MarkupExtensionReturnType(typeof(IValueConverter))]
+public class BoolenNullableToProgressVisibility : MarkupExtension, IValueConverter
+{
+    public bool Reverse { get; set; }
+    public bool IsEnabled { get; set; }
+
+    public BoolenNullableToProgressVisibility( )
+    {
+        Reverse = false;
+        IsEnabled = true;
+    }
+
+    public override object ProvideValue(IServiceProvider serviceProvider)
+    {
+        return this;
+    }
+
+    /// <summary>
+    /// 将 bool? 转换为 Visibility 值。
+    /// </summary>
+    /// <param name="value">要转换的值。</param>
+    /// <param name="targetType">转换后的类型。</param>
+    /// <param name="parameter">转换器的参数。</param>
+    /// <param name="culture">转换器的区域性。</param>
+    /// <returns>转换后的值。</returns>
+    public object Convert(object value , Type targetType , object parameter , CultureInfo culture)
+    {
+        // 根据 IsEnabled 属性返回适当的 Visibility 值。
+        if( !IsEnabled )
+        {
+            return Visibility.Hidden;
+        }
+
+        // 将参数 value 强制转换为 bool? 类型。
+        bool? isVisible = (bool?)value;
+
+        if( !isVisible.HasValue ) { return Visibility.Visible; }
+
+        // 根据 Reverse 属性反转布尔值。
+        if( Reverse )
+        {
+            isVisible = !isVisible;
+        }
+
+        // 如果 isVisible 为 true，则返回 Visibility.Visible，否则返回 Visibility.Collapsed。
+        return isVisible.Value ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+
+    public object ConvertBack(object value , Type targetType , object parameter , CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}

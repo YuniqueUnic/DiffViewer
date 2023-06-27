@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -96,6 +97,13 @@ class FileManager
     {
         ExcelOperator excelOperator = new ExcelOperator(fileFullPath , autoSetExcelType: true);
         ExcelOperatorResult excelOperatorResult = await excelOperator.SetSheetName(sheetName).ExportAsync<T>(TObj);
+        return excelOperatorResult;
+    }
+
+    public static async Task<ExcelOperatorResult> ExportMultiSheetsToExcelAsync<T1, T2>(string fileFullPath , IDictionary<T1 , T2> TDicObj)
+    {
+        ExcelOperator excelOperator = new ExcelOperator(fileFullPath , autoSetExcelType: true);
+        ExcelOperatorResult excelOperatorResult = await excelOperator.ExportAsync(TDicObj);
         return excelOperatorResult;
     }
 }

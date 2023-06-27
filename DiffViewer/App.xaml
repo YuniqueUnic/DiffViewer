@@ -11,6 +11,7 @@
             <vms:ViewModelLocator xmlns:vms="clr-namespace:DiffViewer.Services" x:Key="VMsLocator" />
             <iMy:BooleanInverterConverter x:Key="BooleanInverterConverter" />
             <iMy:BoolenNullableToVisibility x:Key="BoolenNullableToVisibility" />
+            <iMy:BoolenNullableToProgressVisibility x:Key="BoolenNullableToReverseVisibility" Reverse="True" />
             <iMy:IsCheckedToVisibilityConverter x:Key="IsCheckedToVisibility" />
             <iMy:MouseButtonEventArgsToBoolConverter x:Key="MouseButtonClickToBool" ClickButton="Left" />
             <iMy:IndexAndTextToBackgroundConverter x:Key="IndexAndTextToBackground" />
@@ -21,6 +22,7 @@
             <SolidColorBrush x:Key="ThemePrimaryAccent" Color="#72FD8D" />
             <SolidColorBrush x:Key="ThemeWarning" Color="#F53DB4" />
             <SolidColorBrush x:Key="ThemeWarningSecondary" Color="#B844C2" />
+            <SolidColorBrush x:Key="ThemeInfo" Color="#FF306CFF" />
             <SolidColorBrush x:Key="TextLight" Color="White" />
             <SolidColorBrush x:Key="TextLightGrey" Color="#EDEDED" />
             <SolidColorBrush x:Key="TextGrey" Color="#FFB4B4B4" />
@@ -28,6 +30,11 @@
             <SolidColorBrush x:Key="TextDarkGrey" Color="#363636" />
             <SolidColorBrush x:Key="TextGreyDeepen" Color="#FF606060" />
 
+            <!--  Illustration  -->
+            <BitmapImage x:Key="DatabasesPic" UriSource="./Resources/Images/Illustrations/Databases.png" />
+            <BitmapImage x:Key="ProgressLoadingPic" UriSource="./Resources/Images/Illustrations/ProgressLoading.png" />
+            <BitmapImage x:Key="SearchingPic" UriSource="./Resources/Images/Illustrations/Searching.png" />
+            <BitmapImage x:Key="SucceedSavePic" UriSource="./Resources/Images/Illustrations/SucceedSave.png" />
 
             <!--  Window UI Icon  -->
             <BitmapImage x:Key="DiffViewerIcon" UriSource="./Resources/Images/Icons/DiffViewer.png" />

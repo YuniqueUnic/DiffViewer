@@ -42,6 +42,10 @@
     <None Remove="Resources\Images\Icons\Tag.png" />
     <None Remove="Resources\Images\Icons\ZoomIn.png" />
     <None Remove="Resources\Images\Icons\ZoomOut.png" />
+    <None Remove="Resources\Images\Illustrations\Databases.png" />
+    <None Remove="Resources\Images\Illustrations\ProgressLoading.png" />
+    <None Remove="Resources\Images\Illustrations\Searching.png" />
+    <None Remove="Resources\Images\Illustrations\SucceedSave.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -120,6 +124,18 @@
     <Resource Include="Resources\Images\Icons\Import.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Resources\Images\Illustrations\Databases.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Images\Illustrations\ProgressLoading.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Images\Illustrations\Searching.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Images\Illustrations\SucceedSave.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <EmbeddedResource Include="Resources\Languages\en-us.xaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
@@ -147,8 +163,7 @@
 
   <ItemGroup>
     <Reference Include="VSTSDataProvider">
-      <HintPath>F:\VSCodeDepository\Dotnet6\BetaProjects\Works\Credhat-HysysToolModels\VSTSDataProvider\bin\Release\net6.0-windows\VSTSDataProvider.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\HysysToolModels\VSTSDataProvider\bin\Release\net6.0-windows\VSTSDataProvider.dll</HintPath>
     </Reference>
   </ItemGroup>
 

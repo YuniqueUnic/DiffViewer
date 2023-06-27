@@ -10,8 +10,13 @@
     <s:String x:Key="ExportPassToLstDescription">Export Identical TestCases to Hytest .Lst</s:String>
     <s:String x:Key="ExportFailNull">Export Non-Identical to Lst</s:String>
     <s:String x:Key="ExportFailNullDescription">Export Non-Identical TestCases to Hytest .Lst</s:String>
+    <s:String x:Key="ExportPath">Export Path</s:String>
     <s:String x:Key="SucceedExport">Export Successfully</s:String>
     <s:String x:Key="FailedExport">Failed to Export</s:String>
+    <s:String x:Key="ExportToExcelAllMatch">All exported Scripts match TestCases √</s:String>
+    <s:String x:Key="ExportToExcelNotAllMatch">!!! Error matching Scripts and TestCases !!!</s:String>
+    <s:String x:Key="ExportToExcelNotAllMatchMore">For details, see the file with the same name with the ERROR prefix under the export address</s:String>
+    <s:String x:Key="ExportMatchResultToExcelFailed">!!! The matching ERROR analysis file with the ERROR prefix could not be exported successfully !!!</s:String>
     <s:String x:Key="ClickYesToOpen">Click Yes to open the directory of it.</s:String>
     <s:String x:Key="Raw">Raw</s:String>
     <s:String x:Key="Baseline">Baseline</s:String>

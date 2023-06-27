@@ -60,6 +60,25 @@
             </Setter>
         </Style>
 
+        <!--<Storyboard x:Key="MyStoryboard">
+
+            <DoubleAnimation Storyboard.TargetName="playStoryboard"
+                             Storyboard.TargetProperty="Opacity"
+                             To="0.7"
+                             Duration="0:0:10" />
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="playStoryboard"
+                                           Storyboard.TargetProperty="Visibility"
+                                           Duration="0:0:1">
+                <DiscreteObjectKeyFrame KeyTime="0:0:1" Value="{x:Null}" />
+            </ObjectAnimationUsingKeyFrames>
+            <BooleanAnimationUsingKeyFrames Storyboard.TargetName="playStoryboard"
+                                            Storyboard.TargetProperty="Visibility"
+                                            Duration="0:0:1">
+                <DiscreteBooleanKeyFrame KeyTime="0:0:2" Value="False" />
+            </BooleanAnimationUsingKeyFrames>
+
+        </Storyboard>-->
+
     </Window.Resources>
 
     <Grid Name="BaseGrid" Margin="4,0,4,2">
@@ -270,6 +289,56 @@
             </Grid>
 
         </DockPanel>
+
+        <Label Name="LoadingDataProgressLabel"
+               Grid.Row="1"
+               Grid.RowSpan="1"
+               Panel.ZIndex="1"
+               Visibility="{Binding IsVSTSDataHandleOver, Converter={StaticResource BoolenNullableToReverseVisibility}}">
+            <Image d:Source="../Resources/Images/Illustrations/ProgressLoading.png"
+                   Opacity="1"
+                   RenderOptions.BitmapScalingMode="LowQuality"
+                   Stretch="UniformToFill">
+                <Image.Resources>
+                    <Style TargetType="{x:Type Image}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsVSTSDataHandleOver}" Value="false">
+                                <Setter Property="Source" Value="{StaticResource SearchingPic}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsVSTSDataHandleOver}" Value="{x:Null}">
+                                <Setter Property="Source" Value="{StaticResource ProgressLoadingPic}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsVSTSDataHandleOver}" Value="true">
+                                <Setter Property="Source" Value="{StaticResource SucceedSavePic}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Image.Resources>
+            </Image>
+            <Label.Resources>
+                <Style TargetType="Label">
+                    <Setter Property="Label.Opacity" Value="0.8" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsVSTSDataHandleOver}" Value="false">
+                            <Setter Property="Opacity" Value="0.8" />
+                            <Setter Property="Label.Background" Value="{StaticResource ThemeInfo}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsVSTSDataHandleOver}" Value="{x:Null}">
+                            <Setter Property="Opacity" Value="0.64" />
+                            <Setter Property="Label.Background" Value="{StaticResource ThemePrimary}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsVSTSDataHandleOver}" Value="true">
+                            <Setter Property="Opacity" Value="0.2" />
+                            <Setter Property="Label.Background" Value="{StaticResource ThemePrimary}" />
+                        </DataTrigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Opacity" Value="0.8" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Label.Resources>
+        </Label>
+
         <Grid Name="MainFunctionGrid" Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" MinWidth="76" />

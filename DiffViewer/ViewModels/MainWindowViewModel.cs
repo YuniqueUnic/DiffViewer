@@ -136,7 +136,7 @@ public partial class MainWindowViewModel : ObservableObject
     /// Start to handle => False
     /// </summary>
     [ObservableProperty]
-    public bool? _isVSTSDataHandleOver = false;
+    public bool? _isVSTSDataHandleOver = true;
 
 
 
@@ -249,16 +249,19 @@ public partial class MainWindowViewModel : ObservableObject
             return;
         }
 
-        if ( m_GroupedTestCases is null )
+        if( m_GroupedTestCases is null )
         {
             _logger.Warning("No Diff data got.");
             return;
         }
 
+        IsVSTSDataHandleOver = false;
+
+
         _logger.Information("Start trying to Get OTE TestCases from VSTS.");
 
-        await GetOTETestCasesAsync(() => { IsVSTSDataHandleOver = null; }); 
-       
+        await GetOTETestCasesAsync(( ) => { IsVSTSDataHandleOver = null; });
+
 
         //IEnumerable<string?> nonIdenticalScripts = m_GroupedTestCases.Where(g => g.Key != true)
         //                                                       .SelectMany(g => g)
@@ -267,34 +270,39 @@ public partial class MainWindowViewModel : ObservableObject
         //_logger.Information("Start trying to export Passed OTE TestCases to Excel.");
         //LogResultExceptNonIdenticalScripts(nonIdenticalScripts, OTETestCases);
 
+
         IEnumerable<string?> passedScripts = m_GroupedTestCases.Where(g => g.Key == true)
                                                                .SelectMany(g => g)
                                                                .Select(t => t.Name);
 
+
         _logger.Information("Start trying to export Passed OTE TestCases to Excel.");
-        LogResultForPassedScripts(passedScripts, OTETestCases);
-
-        await ExportPassToExcelLogicAsync();
-
+        ScriptTestCasesMatchResult handleResult = HandlePassedScriptsToTestCases(passedScripts , OTETestCases);
         IsVSTSDataHandleOver = true;
+
+
+        await ExportPassToExcelLogicAsync(handleResult);
     }
 
-    public async Task GetOTETestCasesAsync(Action afterPreLoadDataAction=null)
+    public async Task GetOTETestCasesAsync(Action afterPreLoadDataAction = null)
     {
-        var OTETCs = await VSTSDataManager.GET_OTETestCasesAsync(AppConfigManager.AccessCode, afterPreLoadDataAction);
+        var OTETCs = await VSTSDataManager.GET_OTETestCasesAsync(AppConfigManager.AccessCode , afterPreLoadDataAction);
         OTETestCases = OTETCs;
     }
+
+    #region Obsolete Code
 
     // LogResultExceptNonIdenticalScripts is better than LogResultForPassedScripts normally, but for different situation, it may have different performance.
     // 1. Set all scripts except the Failed to Passed first.
     // 2. Set the string.Empty for non-identical scripts.
-    public bool LogResultExceptNonIdenticalScripts(IEnumerable<string?> nonIdenticalScripts, ConcurrentBag<OTETestCase> oTETestCases)
+    [Obsolete("Recommand use HandlePassedScriptsToTestCases Method instead of this.")]
+    public bool LogResultExceptNonIdenticalScripts(IEnumerable<string?> nonIdenticalScripts , ConcurrentBag<OTETestCase> oTETestCases)
     {
         bool success = false;
 
-        oTETestCases.AsParallel().ForAll(tc => {if (tc.Outcome != "Failed"){tc.Outcome = "Passed";}});
+        oTETestCases.AsParallel().ForAll(tc => { if( tc.Outcome != "Failed" ) { tc.Outcome = "Passed"; } });
 
-        foreach (string scriptName in nonIdenticalScripts)
+        foreach( string scriptName in nonIdenticalScripts )
         {
             const string scpEx = @".scp";
             const string hysysPrefix = @"hytest: ";
@@ -302,12 +310,12 @@ public partial class MainWindowViewModel : ObservableObject
 
             OTETestCase matchingTestCase = oTETestCases.FirstOrDefault(t =>
             {
-                bool isMatch = t.GetScriptName().ToLowerInvariant().Replace(scpEx, string.Empty).Trim().Equals(lowerScriptName);
-                if (isMatch) { return true; }
-                return t.Title.ToLowerInvariant().Replace(hysysPrefix, string.Empty).Trim().Equals(lowerScriptName);
+                bool isMatch = t.GetScriptName().ToLowerInvariant().Replace(scpEx , string.Empty).Trim().Equals(lowerScriptName);
+                if( isMatch ) { return true; }
+                return t.Title.ToLowerInvariant().Replace(hysysPrefix , string.Empty).Trim().Equals(lowerScriptName);
             });
 
-            if (matchingTestCase is not null)
+            if( matchingTestCase is not null )
             {
                 //matchingTestCase.Outcome = "Passed";
                 matchingTestCase.Outcome = string.Empty;
@@ -318,11 +326,62 @@ public partial class MainWindowViewModel : ObservableObject
         return success;
     }
 
+    [Obsolete("Recommand use HandlePassedScriptsToTestCases Method instead of this.")]
+    public bool CheckScriptsMatchOTETestCases(IEnumerable<string?> identicalScripts , IEnumerable<string?> nonIdenticalScripts , ConcurrentBag<OTETestCase> oTETestCases)
+    {
+        const string scpEx = @".scp";
+        const string hysysPrefix = @"hytest: ";
+
+        IEnumerable<OTETestCase> nonIdenticalTCs = null;
+        IEnumerable<OTETestCase> identicalTCs = null;
+
+        // Get all Non-Identical OTE TestCases
+        foreach( string scriptName in nonIdenticalScripts )
+        {
+            string lowerScriptName = scriptName.ToLowerInvariant().Trim();
+
+            OTETestCase matchingTestCase = oTETestCases.FirstOrDefault(t =>
+            {
+                bool isMatch = t.GetScriptName().ToLowerInvariant().Replace(scpEx , string.Empty).Trim().Equals(lowerScriptName);
+                if( isMatch ) { return true; }
+                return t.Title.ToLowerInvariant().Replace(hysysPrefix , string.Empty).Trim().Equals(lowerScriptName);
+            });
+
+            if( matchingTestCase is not null )
+            {
+                nonIdenticalTCs.Append(matchingTestCase);
+            }
+        }
+
+        // Get all Identical OTE TestCases
+        foreach( string scriptName in identicalScripts )
+        {
+            string lowerScriptName = scriptName.ToLowerInvariant().Trim();
+
+            OTETestCase matchingTestCase = oTETestCases.FirstOrDefault(t =>
+            {
+                bool isMatch = t.GetScriptName().ToLowerInvariant().Replace(scpEx , string.Empty).Trim().Equals(lowerScriptName);
+                if( isMatch ) { return true; }
+                return t.Title.ToLowerInvariant().Replace(hysysPrefix , string.Empty).Trim().Equals(lowerScriptName);
+            });
+
+            if( matchingTestCase is not null )
+            {
+                identicalTCs.Append(matchingTestCase);
+            }
+        }
+
+        if( (nonIdenticalTCs.Count() + identicalTCs.Count()) != oTETestCases.Count ) { return false; }
+
+        return true;
+    }
+
     // Since the script name or test case name will have a spelling or alias, it will not correctly distinguish between all incoming scripts.
     // try to use logresultexceptnonidentialscripts
     // 1. Set all scripts except the Failed to Passed first.
     // 2. Set the string.Empty for non-identical scripts.
     // LogResultExceptNonIdenticalScripts is better than LogResultForPassedScripts normally, but for different situation, it may have different performance.
+    [Obsolete("Recommand use HandlePassedScriptsToTestCases Method instead of this.")]
     public bool LogResultForPassedScripts(IEnumerable<string?> passedScripts , ConcurrentBag<OTETestCase> oTETestCases)
     {
         bool success = false;
@@ -335,12 +394,12 @@ public partial class MainWindowViewModel : ObservableObject
 
             OTETestCase matchingTestCase = oTETestCases.FirstOrDefault(t =>
             {
-                bool isMatch = t.GetScriptName().ToLowerInvariant().Replace(scpEx, string.Empty).Trim().Equals(lowerScriptName);
-                if (isMatch) { return true; }
-                return t.Title.ToLowerInvariant().Replace(hysysPrefix, string.Empty).Trim().Equals(lowerScriptName);
+                bool isMatch = t.GetScriptName().ToLowerInvariant().Replace(scpEx , string.Empty).Trim().Equals(lowerScriptName);
+                if( isMatch ) { return true; }
+                return t.Title.ToLowerInvariant().Replace(hysysPrefix , string.Empty).Trim().Equals(lowerScriptName);
             });
 
-            if ( matchingTestCase is not null )
+            if( matchingTestCase is not null )
             {
                 matchingTestCase.Outcome = "Passed";
                 //matchingTestCase.Outcome = "Modify😀";
@@ -351,7 +410,49 @@ public partial class MainWindowViewModel : ObservableObject
         return success;
     }
 
-    public async Task ExportPassToExcelLogicAsync( )
+    #endregion Obsolete Code
+
+    public ScriptTestCasesMatchResult HandlePassedScriptsToTestCases(IEnumerable<string?> passedScripts , ConcurrentBag<OTETestCase> oTETestCases)
+    {
+        ScriptTestCasesMatchResult result = new() { AllMatch = true };
+
+        List<ScriptInfo> notMatchedScripts = new List<ScriptInfo>();
+        List<OTETestCase> MatchedTestCases = new List<OTETestCase>();
+
+        foreach( string scriptName in passedScripts )
+        {
+            const string scpEx = @".scp";
+            const string hysysPrefix = @"hytest: ";
+            string lowerScriptName = scriptName.ToLowerInvariant().Trim();
+
+            OTETestCase matchingTestCase = oTETestCases.FirstOrDefault(t =>
+            {
+                bool isMatch = t.GetScriptName().ToLowerInvariant().Replace(scpEx , string.Empty).Trim().Equals(lowerScriptName);
+                if( isMatch ) { return true; }
+                return t.Title.ToLowerInvariant().Replace(hysysPrefix , string.Empty).Trim().Equals(lowerScriptName);
+            });
+
+            if( matchingTestCase is not null )
+            {
+                matchingTestCase.Outcome = "Passed";
+                //matchingTestCase.Outcome = "Modify😀";
+                MatchedTestCases.Add(matchingTestCase);
+            }
+            else
+            {
+                notMatchedScripts.Add(new() { ScriptName = scriptName , ScriptArea = TestCaseShare.Area });
+                result.AllMatch = false;
+            }
+        }
+
+        result.ScriptsNotMatched = notMatchedScripts;
+        result.TestCasesMatched = MatchedTestCases;
+        result.TestCasesNotMatched = oTETestCases.Except(MatchedTestCases);
+
+        return result;
+    }
+
+    public async Task ExportPassToExcelLogicAsync(ScriptTestCasesMatchResult handleResult)
     {
         _logger.Information($"({nameof(ExportPassToExcelLogicAsync)} Called)");
 
@@ -359,9 +460,9 @@ public partial class MainWindowViewModel : ObservableObject
         string filter = "Excel (*.xlsx)|*.xlsx|CSV (*.csv)|*.csv|All (*.*)|*.*";
         string defaultExt = "xlsx";
         string initialDirectory = LatestExportDirctory;
-
         string initialFileNameWithMoreInfo = ConcatMoreInfoToFileName("OTE_" + ImportedFileFullPath.GetFileName(withoutExt: true) , appendTimeNow: true);
 
+        // Actual Export Action
         Action action = async ( ) =>
         {
             _logger.Information($"Start to Export Excel to {m_ExportFileFullPath}.");
@@ -370,14 +471,46 @@ public partial class MainWindowViewModel : ObservableObject
             // Show Export Result MessageBox 
             string _messageBoxCaption;
             string _msgBoxText;
+            string _handleResultMsg = handleResult.AllMatch
+            ? (App.Current.Resources.MergedDictionaries[0]["ExportToExcelAllMatch"].ToString() ?? "All Match √")
+            : (App.Current.Resources.MergedDictionaries[0]["ExportToExcelNotAllMatch"].ToString() ?? "!!! Not All Match !!!")
+            + Environment.NewLine
+            + (App.Current.Resources.MergedDictionaries[0]["ExportToExcelNotAllMatchMore"].ToString() ?? "More details in file");
 
             if( result.SucceedDone )
             {
+                bool succeedExportMatchResult = true;
+
+                // Export Match Result to Excel
+                if( !handleResult.AllMatch )
+                {
+                    string matchResultExportFullPath = Path.Combine(Path.GetDirectoryName(m_ExportFileFullPath) ?? Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
+                                                       , "ERROR_" + m_ExportFileFullPath.GetFileName(withoutExt: true) + ".xlsx");
+
+                    succeedExportMatchResult = await ExportScriptTestCasesMatchResultToExcel(matchResultExportFullPath , handleResult);
+
+                    if( !succeedExportMatchResult )
+                    {
+                        _handleResultMsg = (App.Current.Resources.MergedDictionaries[0]["ExportToExcelNotAllMatch"].ToString() ?? "!!! Not All Match !!!")
+                                         + Environment.NewLine
+                                         + Environment.NewLine
+                                         + (App.Current.Resources.MergedDictionaries[0]["ExportMatchResultToExcelFailed"].ToString() ?? "!!! Failed to export ERROR analysis file !!!")
+                                         + Environment.NewLine
+                                         + (App.Current.Resources.MergedDictionaries[0]["ExportPath"].ToString() ?? "Export Path")
+                                         + Environment.NewLine
+                                         + matchResultExportFullPath;
+                    }
+                }
+
                 _messageBoxCaption = App.Current.Resources.MergedDictionaries[0]["SucceedExport"].ToString() ?? "Export Result"; ;
                 _msgBoxText = (App.Current.Resources.MergedDictionaries[0]["ExportPassToExcelDescription"].ToString() ?? "Export Identical to excel successfully.")
                             + Environment.NewLine
+                            + (App.Current.Resources.MergedDictionaries[0]["ExportPath"].ToString() ?? "Export Path")
                             + Environment.NewLine
                             + m_ExportFileFullPath
+                            + Environment.NewLine
+                            + Environment.NewLine
+                            + _handleResultMsg
                             + Environment.NewLine
                             + App.Current.Resources.MergedDictionaries[0]["ClickYesToOpen"].ToString()
                             ?? $"Yes to open the directory of it.";
@@ -388,6 +521,8 @@ public partial class MainWindowViewModel : ObservableObject
                 _msgBoxText = _messageBoxCaption
                             + Environment.NewLine
                             + Environment.NewLine
+                            + (App.Current.Resources.MergedDictionaries[0]["ExportPath"].ToString() ?? "Export Path")
+                            + Environment.NewLine
                             + m_ExportFileFullPath
                             + Environment.NewLine;
             }
@@ -397,6 +532,32 @@ public partial class MainWindowViewModel : ObservableObject
         };
 
         await ShowSaveDialog(title , filter , defaultExt , initialDirectory , initialFileNameWithMoreInfo , action);
+    }
+
+    public async Task<bool> ExportScriptTestCasesMatchResultToExcel(string exportFullPath , ScriptTestCasesMatchResult handleResult)
+    {
+        IDictionary<string , object> exportSheets = new Dictionary<string , object>()
+        {
+            ["PassedScpMatched"] = handleResult.ScriptsMatched ,
+            ["PassedScpNotMatched"] = handleResult.ScriptsNotMatched ,
+            ["TestCasesMatched"] = handleResult.TestCasesMatched ,
+            ["TestCasesNotMatched"] = handleResult.TestCasesNotMatched
+        };
+
+        var exportResult = await FileManager.ExportMultiSheetsToExcelAsync(exportFullPath , exportSheets);
+
+        if( exportResult.SucceedDone )
+        {
+            _logger.Information($"Export ScriptTestCasesMatchResult to {exportFullPath}.");
+            return true;
+        }
+        else
+        {
+            _logger.Error($"Failed to Export ScriptTestCasesMatchResult to {exportFullPath}.");
+            _logger.Error($"Failed Message: {exportResult.Info}.");
+            return false;
+        }
+
     }
 
 
@@ -444,7 +605,6 @@ public partial class MainWindowViewModel : ObservableObject
 
     }
 
-
     [RelayCommand]
     public async Task ExportFailNullLst( )
     {
@@ -489,7 +649,44 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
 
-    #region Refactoring export lst function ★☆★☆★
+    private async Task ExportToFileAsync(string exportFileFullPath , string msgboxCustomText , bool showExplorer , Func<bool> customTask)
+    {
+        if( customTask is null ) { return; }
+
+        var location = $"({nameof(ExportToFileAsync)} Called).(Export File Full Path: {exportFileFullPath})";
+
+        bool isCustomTaskSucceed = await TasksManager.RunTaskWithReturnAsync<bool>(customTask , location , catchException: true);
+
+        if( isCustomTaskSucceed )
+        {
+            var _messageBoxCaption = App.Current.Resources.MergedDictionaries[0]["SucceedExport"].ToString() ?? "Export Result";
+
+            msgboxCustomText += Environment.NewLine
+                               + Environment.NewLine
+                               + exportFileFullPath
+                               + Environment.NewLine
+                               + Environment.NewLine
+                               + App.Current.Resources.MergedDictionaries[0]["ClickYesToOpen"].ToString()
+                               ?? $"Yes to open the directory of it.";
+
+            ShowExportResultMessageBox(_messageBoxCaption , msgboxCustomText , showExplorer , exportFileFullPath);
+        }
+        else
+        {
+            var _messageBoxCaption = App.Current.Resources.MergedDictionaries[0]["FailedExport"].ToString() ?? "Export Result";
+
+            var _messageBoxText = _messageBoxCaption
+                                        + Environment.NewLine
+                                        + Environment.NewLine
+                                        + exportFileFullPath
+                                        + Environment.NewLine;
+
+            ShowExportResultMessageBox(_messageBoxCaption , _messageBoxText , false , exportFileFullPath);
+        }
+    }
+
+
+    #region Refactoring export function ★☆★☆★
 
     public string ConcatMoreInfoToFileName(string fileNameWithoutExt , bool appendTimeNow = true)
     {
@@ -534,41 +731,6 @@ public partial class MainWindowViewModel : ObservableObject
         }
     }
 
-    private async Task ExportToFileAsync(string exportFileFullPath , string msgboxCustomText , bool showExplorer , Func<bool> customTask)
-    {
-        if( customTask is null ) { return; }
-
-        var location = $"({nameof(ExportToFileAsync)} Called).(Export File Full Path: {exportFileFullPath})";
-
-        bool isCustomTaskSucceed = await TasksManager.RunTaskWithReturnAsync<bool>(customTask , location , catchException: true);
-
-        if( isCustomTaskSucceed )
-        {
-            var _messageBoxCaption = App.Current.Resources.MergedDictionaries[0]["SucceedExport"].ToString() ?? "Export Result";
-
-            msgboxCustomText += Environment.NewLine
-                               + Environment.NewLine
-                               + exportFileFullPath
-                               + Environment.NewLine
-                               + App.Current.Resources.MergedDictionaries[0]["ClickYesToOpen"].ToString()
-                               ?? $"Yes to open the directory of it.";
-
-            ShowExportResultMessageBox(_messageBoxCaption , msgboxCustomText , showExplorer , exportFileFullPath);
-        }
-        else
-        {
-            var _messageBoxCaption = App.Current.Resources.MergedDictionaries[0]["FailedExport"].ToString() ?? "Export Result";
-
-            var _messageBoxText = _messageBoxCaption
-                                        + Environment.NewLine
-                                        + Environment.NewLine
-                                        + exportFileFullPath
-                                        + Environment.NewLine;
-
-            ShowExportResultMessageBox(_messageBoxCaption , _messageBoxText , false , exportFileFullPath);
-        }
-    }
-
     private void ShowExportResultMessageBox(string msgBoxCaption , string msgboxText , bool succeedExport , string exportFileFullPath)
     {
         MessageBoxSettings messageBoxSettings = new()
@@ -606,8 +768,7 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
 
-    #endregion Refactoring export lst function ★☆★☆★
-
+    #endregion Refactoring export function ★☆★☆★
 
 
     #endregion Logic
@@ -664,6 +825,31 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     public void ShowUsageWindow( )
     {
+        //await Task.Run(( ) =>
+        //{
+        //    Stopwatch sw = Stopwatch.StartNew();
+        //    int i = 2;
+        //    while( (sw.ElapsedMilliseconds / 1000) < 30 )
+        //    {
+        //        float t = sw.ElapsedMilliseconds / 1000;
+        //        if( t <= 5 * i )
+        //        {
+        //            IsVSTSDataHandleOver = false;
+        //            _logger.Information($"IsVSTSDataHandleOver = false, t: {t}");
+        //        }
+        //        else if( 5 * i <= t && t <= 5 * i * 2 )
+        //        {
+        //            IsVSTSDataHandleOver = null;
+        //            _logger.Information($"IsVSTSDataHandleOver = null, t: {t}");
+        //        }
+        //        else if( 5 * i * 2 <= t && t <= 5 * i * 3 )
+        //        {
+        //            IsVSTSDataHandleOver = true;
+        //            _logger.Information($"IsVSTSDataHandleOver = true, t: {t}");
+
+        //        }
+        //    }
+        //});
         _logger.Debug($"{nameof(ShowUsageWindow)} called");
         _aboutWindow.Owner = App.ViewModelLocator.Main_Window;
         _aboutWindow.Show();
