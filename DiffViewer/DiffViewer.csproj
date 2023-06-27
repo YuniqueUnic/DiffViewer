@@ -17,6 +17,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Test\Data\dyn1091\**" />
+    <Compile Remove="Test\Data\refsys_v15media134\**" />
+    <Compile Remove="Test\Data\sulsim_v15media134\**" />
+    <EmbeddedResource Remove="Test\Data\dyn1091\**" />
+    <EmbeddedResource Remove="Test\Data\refsys_v15media134\**" />
+    <EmbeddedResource Remove="Test\Data\sulsim_v15media134\**" />
+    <None Remove="Test\Data\dyn1091\**" />
+    <None Remove="Test\Data\refsys_v15media134\**" />
+    <None Remove="Test\Data\sulsim_v15media134\**" />
+    <Page Remove="Test\Data\dyn1091\**" />
+    <Page Remove="Test\Data\refsys_v15media134\**" />
+    <Page Remove="Test\Data\sulsim_v15media134\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Resources\Images\Icons\Alert.png" />
     <None Remove="Resources\Images\Icons\Close.png" />
     <None Remove="Resources\Images\Icons\DiffViewer.png" />
@@ -46,6 +61,11 @@
     <None Remove="Resources\Images\Illustrations\ProgressLoading.png" />
     <None Remove="Resources\Images\Illustrations\Searching.png" />
     <None Remove="Resources\Images\Illustrations\SucceedSave.png" />
+    <None Remove="Test\Data\diffFolder.7z" />
+    <None Remove="Test\Data\dyn1091.dif" />
+    <None Remove="Test\Data\P_dyn1091_06_27_23_22.lst" />
+    <None Remove="Test\Data\refsys_v15media134.dif" />
+    <None Remove="Test\Data\sulsim_v15media134.dif" />
   </ItemGroup>
 
   <ItemGroup>
@@ -146,6 +166,7 @@
 
   <ItemGroup>
     <Folder Include="Resources\Fonts\" />
+    <Folder Include="Test\Data\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -364,15 +364,4 @@ FodyWeavers.xsd
 
 
 # User Specified
-/DiffViewer/Test/Data
-/DiffViewer/Test/Data/dyn1091
-/DiffViewer/Test/Data/refsys_v15media134
-/DiffViewer/Test/Data/diffFolder.7z
-/DiffViewer/Test/Data/dyn1091.dif
-/DiffViewer/Test/Data/P_dyn1091_06_27_23_22.lst
-/DiffViewer/Test/Data/refsys_v15media134.dif
-/DiffViewer/Test/Data/sulsim_v15media134
-/DiffViewer/Test/Data/sulsim_v15media134/DiffAll_sulsim_v15media134.dif
-/DiffViewer/Test/Data/sulsim_v15media134/DiffNames_sulsim_v15media134.dif
-/DiffViewer/Test/Data/sulsim_v15media134/Results_sulsim_v15media134.dif
-/DiffViewer/Test/Data/sulsim_v15media134.dif
+!Data/
