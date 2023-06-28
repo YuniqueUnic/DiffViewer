@@ -39,7 +39,6 @@
             <!--  Window UI Icon  -->
             <BitmapImage x:Key="DiffViewerIcon" UriSource="./Resources/Images/Icons/DiffViewer.png" />
             <BitmapImage x:Key="CloseIcon" UriSource="./Resources/Images/Icons/Close.png" />
-            <BitmapImage x:Key="SearchIcon" UriSource="./Resources/Images/Icons/Search.png" />
             <BitmapImage x:Key="MaximizeIcon" UriSource="./Resources/Images/Icons/Maximize.png" />
             <BitmapImage x:Key="MinimizeIcon" UriSource="./Resources/Images/Icons/Minimize.png" />
 
@@ -47,6 +46,10 @@
             <!--  Normal Icon  -->
             <BitmapImage x:Key="LeftTextImportIcon" UriSource="./Resources/Images/Icons/LeftBranch.png" />
             <BitmapImage x:Key="RightTextImportIcon" UriSource="./Resources/Images/Icons/RightBranch.png" />
+
+            <BitmapImage x:Key="SearchIcon" UriSource="./Resources/Images/Icons/Search.png" />
+            <BitmapImage x:Key="UpSquareIcon" UriSource="./Resources/Images/Icons/UpSquare.png" />
+            <BitmapImage x:Key="DownSquareIcon" UriSource="./Resources/Images/Icons/DownSquare.png" />
 
             <BitmapImage x:Key="ImportIcon" UriSource="./Resources/Images/Icons/Import.png" />
             <BitmapImage x:Key="ExportIcon" UriSource="./Resources/Images/Icons/Export.png" />

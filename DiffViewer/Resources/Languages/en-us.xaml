@@ -33,6 +33,8 @@
     <s:String x:Key="English">English</s:String>
     <s:String x:Key="Chinese">Chinese</s:String>
     <s:String x:Key="Search">Search</s:String>
+    <s:String x:Key="Next">Next</s:String>
+    <s:String x:Key="Last">Last</s:String>
     <s:String x:Key="LeftImport">Import file to the Left side</s:String>
     <s:String x:Key="RightImport">Import file to the Right side</s:String>
     <s:String x:Key="Minimize">Minimize</s:String>

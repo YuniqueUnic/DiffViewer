@@ -26,15 +26,60 @@
         </d:FlowDocument>
     </Window.Resources>
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="3*" MinWidth="5" />
-            <ColumnDefinition Width="5" />
-            <ColumnDefinition Width="1*" MinWidth="5" />
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" MinHeight="5" />
+            <!--<RowDefinition Height="5" />-->
+            <RowDefinition Height="1*" MinHeight="5" />
+        </Grid.RowDefinitions>
+        <DockPanel Grid.Row="0"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Center">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Name="SearchTextButton"
+                        Style="{StaticResource IconButtonStyle}"
+                        d:Content="Search"
+                        Click="SearchButton_Click"
+                        DockPanel.Dock="Right"
+                        ToolTip="{DynamicResource Search}">
+                    <Image Style="{StaticResource IconImageStyle}" Source="{StaticResource SearchIcon}" />
+                </Button>
+                <Button Name="LastTextButton"
+                        Style="{StaticResource IconButtonStyle}"
+                        d:Content="Last"
+                        Click="LastSearchButton_Click"
+                        DockPanel.Dock="Right"
+                        ToolTip="{DynamicResource Last}">
+                    <Image Style="{StaticResource IconImageStyle}" Source="{StaticResource UpSquareIcon}" />
+                </Button>
 
-        <FlowDocumentReader x:Name="RawRichFlowDocumentReader"
-                            Grid.Row="0"
-                            Grid.Column="0"
+                <Button Name="NextTextButton"
+                        Style="{StaticResource IconButtonStyle}"
+                        Margin="4,0"
+                        d:Content="Next"
+                        Click="NextSearchButton_Click"
+                        DockPanel.Dock="Right"
+                        ToolTip="{DynamicResource Next}">
+                    <Image Style="{StaticResource IconImageStyle}" Source="{StaticResource DownSquareIcon}" />
+
+                </Button>
+            </StackPanel>
+            <TextBox Name="SearchTextBox"
+                     Grid.Row="0"
+                     Height="{Binding ElementName=SearchTextButton, Path=ActualHeight}"
+                     Margin="0,0,4,0"
+                     d:Text="dsdlfkjslkdfjsfjlksjfj" />
+        </DockPanel>
+        <!--<GridSplitter Grid.Row="1"
+                      Height="5"
+                      Margin="0,2,0,0"
+                      HorizontalAlignment="Stretch"
+                      Background="{StaticResource ThemeSecondary}"
+                      BorderThickness="1"
+                      Opacity="0.18"
+                      ShowsPreview="True" />-->
+
+        <!--<FlowDocumentReader x:Name="RawRichFlowDocumentReader"
+                            Grid.Row="2"
                             d:Document="{StaticResource SampleDocument}"
                             BorderBrush="Transparent"
                             FontSize="12"
@@ -48,6 +93,7 @@
                             VirtualizingPanel.IsVirtualizing="True"
                             VirtualizingPanel.ScrollUnit="Item"
                             VirtualizingPanel.VirtualizationMode="Recycling"
+                            Visibility="Hidden"
                             Zoom="2"
                             ZoomIncrement="1.5">
             <FlowDocumentReader.Resources>
@@ -57,21 +103,14 @@
                     <Setter Property="Typography.StandardLigatures" Value="True" />
                 </Style>
             </FlowDocumentReader.Resources>
-        </FlowDocumentReader>
-        <GridSplitter Grid.Row="0"
-                      Grid.Column="1"
-                      Width="5"
-                      Margin="2,0,0,0"
-                      HorizontalAlignment="Stretch"
-                      Background="{StaticResource ThemeSecondary}"
-                      BorderThickness="1"
-                      Opacity="0.18"
-                      ShowsPreview="True" />
+        </FlowDocumentReader>-->
+
+        <!--  IsReadOnly="True"  -->
         <TextBox Name="RawTextBox"
-                 Grid.Row="0"
-                 Grid.Column="2"
+                 Grid.Row="2"
+                 Margin="0,4,0,0"
                  FontSize="12"
-                 IsReadOnly="True"
+                 IsReadOnlyCaretVisible="True"
                  PreviewMouseWheel="RawTextBox_PreviewMouseWheel"
                  ScrollViewer.CanContentScroll="True"
                  ScrollViewer.VerticalScrollBarVisibility="Auto"
