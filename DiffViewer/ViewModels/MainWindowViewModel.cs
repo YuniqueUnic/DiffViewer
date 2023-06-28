@@ -260,7 +260,7 @@ public partial class MainWindowViewModel : ObservableObject
             return;
         }
 
-        if( m_GroupedTestCases is null )
+        if( m_GroupedTestCases is null || m_GroupedTestCases.Count()<=0)
         {
             _logger.Warning("No Diff data got.");
             return;
@@ -580,6 +580,12 @@ public partial class MainWindowViewModel : ObservableObject
 
         _logger.Information($"({nameof(ExportPassedLst)} Called)");
 
+        if (m_GroupedTestCases is null || m_GroupedTestCases.Count() <= 0)
+        {
+            _logger.Warning("No Diff data got.");
+            return;
+        }
+
         string title = $"{App.Current.Resources.MergedDictionaries[0]["ExportPassToLstDescription"]}";
         string filter = "Lst File (*.lst)|*.lst|Excel (*.xlsx)|*.xlsx|CSV (*.csv)|*.csv|All (*.*)|*.*";
         string defaultExt = "lst";
@@ -622,6 +628,13 @@ public partial class MainWindowViewModel : ObservableObject
     {
 
         _logger.Information($"({nameof(ExportFailNullLst)} Called)");
+
+        if (m_GroupedTestCases is null || m_GroupedTestCases.Count() <= 0)
+        {
+            _logger.Warning("No Diff data got.");
+            return;
+        }
+
 
         string title = $"{App.Current.Resources.MergedDictionaries[0]["ExportFailNullDescription"]}";
         string filter = "Lst File (*.lst)|*.lst|All (*.*)|*.*";
