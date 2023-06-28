@@ -9,7 +9,7 @@
     <StartupObject>DiffViewer.App</StartupObject>
     <ApplicationIcon>DiffViewer.ico</ApplicationIcon>
     <Copyright>MIT</Copyright>
-    <Version>1.1.0</Version>
+    <Version>1.3.2</Version>
     <Authors>Yun</Authors>
     <PackageProjectUrl>https://github.com/YooogiYun/DiffViewer</PackageProjectUrl>
     <PackageIcon>DiffViewerPNG.png</PackageIcon>
@@ -184,7 +184,7 @@
 
   <ItemGroup>
     <Reference Include="VSTSDataProvider">
-      <HintPath>..\..\HysysToolModels\VSTSDataProvider\bin\Release\net6.0-windows\VSTSDataProvider.dll</HintPath>
+      <HintPath>F:\VSCodeDepository\Dotnet6\BetaProjects\Works\Credhat-HysysToolModels\VSTSDataProvider\bin\Release\net6.0-windows\VSTSDataProvider.dll</HintPath>
     </Reference>
   </ItemGroup>
 

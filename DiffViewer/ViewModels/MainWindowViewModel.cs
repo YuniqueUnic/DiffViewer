@@ -138,6 +138,17 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     public bool? _isVSTSDataHandleOver = true;
 
+    //public bool? _vstsDataHandleOver;
+
+    //public bool? VSTSDataHandleOver { 
+    //    get { return _vstsDataHandleOver; }
+    //    set { 
+    //        _vstsDataHandleOver = value;  
+    //    } 
+    //}
+
+    //public int VSTSDataHandledTime { get; set; }
+
 
 
     #region Window UI RelayCommands
@@ -249,13 +260,14 @@ public partial class MainWindowViewModel : ObservableObject
             return;
         }
 
-        if( m_GroupedTestCases is null )
+        if( m_GroupedTestCases is null || m_GroupedTestCases.Count()<=0)
         {
             _logger.Warning("No Diff data got.");
             return;
         }
 
         IsVSTSDataHandleOver = false;
+        OnPropertyChanged(nameof(IsVSTSDataHandleOver));
 
 
         _logger.Information("Start trying to Get OTE TestCases from VSTS.");
@@ -423,13 +435,13 @@ public partial class MainWindowViewModel : ObservableObject
         {
             const string scpEx = @".scp";
             const string hysysPrefix = @"hytest: ";
-            string lowerScriptName = scriptName.ToLowerInvariant().Trim();
+            string lowerScriptName = scriptName?.ToLowerInvariant().Trim() ?? "!!! ERROR on ScriptName !!!";
 
             OTETestCase matchingTestCase = oTETestCases.FirstOrDefault(t =>
             {
-                bool isMatch = t.GetScriptName().ToLowerInvariant().Replace(scpEx , string.Empty).Trim().Equals(lowerScriptName);
+                bool isMatch = t.GetScriptName()?.ToLowerInvariant().Replace(scpEx , string.Empty).Trim().Equals(lowerScriptName) ?? false;
                 if( isMatch ) { return true; }
-                return t.Title.ToLowerInvariant().Replace(hysysPrefix , string.Empty).Trim().Equals(lowerScriptName);
+                return t.Title?.ToLowerInvariant().Replace(hysysPrefix , string.Empty).Trim().Equals(lowerScriptName) ?? false;
             });
 
             if( matchingTestCase is not null )
@@ -568,6 +580,12 @@ public partial class MainWindowViewModel : ObservableObject
 
         _logger.Information($"({nameof(ExportPassedLst)} Called)");
 
+        if (m_GroupedTestCases is null || m_GroupedTestCases.Count() <= 0)
+        {
+            _logger.Warning("No Diff data got.");
+            return;
+        }
+
         string title = $"{App.Current.Resources.MergedDictionaries[0]["ExportPassToLstDescription"]}";
         string filter = "Lst File (*.lst)|*.lst|Excel (*.xlsx)|*.xlsx|CSV (*.csv)|*.csv|All (*.*)|*.*";
         string defaultExt = "lst";
@@ -610,6 +628,13 @@ public partial class MainWindowViewModel : ObservableObject
     {
 
         _logger.Information($"({nameof(ExportFailNullLst)} Called)");
+
+        if (m_GroupedTestCases is null || m_GroupedTestCases.Count() <= 0)
+        {
+            _logger.Warning("No Diff data got.");
+            return;
+        }
+
 
         string title = $"{App.Current.Resources.MergedDictionaries[0]["ExportFailNullDescription"]}";
         string filter = "Lst File (*.lst)|*.lst|All (*.*)|*.*";
