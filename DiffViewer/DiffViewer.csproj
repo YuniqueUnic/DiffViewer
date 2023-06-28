@@ -9,7 +9,7 @@
     <StartupObject>DiffViewer.App</StartupObject>
     <ApplicationIcon>DiffViewer.ico</ApplicationIcon>
     <Copyright>MIT</Copyright>
-    <Version>1.3.2</Version>
+    <Version>1.4.0</Version>
     <Authors>Yun</Authors>
     <PackageProjectUrl>https://github.com/YooogiYun/DiffViewer</PackageProjectUrl>
     <PackageIcon>DiffViewerPNG.png</PackageIcon>
