@@ -435,13 +435,13 @@ public partial class MainWindowViewModel : ObservableObject
         {
             const string scpEx = @".scp";
             const string hysysPrefix = @"hytest: ";
-            string lowerScriptName = scriptName.ToLowerInvariant().Trim();
+            string lowerScriptName = scriptName?.ToLowerInvariant().Trim() ?? "!!! ERROR on ScriptName !!!";
 
             OTETestCase matchingTestCase = oTETestCases.FirstOrDefault(t =>
             {
-                bool isMatch = t.GetScriptName().ToLowerInvariant().Replace(scpEx , string.Empty).Trim().Equals(lowerScriptName);
+                bool isMatch = t.GetScriptName()?.ToLowerInvariant().Replace(scpEx , string.Empty).Trim().Equals(lowerScriptName) ?? false;
                 if( isMatch ) { return true; }
-                return t.Title.ToLowerInvariant().Replace(hysysPrefix , string.Empty).Trim().Equals(lowerScriptName);
+                return t.Title?.ToLowerInvariant().Replace(hysysPrefix , string.Empty).Trim().Equals(lowerScriptName) ?? false;
             });
 
             if( matchingTestCase is not null )
