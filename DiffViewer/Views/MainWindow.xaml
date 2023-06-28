@@ -126,6 +126,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="7*" />
                 </Grid.ColumnDefinitions>
                 <!--  Grid.Column="0"  -->
@@ -253,6 +254,37 @@
                     </TextBox.InputBindings>
                 </TextBox>-->
                 <StackPanel Grid.Column="2"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal">
+                    <Button Name="LeftTextImportButton"
+                            Style="{StaticResource IconButtonStyle}"
+                            Margin="2,0"
+                            ToolTip="{DynamicResource LeftImport}">
+                        <Image Style="{StaticResource IconImageStyle}"
+                               d:Source="../Resources/Images/Icons/LeftBranch.png"
+                               Source="{StaticResource LeftTextImportIcon}" />
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseDoubleClick">
+                                <i:InvokeCommandAction Command="{Binding ImportFileToLeftSideCommand}" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </Button>
+                    <Button Name="RightTextImportButton"
+                            Style="{StaticResource IconButtonStyle}"
+                            Margin="2,0"
+                            ToolTip="{DynamicResource RightImport}">
+                        <Image Style="{StaticResource IconImageStyle}"
+                               d:Source="../Resources/Images/Icons/RightBranch.png"
+                               Source="{StaticResource RightTextImportIcon}" />
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseDoubleClick">
+                                <i:InvokeCommandAction Command="{Binding ImportFileToRightSideCommand}" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </Button>
+                </StackPanel>
+                <StackPanel Grid.Column="3"
                             Margin="4,2"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center"
@@ -464,6 +496,7 @@
             <diffPlex:DiffViewer Name="diffPlexDiffViewer"
                                  Grid.Row="0"
                                  Grid.Column="2"
+                                 IsOpenFileButtonVisible="False"
                                  IsSideBySide="{Binding IsSideBySide}"
                                  LinesContext="2"
                                  NewText="{Binding OldResult}"

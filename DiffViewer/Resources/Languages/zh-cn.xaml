@@ -33,6 +33,8 @@
     <s:String x:Key="English">英 语</s:String>
     <s:String x:Key="Chinese">中 文</s:String>
     <s:String x:Key="Search">搜 索</s:String>
+    <s:String x:Key="LeftImport">导入文件到 左侧</s:String>
+    <s:String x:Key="RightImport">导入文件到 右侧</s:String>
     <s:String x:Key="Minimize">最小化</s:String>
     <s:String x:Key="Maximize">最大化</s:String>
     <s:String x:Key="Close">关闭</s:String>

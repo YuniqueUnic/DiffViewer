@@ -45,6 +45,9 @@
 
 
             <!--  Normal Icon  -->
+            <BitmapImage x:Key="LeftTextImportIcon" UriSource="./Resources/Images/Icons/LeftBranch.png" />
+            <BitmapImage x:Key="RightTextImportIcon" UriSource="./Resources/Images/Icons/RightBranch.png" />
+
             <BitmapImage x:Key="ImportIcon" UriSource="./Resources/Images/Icons/Import.png" />
             <BitmapImage x:Key="ExportIcon" UriSource="./Resources/Images/Icons/Export.png" />
             <BitmapImage x:Key="OpenFolderIcon" UriSource="./Resources/Images/Icons/OpenFolder.png" />

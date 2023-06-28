@@ -32,7 +32,20 @@ public partial class MainWindowViewModel : ObservableObject
     private IWindow _rawDataWindow;
     private IWindow _vstsSettingWindow;
 
+    private string m_ImportFileFullPath;
     private string m_ExportFileFullPath;
+    
+    public string LatestImportDirctory
+    {
+        get
+        {
+            if (m_ImportFileFullPath.IsNullOrWhiteSpaceOrEmpty())
+            {
+                return Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            }
+            return Path.GetDirectoryName(m_ImportFileFullPath) ?? Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+        }
+    }
     public string LatestExportDirctory
     {
         get
@@ -156,6 +169,91 @@ public partial class MainWindowViewModel : ObservableObject
     #region Logic
 
     [RelayCommand]
+    public async Task ImportFileToLeftSide()
+    {
+        string title = (App.Current.Resources.MergedDictionaries[0]["LeftImport"].ToString()) ?? "Import";
+        string filter = "Dif File (*.dif)|*.dif|All (*.*)|*.*";
+
+        Action action = async () =>
+        {
+            _logger.Information($"({nameof(ImportFileToLeftSide)}).Action Start");
+
+            var result = await FileManager.GetTextInfoAsync(m_ImportFileFullPath);
+
+            if (result.Item2 is not null)
+            {
+                NewResult = result.Item2;
+                _logger.Information($"({nameof(ImportFileToLeftSide)}).Action Done. Total Line count:{result.Item1}");
+                return;
+            }
+
+            _logger.Information($"({nameof(ImportFileToLeftSide)}).Action Done. Content is null, Total Line count:{result.Item1}");
+        };
+
+        await ShowOpenFileDialog(title, filter, LatestImportDirctory, action);
+    }
+
+
+    [RelayCommand]
+    public async Task ImportFileToRightSide()
+    {
+        string title = (App.Current.Resources.MergedDictionaries[0]["RightImport"].ToString()) ?? "Import";
+        string filter = "Dif File (*.dif)|*.dif|All (*.*)|*.*";
+
+        Action action = async () =>
+        {
+            _logger.Information($"({nameof(ImportFileToRightSide)}).Action Start");
+
+            var result= await FileManager.GetTextInfoAsync(m_ImportFileFullPath);
+
+            if (result.Item2 is not null)
+            {
+                OldResult = result.Item2;
+                _logger.Information($"({nameof(ImportFileToRightSide)}).Action Done. Total Line count:{result.Item1}");
+                return;
+            }
+
+            _logger.Information($"({nameof(ImportFileToLeftSide)}).Action Done. Content is null, Total Line count:{result.Item1}");
+
+        };
+
+        await ShowOpenFileDialog(title, filter, LatestImportDirctory,action);
+    }
+
+
+    public async Task ShowOpenFileDialog(string title,string filter,string initalDir,Action action)
+    {
+        _logger.Debug($"{nameof(ShowOpenFileDialog)} called");
+
+        var settings = new OpenFileDialogSettings()
+        {
+            Title = title,
+            Filter = filter,
+            InitialDirectory = initalDir,
+            CheckFileExists = true,
+        };
+
+        bool? success = _dialogService.ShowOpenFileDialog(this, settings);
+
+        if (success == true)
+        {
+            TestCaseShare.Time = new FileInfo(settings.FileName).LastWriteTime.ToString();
+
+            m_ImportFileFullPath = settings.FileName;
+
+            _logger.Information($"Imported Diff File: {m_ImportFileFullPath}");
+
+            var location = $"({nameof(ShowOpenFileDialog)} Called).(Import File Full Path: {m_ImportFileFullPath})";
+
+            await TasksManager.RunTaskAsync(action, location);
+        }
+    }
+
+
+
+
+
+    [RelayCommand]
     public async Task ImportDiffFile(object doubleLeftClicked)
     {
         if( !(bool)doubleLeftClicked ) { return; }
@@ -166,7 +264,7 @@ public partial class MainWindowViewModel : ObservableObject
         {
             Title = $"{App.Current.Resources.MergedDictionaries[0]["Import"]} Diff" ,
             Filter = "Dif File (*.dif)|*.dif|All (*.*)|*.*" ,
-            InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) ,
+            InitialDirectory = LatestImportDirctory ,
             CheckFileExists = true ,
         };
 
@@ -179,6 +277,8 @@ public partial class MainWindowViewModel : ObservableObject
             ImportedFileFullPath = settings.FileName;
 
             _logger.Information($"Imported Diff File: {ImportedFileFullPath}");
+
+            m_ImportFileFullPath = ImportedFileFullPath;
 
             await LoadDiffFile(ImportedFileFullPath);
         }
