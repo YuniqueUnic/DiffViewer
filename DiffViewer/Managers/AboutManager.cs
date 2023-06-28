@@ -180,7 +180,7 @@ internal class AboutManager
 
     #endregion FlowDocumentContent
 
-    private void GetSoftwareAssemblyInfos( )
+    public void GetSoftwareAssemblyInfos( )
     {
         Assembly assembly = Assembly.GetExecutingAssembly();
         AssemblyName assemblyName = assembly.GetName();
@@ -221,7 +221,7 @@ internal class AboutManager
         _company = company;
     }
 
-    private async Task<List<OpenSourceProject>> GetNuGetProjectsAsync( )
+    public async Task<List<OpenSourceProject>> GetNuGetProjectsAsync( )
     {
         List<OpenSourceProject> nuGetProjects = new();
         Dictionary<string , string> nugetPackages = GetNuGetPackages();
@@ -251,7 +251,7 @@ internal class AboutManager
 
     }
 
-    private Dictionary<string , string> GetNuGetPackages( )
+    public Dictionary<string , string> GetNuGetPackages( )
     {
         var context = DependencyContext.Load(Assembly.GetEntryAssembly());
         var packages = context.RuntimeLibraries.Where(library => library.Type == "package");
@@ -265,7 +265,7 @@ internal class AboutManager
         return nugetPackages;
     }
 
-    private string GetStringFromAppResources(string resourcekey)
+    public string GetStringFromAppResources(string resourcekey)
     {
         string location = $"({nameof(AboutManager)}).({nameof(GetStringFromAppResources)})";
         try

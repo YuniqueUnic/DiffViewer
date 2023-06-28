@@ -138,6 +138,17 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     public bool? _isVSTSDataHandleOver = true;
 
+    //public bool? _vstsDataHandleOver;
+
+    //public bool? VSTSDataHandleOver { 
+    //    get { return _vstsDataHandleOver; }
+    //    set { 
+    //        _vstsDataHandleOver = value;  
+    //    } 
+    //}
+
+    //public int VSTSDataHandledTime { get; set; }
+
 
 
     #region Window UI RelayCommands
@@ -256,6 +267,7 @@ public partial class MainWindowViewModel : ObservableObject
         }
 
         IsVSTSDataHandleOver = false;
+        OnPropertyChanged(nameof(IsVSTSDataHandleOver));
 
 
         _logger.Information("Start trying to Get OTE TestCases from VSTS.");

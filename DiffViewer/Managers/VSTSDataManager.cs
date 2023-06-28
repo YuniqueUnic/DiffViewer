@@ -194,14 +194,14 @@ public class VSTSDataManager
                 {
                     TestCaseId = v.workItem.id ,
                     Title = v.workItem.name ,
-                    TestPointId = (int)v.pointAssignments.FirstOrDefault(point => point.id >= default(int))?.id ,
+                    TestPointId = (int)v.pointAssignments.FirstOrDefault(point => point.id >= default(int))?.id,
                     Configuration = v.pointAssignments.FirstOrDefault(point => point.configurationName != null)?.configurationName ,
                     AssignedTo = v.pointAssignments.FirstOrDefault(point => point.tester != null)?.tester.displayName ,
-                    Outcome = TurnOutcomeToIdentialFormat(querModel.value.FirstOrDefault(tempQueryModel => tempQueryModel.testCaseReference.id == v.workItem.id)?.results.outcome) ,
+                    Outcome = TurnOutcomeToIdentialFormat(querModel.value.FirstOrDefault(tempQueryModel => tempQueryModel.testCaseReference.id == v.workItem.id)?.results.outcome ?? string.Empty) ,
                     RunBy = v.pointAssignments.FirstOrDefault(point => point.tester != null)?.tester.uniqueName ,
                 };
                 OTE_TestCast.SetIndex(currentIndex);
-                OTE_TestCast.SetScriptName(v.workItem.fields.FirstOrDefault(field => field.scriptName != null)?.scriptName);
+                OTE_TestCast.SetScriptName(v.workItem.fields.FirstOrDefault(field => field.scriptName != null)?.scriptName ?? string.Empty);
 
                 return OTE_TestCast;
             }));
