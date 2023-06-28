@@ -44,6 +44,7 @@ public partial class MainWindow : Window
             {
                 case "Close":
                     this.Close();
+                    App.Current.Shutdown();
                     break;
                 case "Maximize":
                     this.WindowState = this.WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
