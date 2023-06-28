@@ -9,7 +9,7 @@
     <StartupObject>DiffViewer.App</StartupObject>
     <ApplicationIcon>DiffViewer.ico</ApplicationIcon>
     <Copyright>MIT</Copyright>
-    <Version>1.4.0</Version>
+    <Version>1.4.4</Version>
     <Authors>Yun</Authors>
     <PackageProjectUrl>https://github.com/YooogiYun/DiffViewer</PackageProjectUrl>
     <PackageIcon>DiffViewerPNG.png</PackageIcon>
@@ -48,6 +48,7 @@
     <None Remove="Resources\Images\Icons\LeftBranch.png" />
     <None Remove="Resources\Images\Icons\Maximize.png" />
     <None Remove="Resources\Images\Icons\Minimize.png" />
+    <None Remove="Resources\Images\Icons\Notepad.png" />
     <None Remove="Resources\Images\Icons\OpenFolder.png" />
     <None Remove="Resources\Images\Icons\Pass.png" />
     <None Remove="Resources\Images\Icons\PassedGreen.png" />
@@ -125,6 +126,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Resources\Images\Icons\Minimize.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Images\Icons\Notepad.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Resources\Images\Icons\OpenFolder.png">

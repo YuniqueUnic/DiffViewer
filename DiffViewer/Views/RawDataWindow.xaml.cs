@@ -4,6 +4,8 @@ using MvvmDialogs;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -187,6 +189,7 @@ public partial class RawDataWindow : Window, IWindow
         return all_results;
     }
 
+
     private void RawTextBox_PreviewMouseWheel(object sender , System.Windows.Input.MouseWheelEventArgs e)
     {
         if( Keyboard.Modifiers == ModifierKeys.Control )
@@ -203,6 +206,97 @@ public partial class RawDataWindow : Window, IWindow
             e.Handled = true;
         }
     }
+
+
+    private async void OpenTextByNotepadButton_Click(object sender , RoutedEventArgs e)
+    {
+        if( !string.IsNullOrEmpty(RawTextBox.Text) )
+        {
+            await ShowTextInNotepadByTempAsync(RawTextBox.Text , waitNotepadExit: false);
+        }
+
+    }
+
+    public static async Task ShowTextInNotepadDirectAsync(string text , bool waitNotepadExit = false)
+    {
+        await Task.Run(( ) =>
+        {
+            // 启动 Notepad 进程
+            Process notepad = new Process();
+            notepad.StartInfo.FileName = "notepad.exe";
+
+            // 将字符串作为命令行参数传递给 Notepad
+            notepad.StartInfo.Arguments = "\"" + text + "\"";
+
+            notepad.Start();
+            if( waitNotepadExit )
+            {
+                notepad.WaitForExit();
+            }
+        });
+    }
+
+    public static async Task ShowTextInNotepadByTempAsync(string text , bool waitNotepadExit = false)
+    {
+        await Task.Run(( ) =>
+        {
+            // 将字符串写入临时文本文件中
+            string tempFilePath = Path.GetTempFileName();
+            File.WriteAllText(tempFilePath , text);
+
+            // 启动 Notepad 进程
+            Process notepad = new Process();
+            notepad.StartInfo.FileName = "notepad.exe";
+
+            // 将临时文件路径作为命令行参数传递给 Notepad
+            notepad.StartInfo.Arguments = "\"" + tempFilePath + "\"";
+
+            try
+            {
+                notepad.Start();
+                notepad.WaitForExit();
+            }
+            catch( Win32Exception ex )
+            {
+                if( ex.NativeErrorCode == 2 ) // 文件不存在
+                {
+                    // 弹窗提示用户选择是否创建新文件
+                    MessageBoxResult result = MessageBox.Show("找不到临时文件，是否创建新文件？" , "错误" , MessageBoxButton.YesNo , MessageBoxImage.Error);
+
+                    if( result == MessageBoxResult.Yes )
+                    {
+                        // 创建新文件并重试
+                        tempFilePath = Path.Combine(Path.GetTempPath() , Path.GetRandomFileName());
+                        File.WriteAllText(tempFilePath , text);
+
+                        notepad.StartInfo.Arguments = "\"" + tempFilePath + "\"";
+                        notepad.Start();
+                        if( waitNotepadExit )
+                        {
+                            notepad.WaitForExit();
+                        }
+                    }
+                    else
+                    {
+                        // 用户取消操作，删除临时文件
+                        File.Delete(tempFilePath);
+                    }
+                }
+                else
+                {
+                    // 其他错误，删除临时文件
+                    File.Delete(tempFilePath);
+                    throw;
+                }
+            }
+            finally
+            {
+                // 删除临时文件
+                File.Delete(tempFilePath);
+            }
+        });
+    }
+
 
     //private void RawRichFlowDocumentReader_PreviewMouseWheel(object sender , System.Windows.Input.MouseWheelEventArgs e)
     //{

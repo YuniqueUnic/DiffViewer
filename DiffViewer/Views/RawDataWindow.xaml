@@ -43,8 +43,10 @@
                         ToolTip="{DynamicResource Search}">
                     <Image Style="{StaticResource IconImageStyle}" Source="{StaticResource SearchIcon}" />
                 </Button>
+
                 <Button Name="LastTextButton"
                         Style="{StaticResource IconButtonStyle}"
+                        Margin="4,0"
                         d:Content="Last"
                         Click="LastSearchButton_Click"
                         DockPanel.Dock="Right"
@@ -54,7 +56,6 @@
 
                 <Button Name="NextTextButton"
                         Style="{StaticResource IconButtonStyle}"
-                        Margin="4,0"
                         d:Content="Next"
                         Click="NextSearchButton_Click"
                         DockPanel.Dock="Right"
@@ -62,6 +63,18 @@
                     <Image Style="{StaticResource IconImageStyle}" Source="{StaticResource DownSquareIcon}" />
 
                 </Button>
+
+                <Button Name="OpenTextByNotepadButton"
+                        Style="{StaticResource IconButtonStyle}"
+                        Margin="4,0,0,0"
+                        d:Content="Next"
+                        Click="OpenTextByNotepadButton_Click"
+                        DockPanel.Dock="Right"
+                        ToolTip="{DynamicResource Notepad}">
+                    <Image Style="{StaticResource IconImageStyle}" Source="{StaticResource NotepadIcon}" />
+
+                </Button>
+
             </StackPanel>
             <TextBox Name="SearchTextBox"
                      Grid.Row="0"

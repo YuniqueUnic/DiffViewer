@@ -50,6 +50,7 @@
             <BitmapImage x:Key="SearchIcon" UriSource="./Resources/Images/Icons/Search.png" />
             <BitmapImage x:Key="UpSquareIcon" UriSource="./Resources/Images/Icons/UpSquare.png" />
             <BitmapImage x:Key="DownSquareIcon" UriSource="./Resources/Images/Icons/DownSquare.png" />
+            <BitmapImage x:Key="NotepadIcon" UriSource="./Resources/Images/Icons/Notepad.png" />
 
             <BitmapImage x:Key="ImportIcon" UriSource="./Resources/Images/Icons/Import.png" />
             <BitmapImage x:Key="ExportIcon" UriSource="./Resources/Images/Icons/Export.png" />
