@@ -148,8 +148,9 @@ public class DiffDataManager
                 {
 
                     // Update the TestCase some major Infos.
-                    m_testCases.First(t => t.Name.Equals(name))
+                    m_testCases.First(t => (t.Name.Equals(name)))
                                .SetRaw(raw)
+                               .SetRawSize(raw)
                                .SetNewText(splitedData.actualText)
                                .SetOldText(splitedData.baseLineText)
                                .SetIdentical(raw);

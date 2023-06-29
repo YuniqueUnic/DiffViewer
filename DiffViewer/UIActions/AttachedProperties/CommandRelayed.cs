@@ -22,3 +22,24 @@ class CommandRelayed : DependencyObject
             new PropertyMetadata(""));
 
 }
+
+
+class AdditionalInfoClass : DependencyObject
+{
+    public static double GetAdditionalInfoDouble(DependencyObject obj)
+    {
+        return (double)obj.GetValue(AdditionalInfoDoubleProperty);
+    }
+
+    public static void SetAdditionalInfoDouble(DependencyObject obj , double value)
+    {
+        obj.SetValue(AdditionalInfoDoubleProperty , value);
+    }
+
+    // Using a DependencyProperty as the backing store for AdditionalInfoDouble.  This enables animation, styling, binding, etc...
+    public static readonly DependencyProperty AdditionalInfoDoubleProperty =
+        DependencyProperty.RegisterAttached("AdditionalInfoDouble" ,
+            typeof(double) ,
+            typeof(AdditionalInfoClass) ,
+            new PropertyMetadata(double.NaN));
+}

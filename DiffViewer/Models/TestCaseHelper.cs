@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace DiffViewer.Models;
@@ -30,6 +31,28 @@ public static class TestCaseHelper
     {
         IsNullTestCase(testCase);
         testCase.Raw = raw;
+        testCase.RawSize = raw.Length;
+        return testCase;
+    }
+
+    /// <summary>
+    /// Set the test case's RawSize property
+    /// </summary>
+    /// <param name="testCase"></param>
+    /// <param name="raw"></param>
+    public static DiffTestCase SetRawSize(this DiffTestCase testCase , string raw)
+    {
+        IsNullTestCase(testCase);
+
+        // Calculate the size of the UTF-8 encoded byte array
+        byte[] bytes = Encoding.UTF8.GetBytes(raw);
+        int size = bytes.Length;
+        // Add the length of the newline character
+        size += Environment.NewLine.Length;
+        // Add the length of the notepad file header: BOM (Byte Order Mark) and the UTF-8 encoding
+        size += 4;
+        double sizeInKB = Math.Round(size / 1024.0 , 2);
+        testCase.RawSize = sizeInKB;
         return testCase;
     }
 

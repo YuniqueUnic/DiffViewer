@@ -12,6 +12,7 @@ public class DiffTestCase
     public string? Raw { get; set; }
     public string? OldText_BaseLine { get; set; }
     public string? NewText_Actual { get; set; }
+    public double RawSize { get; set; }
     public TestCaseShare? MoreInfo { get; set; }
 }
 

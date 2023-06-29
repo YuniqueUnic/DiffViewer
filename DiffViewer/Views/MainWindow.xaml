@@ -25,6 +25,9 @@
     </d:Window.DataContext>
 
     <Window.Resources>
+        <iMy:RawSizeToGradientStopConverter x:Key="RawSizeToGradientStopConverter" />
+        <iMy:RawSizeToGradientStopMultiConverter x:Key="RawSizeToGradientStopColorMultiConverter" returnColor="True" />
+        <iMy:RawSizeToGradientStopMultiConverter x:Key="RawSizeToGradientStopOffsetMultiConverter" />
 
         <Style x:Key="ThreeStateCheckBoxStyle" TargetType="{x:Type CheckBox}">
             <Setter Property="IsThreeState" Value="True" />
@@ -387,7 +390,9 @@
                 </Grid.RowDefinitions>
                 <!--  SelectedItem="{Binding SelectedTestCase}"  -->
                 <ListView Grid.Row="1"
+                          Background="Transparent"
                           d:ItemsSource="{d:SampleData ItemCount=100}"
+                          iMy:AdditionalInfoClass.AdditionalInfoDouble="{Binding DiffRawSizeSum}"
                           SelectedItem="{Binding SelectedTestCase}"
                           SelectionChanged="ListView_SelectionChanged"
                           Tag="{Binding CurrentSelectedIndex}"
@@ -397,8 +402,14 @@
                     <ListView.Template>
                         <ControlTemplate TargetType="ListView">
                             <ScrollViewer CanContentScroll="False" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                                <DockPanel>
-                                    <ItemsControl DockPanel.Dock="Left"
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <ItemsControl Grid.Column="0"
+                                                  DockPanel.Dock="Left"
                                                   VirtualizingPanel.IsVirtualizing="True"
                                                   VirtualizingPanel.ScrollUnit="Item"
                                                   ItemsSource="{Binding TestCasesIndexes}">
@@ -423,8 +434,64 @@
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
-                                    <ItemsPresenter />
-                                </DockPanel>
+
+                                    <ItemsControl Name="SizeScaleItemsControl"
+                                                  Grid.Column="1"
+                                                  DockPanel.Dock="Left"
+                                                  VirtualizingPanel.IsVirtualizing="True"
+                                                  VirtualizingPanel.ScrollUnit="Item"
+                                                  ItemsSource="{Binding DiffTestCases}">
+                                        <ItemsControl.ItemContainerStyle>
+                                            <Style TargetType="ContentPresenter">
+                                                <Setter Property="Height" Value="20" />
+                                                <Setter Property="Margin" Value="0,0,4,0" />
+                                            </Style>
+                                        </ItemsControl.ItemContainerStyle>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid>
+                                                    <TextBlock x:Name="RawDataSizeTextBlock"
+                                                               VerticalAlignment="Center"
+                                                               Foreground="{StaticResource TextGrey}"
+                                                               Background="Transparent"
+                                                               FlowDirection="RightToLeft"
+                                                               Opacity="0.64"
+                                                               Text="{Binding RawSize, StringFormat='{}{0:0.##} KB', ConverterCulture='en-US'}" />
+
+                                                    <Label x:Name="SizeScaleLabel"
+                                                           Height="20"
+                                                           VerticalAlignment="Center"
+                                                           Opacity="0.32">
+                                                        <Label.Background>
+                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                <GradientStop Offset="0.7" Color="Transparent" />
+                                                                <!--<GradientStop Offset="1.0" Color="Red" />-->
+                                                                <GradientStop>
+                                                                    <GradientStop.Color>
+                                                                        <MultiBinding Converter="{StaticResource RawSizeToGradientStopColorMultiConverter}">
+                                                                            <Binding Path="RawSize" />
+                                                                            <Binding Path="(iMy:AdditionalInfoClass.AdditionalInfoDouble)" RelativeSource="{RelativeSource AncestorType={x:Type ListView}}" />
+                                                                        </MultiBinding>
+                                                                    </GradientStop.Color>
+                                                                    <GradientStop.Offset>
+                                                                        <MultiBinding Converter="{StaticResource RawSizeToGradientStopOffsetMultiConverter}">
+                                                                            <Binding Path="RawSize" />
+                                                                            <Binding Path="(iMy:AdditionalInfoClass.AdditionalInfoDouble)" RelativeSource="{RelativeSource AncestorType={x:Type ListView}}" />
+                                                                        </MultiBinding>
+                                                                    </GradientStop.Offset>
+                                                                </GradientStop>
+                                                            </LinearGradientBrush>
+                                                        </Label.Background>
+                                                    </Label>
+
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                    <ItemsPresenter Grid.Column="1" />
+
+                                </Grid>
                             </ScrollViewer>
                         </ControlTemplate>
                     </ListView.Template>
@@ -450,17 +517,31 @@
                     </ListView.ItemTemplate>
                     <ListView.Resources>
                         <Style TargetType="{x:Type ListViewItem}">
-                            <Setter Property="Background" Value="{StaticResource TextLightGrey}" />
+                            <Setter Property="Background" Value="Transparent" />
                             <Setter Property="BorderBrush" Value="Transparent" />
                             <Setter Property="BorderThickness" Value="1" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsIdentical}" Value="False">
-                                    <Setter Property="Background" Value="DarkOrange" />
-                                    <Setter Property="BorderBrush" Value="YellowGreen" />
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Offset="0.1" Color="#64FF8C00" />
+                                                <GradientStop Offset="1" Color="Transparent" />
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <!--<Setter Property="BorderBrush" Value="#FF9ACD32" />-->
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding IsIdentical}" Value="{x:Null}">
-                                    <Setter Property="Background" Value="Fuchsia" />
-                                    <Setter Property="Foreground" Value="White" />
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Offset="0.2" Color="#64FF00FF" />
+                                                <GradientStop Offset="1" Color="Transparent" />
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <!--<Setter Property="Foreground" Value="White" />-->
                                     <Setter Property="FontWeight" Value="Bold" />
                                 </DataTrigger>
                                 <Trigger Property="IsKeyboardFocusWithin" Value="True">

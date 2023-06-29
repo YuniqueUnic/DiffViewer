@@ -34,12 +34,12 @@ public partial class MainWindowViewModel : ObservableObject
 
     private string m_ImportFileFullPath;
     private string m_ExportFileFullPath;
-    
+
     public string LatestImportDirctory
     {
         get
         {
-            if (m_ImportFileFullPath.IsNullOrWhiteSpaceOrEmpty())
+            if( m_ImportFileFullPath.IsNullOrWhiteSpaceOrEmpty() )
             {
                 return Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             }
@@ -93,11 +93,12 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TestCasesState) , nameof(TestCasesIndexes))]
+    [NotifyPropertyChangedFor(nameof(TestCasesState) , nameof(TestCasesIndexes) , nameof(DiffRawSizeSum))]
     public ObservableCollection<DiffTestCase> _diffTestCases = new ObservableCollection<DiffTestCase>();
 
     public IEnumerable<int> TestCasesIndexes => Enumerable.Range(1 , DiffTestCases.Count);
 
+    public double DiffRawSizeSum => DiffTestCases.Sum(t => t.RawSize);
 
     [ObservableProperty]
     public ConcurrentBag<OTETestCase> _OTETestCases;
@@ -169,18 +170,18 @@ public partial class MainWindowViewModel : ObservableObject
     #region Logic
 
     [RelayCommand]
-    public async Task ImportFileToLeftSide()
+    public async Task ImportFileToLeftSide( )
     {
         string title = (App.Current.Resources.MergedDictionaries[0]["LeftImport"].ToString()) ?? "Import";
         string filter = "Dif File (*.dif)|*.dif|All (*.*)|*.*";
 
-        Action action = async () =>
+        Action action = async ( ) =>
         {
             _logger.Information($"({nameof(ImportFileToLeftSide)}).Action Start");
 
             var result = await FileManager.GetTextInfoAsync(m_ImportFileFullPath);
 
-            if (result.Item2 is not null)
+            if( result.Item2 is not null )
             {
                 NewResult = result.Item2;
                 _logger.Information($"({nameof(ImportFileToLeftSide)}).Action Done. Total Line count:{result.Item1}");
@@ -190,23 +191,23 @@ public partial class MainWindowViewModel : ObservableObject
             _logger.Information($"({nameof(ImportFileToLeftSide)}).Action Done. Content is null, Total Line count:{result.Item1}");
         };
 
-        await ShowOpenFileDialog(title, filter, LatestImportDirctory, action);
+        await ShowOpenFileDialog(title , filter , LatestImportDirctory , action);
     }
 
 
     [RelayCommand]
-    public async Task ImportFileToRightSide()
+    public async Task ImportFileToRightSide( )
     {
         string title = (App.Current.Resources.MergedDictionaries[0]["RightImport"].ToString()) ?? "Import";
         string filter = "Dif File (*.dif)|*.dif|All (*.*)|*.*";
 
-        Action action = async () =>
+        Action action = async ( ) =>
         {
             _logger.Information($"({nameof(ImportFileToRightSide)}).Action Start");
 
-            var result= await FileManager.GetTextInfoAsync(m_ImportFileFullPath);
+            var result = await FileManager.GetTextInfoAsync(m_ImportFileFullPath);
 
-            if (result.Item2 is not null)
+            if( result.Item2 is not null )
             {
                 OldResult = result.Item2;
                 _logger.Information($"({nameof(ImportFileToRightSide)}).Action Done. Total Line count:{result.Item1}");
@@ -217,25 +218,25 @@ public partial class MainWindowViewModel : ObservableObject
 
         };
 
-        await ShowOpenFileDialog(title, filter, LatestImportDirctory,action);
+        await ShowOpenFileDialog(title , filter , LatestImportDirctory , action);
     }
 
 
-    public async Task ShowOpenFileDialog(string title,string filter,string initalDir,Action action)
+    public async Task ShowOpenFileDialog(string title , string filter , string initalDir , Action action)
     {
         _logger.Debug($"{nameof(ShowOpenFileDialog)} called");
 
         var settings = new OpenFileDialogSettings()
         {
-            Title = title,
-            Filter = filter,
-            InitialDirectory = initalDir,
-            CheckFileExists = true,
+            Title = title ,
+            Filter = filter ,
+            InitialDirectory = initalDir ,
+            CheckFileExists = true ,
         };
 
-        bool? success = _dialogService.ShowOpenFileDialog(this, settings);
+        bool? success = _dialogService.ShowOpenFileDialog(this , settings);
 
-        if (success == true)
+        if( success == true )
         {
             TestCaseShare.Time = new FileInfo(settings.FileName).LastWriteTime.ToString();
 
@@ -245,7 +246,7 @@ public partial class MainWindowViewModel : ObservableObject
 
             var location = $"({nameof(ShowOpenFileDialog)} Called).(Import File Full Path: {m_ImportFileFullPath})";
 
-            await TasksManager.RunTaskAsync(action, location);
+            await TasksManager.RunTaskAsync(action , location);
         }
     }
 
@@ -360,7 +361,7 @@ public partial class MainWindowViewModel : ObservableObject
             return;
         }
 
-        if( m_GroupedTestCases is null || m_GroupedTestCases.Count()<=0)
+        if( m_GroupedTestCases is null || m_GroupedTestCases.Count() <= 0 )
         {
             _logger.Warning("No Diff data got.");
             return;
@@ -680,7 +681,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         _logger.Information($"({nameof(ExportPassedLst)} Called)");
 
-        if (m_GroupedTestCases is null || m_GroupedTestCases.Count() <= 0)
+        if( m_GroupedTestCases is null || m_GroupedTestCases.Count() <= 0 )
         {
             _logger.Warning("No Diff data got.");
             return;
@@ -729,7 +730,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         _logger.Information($"({nameof(ExportFailNullLst)} Called)");
 
-        if (m_GroupedTestCases is null || m_GroupedTestCases.Count() <= 0)
+        if( m_GroupedTestCases is null || m_GroupedTestCases.Count() <= 0 )
         {
             _logger.Warning("No Diff data got.");
             return;

@@ -433,3 +433,141 @@ public class BoolenNullableToProgressVisibility : MarkupExtension, IValueConvert
         throw new NotImplementedException();
     }
 }
+
+
+public class RawSizeToGradientStopConverter : DependencyObject, IValueConverter
+{
+    public double SmallSize { get; set; } = 0.15;
+    public double MediumSize { get; set; } = 0.3;
+    public double LargeSize { get; set; } = 0.5;
+    public Color SmallColor { get; set; } = Colors.Green;
+    public Color MediumColor { get; set; } = Colors.Yellow;
+    public Color LargeColor { get; set; } = Colors.Red;
+
+    //public double TotalSize
+    //{
+    //    get { return (double)GetValue(TotalSizeProperty); }
+    //    set { SetValue(TotalSizeProperty , value); }
+    //}
+
+    //// Using a DependencyProperty as the backing store for TotalSize.  This enables animation, styling, binding, etc...
+    //public static readonly DependencyProperty TotalSizeProperty =
+    //    DependencyProperty.Register("TotalSize" ,
+    //        typeof(double) ,
+    //        typeof(RawSizeToGradientStopConverter) ,
+    //        new PropertyMetadata(double.NaN));
+
+
+    public object Convert(object value , Type targetType , object parameter , CultureInfo culture)
+    {
+        if( value is double rawSize && parameter is double totalSize )
+        {
+            rawSize = rawSize / totalSize / 2;
+
+            var gradientStop = new GradientStop
+            {
+                Offset = rawSize ,
+                Color = Colors.Transparent
+            };
+
+            // 根据 RawSize 的值设置不同的颜色
+            if( rawSize < SmallSize )
+            {
+                gradientStop.Color = SmallColor;
+            }
+            else if( rawSize < MediumSize )
+            {
+                gradientStop.Color = MediumColor;
+            }
+            else if( rawSize < LargeSize )
+            {
+                gradientStop.Color = LargeColor;
+            }
+
+
+            return gradientStop;
+        }
+
+        return null;
+    }
+
+    public object ConvertBack(object value , Type targetType , object parameter , CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+
+public class RawSizeToGradientStopMultiConverter : IMultiValueConverter
+{
+    public double SmallSize { get; set; } = 0.001;
+    public double MediumSize { get; set; } = 0.01;
+    public double LargeSize { get; set; } = 0.1;
+    public Color SmallColor { get; set; } = Colors.Transparent;
+    public Color MediumColor { get; set; } = Colors.Gold;
+    public Color LargeColor { get; set; } = Colors.Red;
+    public Color ExrtaLargeColor { get; set; } = Colors.Purple;
+
+    public bool returnColor { get; set; } = false;
+
+    public object Convert(object[] values , Type targetType , object parameter , CultureInfo culture)
+    {
+        if( values is null || values.Length <= 0 ) { return null; }
+
+        if( values[0] is double rawSize && values[1] is double totalSize )
+        {
+            rawSize = rawSize / totalSize;
+            App.Logger.Information($"rawSize {rawSize}, totalSize {totalSize}");
+
+            var gradientStop = new GradientStop
+            {
+                Offset = 1 ,
+                Color = Colors.Transparent ,
+            };
+
+            // 根据 RawSize 的值设置不同的颜色
+            if( rawSize < SmallSize )
+            {
+                gradientStop.Offset = 1;
+                gradientStop.Color = SmallColor;
+                App.Logger.Debug($"SmallColor Color: {gradientStop.Color}, Offset: {gradientStop.Offset}");
+            }
+            else if( rawSize < MediumSize )
+            {
+                gradientStop.Offset = 0.9;
+                gradientStop.Color = MediumColor;
+                App.Logger.Debug($"Medium Color Color: {gradientStop.Color}, Offset: {gradientStop.Offset}");
+
+            }
+            else if( rawSize < LargeSize )
+            {
+                gradientStop.Offset = 0.8;
+                gradientStop.Color = LargeColor;
+                App.Logger.Debug($"Large Color Color: {gradientStop.Color}, Offset: {gradientStop.Offset}");
+
+            }
+            else
+            {
+                gradientStop.Offset = 0.75;
+                gradientStop.Color = ExrtaLargeColor;
+                App.Logger.Debug($"ExrtaLarge Color Color: {gradientStop.Color}, Offset: {gradientStop.Offset}");
+
+            }
+
+            if( returnColor )
+            {
+                return gradientStop.Color;
+            }
+
+
+            return gradientStop.Offset;
+        }
+
+        return null;
+    }
+
+    public object[] ConvertBack(object value , Type[] targetTypes , object parameter , CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}

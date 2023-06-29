@@ -1,15 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!--<OutputType>Exe</OutputType>-->
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
+    <!--<OutputType>WinExe</OutputType>-->
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <StartupObject>DiffViewer.App</StartupObject>
     <ApplicationIcon>DiffViewer.ico</ApplicationIcon>
     <Copyright>MIT</Copyright>
-    <Version>1.5.0</Version>
+    <Version>1.6.0</Version>
     <Authors>Yun</Authors>
     <PackageProjectUrl>https://github.com/YooogiYun/DiffViewer</PackageProjectUrl>
     <PackageIcon>DiffViewerPNG.png</PackageIcon>
