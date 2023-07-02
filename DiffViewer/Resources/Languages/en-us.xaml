@@ -10,6 +10,8 @@
     <s:String x:Key="ExportPassToLstDescription">Export Identical TestCases to Hytest .Lst</s:String>
     <s:String x:Key="ExportFailNull">Export Non-Identical to Lst</s:String>
     <s:String x:Key="ExportFailNullDescription">Export Non-Identical TestCases to Hytest .Lst</s:String>
+    <s:String x:Key="ExportDetail">Export Detail to Excel</s:String>
+    <s:String x:Key="ExportDetailDescription">Export OTE + ScriptName + RawDataSize ... to Excel</s:String>
     <s:String x:Key="ExportPath">Export Path</s:String>
     <s:String x:Key="SucceedExport">Export Successfully</s:String>
     <s:String x:Key="FailedExport">Failed to Export</s:String>

@@ -5,7 +5,7 @@ public class DiffTestCase
     public string? Name { get; set; }
     /// <summary>
     /// Identical     = true   ---> No Color
-    /// Not Identical = false  ---> Red Color
+    /// Not Identical = false  ---> Orange Color
     /// Severe Error  = null   ---> Red Color + Bold
     /// </summary>
     public bool? IsIdentical { get; set; }

@@ -59,6 +59,7 @@
             <BitmapImage x:Key="InformationIcon" UriSource="./Resources/Images/Icons/Information.png" />
             <BitmapImage x:Key="PreviewIcon" UriSource="./Resources/Images/Icons/Preview.png" />
             <BitmapImage x:Key="ExcelIcon" UriSource="./Resources/Images/Icons/Excel.png" />
+            <BitmapImage x:Key="ExcelDetailIcon" UriSource="./Resources/Images/Icons/ExcelDetail.png" />
             <BitmapImage x:Key="FailNullIcon" UriSource="./Resources/Images/Icons/FailNull.png" />
 
 

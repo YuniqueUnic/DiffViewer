@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace DiffViewer.Models;
 
-public static class TestCaseHelper
+public static class DiffTestCaseHelper
 {
     public const string sIdentical = "are identical";
     public const string sSevereError1 = "No such file or directory";
@@ -178,5 +178,4 @@ public static class TestCaseHelper
         }
         return tcList;
     }
-
 }

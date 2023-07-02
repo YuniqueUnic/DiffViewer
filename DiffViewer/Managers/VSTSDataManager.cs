@@ -36,7 +36,6 @@ public class VSTSDataManager
         return true;
     }
 
-
     public static bool IsValidUrl(string url)
     {
         bool isTestPlanSuiteIdFound = false;
@@ -51,6 +50,17 @@ public class VSTSDataManager
         }
 
         return isTestPlanSuiteIdFound;
+    }
+
+    public static string TurnOutcomeToIdentialFormat(string outcome)
+    {
+        return outcome.ToLowerInvariant() switch
+        {
+            "passed" => "Passed",
+            "failed" => "Failed",
+            //"unspecified" => string.Empty,
+            _ => string.Empty,
+        };
     }
 
     /// <summary>
@@ -88,40 +98,7 @@ public class VSTSDataManager
         return testPlanSuiteId;
     }
 
-    /// <summary>
-    /// Load Data from VSTS and Cast it into OTE_TestCases
-    /// Recommand to use Token to access VSTS ☆★☆★☆.
-    /// </summary>
-    /// <returns></returns>
-    /// <exception cref="ArgumentException"></exception>
-    public static async Task<ConcurrentBag<OTETestCase>> GET_OTETestCasesAsync(VSTSAccessInfo accessInfo , Action afterPreLoadDataAction = null)
-    {
-        var preLoadDataResults = await PredLoadVSTSDataAsync(accessInfo);
 
-        if( !preLoadDataResults.Item1 )
-        {
-            App.Logger.Warning("Can't PreLoadData, AccessCode is not right.");
-
-            throw new ArgumentException("Can't PreLoadData, AccessCode is not right.");
-        }
-        else if( preLoadDataResults.Item2 is not null )
-        {
-            if( afterPreLoadDataAction is not null ) { afterPreLoadDataAction(); }
-
-            App.Logger.Information("Pre-Load Data Over, Start to Merge VSTS Data Models to OTETestCase...");
-
-            ConcurrentBag<OTETestCase> oteTestCases = await MergeModelstoOTETestCaseByAsync(preLoadDataResults.Item2.ExeRootObject , preLoadDataResults.Item2.QueryRootObject);
-
-            App.Logger.Information("Merge VSTS Data Models to OTETestCase Over.");
-
-            return oteTestCases;
-        }
-        else
-        {
-            App.Logger.Error("Pre-Load Data Failed.");
-            return null;
-        }
-    }
 
     /// <summary>
     /// Before Load Data from VSTS, must PreLoadData from VSTS by using PredLoadVSTSDataAsync Method
@@ -194,7 +171,7 @@ public class VSTSDataManager
                 {
                     TestCaseId = v.workItem.id ,
                     Title = v.workItem.name ,
-                    TestPointId = (int)v.pointAssignments.FirstOrDefault(point => point.id >= default(int))?.id,
+                    TestPointId = (int)v.pointAssignments.FirstOrDefault(point => point.id >= default(int))?.id ,
                     Configuration = v.pointAssignments.FirstOrDefault(point => point.configurationName != null)?.configurationName ,
                     AssignedTo = v.pointAssignments.FirstOrDefault(point => point.tester != null)?.tester.displayName ,
                     Outcome = TurnOutcomeToIdentialFormat(querModel.value.FirstOrDefault(tempQueryModel => tempQueryModel.testCaseReference.id == v.workItem.id)?.results.outcome ?? string.Empty) ,
@@ -210,6 +187,117 @@ public class VSTSDataManager
         App.Logger.Information($"MergeModelstoOTETestCaseByAsync Done. Total: {exeModel.count + 1}");
         return DetailModels;
     }
+
+    /// <summary>
+    /// Load Data from VSTS and Cast it into OTE_TestCases
+    /// Recommand to use Token to access VSTS ☆★☆★☆.
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
+    public static async Task<ConcurrentBag<OTETestCase>> GET_OTETestCasesAsync(VSTSAccessInfo accessInfo , Action afterPreLoadDataAction = null)
+    {
+        var preLoadDataResults = await PredLoadVSTSDataAsync(accessInfo);
+
+        if( !preLoadDataResults.Item1 )
+        {
+            App.Logger.Warning("Can't PreLoadData, AccessCode is not right.");
+
+            throw new ArgumentException("Can't PreLoadData, AccessCode is not right.");
+        }
+        else if( preLoadDataResults.Item2 is not null )
+        {
+            if( afterPreLoadDataAction is not null ) { afterPreLoadDataAction(); }
+
+            App.Logger.Information("Pre-Load Data Over, Start to Merge VSTS Data Models to OTETestCase...");
+
+            ConcurrentBag<OTETestCase> oteTestCases = await MergeModelstoOTETestCaseByAsync(preLoadDataResults.Item2.ExeRootObject , preLoadDataResults.Item2.QueryRootObject);
+
+            App.Logger.Information("Merge VSTS Data Models to OTETestCase Over.");
+
+            return oteTestCases;
+        }
+        else
+        {
+            App.Logger.Error("Pre-Load Data Failed.");
+            return null;
+        }
+    }
+
+
+
+    /// <summary>
+    /// Load Data from VSTS and Cast it into OTE_TestCases
+    /// Recommand to use Token to access VSTS ☆★☆★☆.
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
+    public static async Task<ConcurrentBag<OTEDetailTestCase>> GET_OTEDetailTestCasesAsync(VSTSAccessInfo accessInfo , Action afterPreLoadDataAction = null)
+    {
+
+        Func<ExecuteVSTSModel.RootObject , QueryVSTSModel.RootObject , ConcurrentBag<OTEDetailTestCase>> customRuleForOTEDetail = (exeModel , querModel) =>
+        {
+            int index = exeModel.count + 1;
+
+            return new ConcurrentBag<OTEDetailTestCase>(exeModel.value.AsParallel().Select(v =>
+            {
+                int currentIndex = System.Threading.Interlocked.Decrement(ref index);
+                var OTEDetail = new OTEDetailTestCase()
+                {
+                    TestCaseId = v.workItem.id ,
+                    Title = v.workItem.name ,
+                    TestPointId = (int)v.pointAssignments.FirstOrDefault(point => point.id >= default(int))?.id ,
+                    Configuration = v.pointAssignments.FirstOrDefault(point => point.configurationName != null)?.configurationName ,
+                    AssignedTo = v.pointAssignments.FirstOrDefault(point => point.tester != null)?.tester.displayName ,
+                    Outcome = TurnOutcomeToIdentialFormat(querModel.value.FirstOrDefault(tempQueryModel => tempQueryModel.testCaseReference.id == v.workItem.id)?.results.outcome ?? string.Empty) ,
+                    RunBy = v.pointAssignments.FirstOrDefault(point => point.tester != null)?.tester.uniqueName ,
+                    ScriptName = v.workItem.fields.FirstOrDefault(field => field.scriptName != null)?.scriptName ?? string.Empty ,
+                };
+                OTEDetail.SetIndex(currentIndex);
+                return OTEDetail;
+            }));
+        };
+
+        return await GET_CustomModelAsync<OTEDetailTestCase>(accessInfo , customRuleForOTEDetail , afterPreLoadDataAction);
+    }
+
+
+
+
+    /// <summary>
+    /// Load Data from VSTS and Cast it into Custom Models
+    /// Recommand to use Token to access VSTS ☆★☆★☆.
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
+    public static async Task<ConcurrentBag<T>> GET_CustomModelAsync<T>(VSTSAccessInfo accessInfo , Func<ExecuteVSTSModel.RootObject , QueryVSTSModel.RootObject , ConcurrentBag<T>> customRule , Action afterPreLoadDataAction = null)
+    {
+        var preLoadDataResults = await PredLoadVSTSDataAsync(accessInfo);
+
+        if( !preLoadDataResults.Item1 )
+        {
+            App.Logger.Warning("Can't PreLoadData, AccessCode is not right.");
+
+            throw new ArgumentException("Can't PreLoadData, AccessCode is not right.");
+        }
+        else if( preLoadDataResults.Item2 is not null )
+        {
+            if( afterPreLoadDataAction is not null ) { afterPreLoadDataAction(); }
+
+            App.Logger.Information("Pre-Load Data Over, Start to Merge VSTS Data Models to CustomModels...");
+
+            var customModels = await MergeByCustomRuleAsync(preLoadDataResults.Item2.ExeRootObject , preLoadDataResults.Item2.QueryRootObject , customRule);
+
+            App.Logger.Information("Merge VSTS Data Models to CustomModels Over.");
+
+            return customModels;
+        }
+        else
+        {
+            App.Logger.Error("Pre-Load Data Failed.");
+            return null;
+        }
+    }
+
 
     /// <summary>
     /// Merge ExecuteVSTSModel and QueryVSTSModel by using custom rule
@@ -231,16 +319,5 @@ public class VSTSDataManager
 
         App.Logger.Information($"MergeByCustomRuleAsync Done.");
         return resultModels;
-    }
-
-    public static string TurnOutcomeToIdentialFormat(string outcome)
-    {
-        return outcome.ToLowerInvariant() switch
-        {
-            "passed" => "Passed",
-            "failed" => "Failed",
-            //"unspecified" => string.Empty,
-            _ => string.Empty,
-        };
     }
 }

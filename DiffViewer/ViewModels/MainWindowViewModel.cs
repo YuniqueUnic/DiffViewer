@@ -25,6 +25,10 @@ namespace DiffViewer.ViewModels;
 
 public partial class MainWindowViewModel : ObservableObject
 {
+    const string scpEx = @".scp";
+    const string hysysPrefix = @"hytest: ";
+
+
     private ILogger _logger;
     private IDialogService _dialogService;
 
@@ -151,6 +155,34 @@ public partial class MainWindowViewModel : ObservableObject
     /// </summary>
     [ObservableProperty]
     public bool? _isVSTSDataHandleOver = true;
+    partial void OnIsVSTSDataHandleOverChanged(bool? value)
+    {
+        if( value.HasValue && value.Value )
+        {
+            // When the value is True that's meaning of it handled over.
+            VSTSDataHandlingStopWatch.Stop();
+        }
+        else
+        {
+
+            if( (VSTSDataHandlingStopWatch.ElapsedMilliseconds / 1000.00) > ShutdownHandleSeconds )
+            {
+                IsVSTSDataHandleOver = true;
+            }
+
+            if( value.HasValue && !value.Value )
+            {
+                VSTSDataHandlingStopWatch.Restart();
+            }
+        }
+
+    }
+
+
+    // If the processing of VSTS data exceeds 30 seconds, forcibly stop the UI animation display
+    public const double ShutdownHandleSeconds = 30.00;
+    public static Stopwatch VSTSDataHandlingStopWatch = new Stopwatch();
+
 
     //public bool? _vstsDataHandleOver;
 
@@ -345,7 +377,175 @@ public partial class MainWindowViewModel : ObservableObject
         SelectedTestCaseName = testCase.Name ?? string.Empty;
     }
 
+    #region To be Continue.
 
+    [RelayCommand]
+    public async Task ExportDetailToExcel( )
+    {
+        _logger.Debug("ExportPassedScriptsToExcelCommand called");
+
+        if( !VSTSDataManager.IsValidUrl(AppConfigManager.AccessCode.Url) )
+        {
+            string caption = App.Current.Resources.MergedDictionaries[0]["PleaseSetUriFirst"].ToString() ?? "Please set the VSTS URL first.";
+            string msgText = caption + Environment.NewLine.Repeat(2) + App.Current.Resources.MergedDictionaries[0]["ErrorAccessCodeInfo"].ToString() ?? "Token or Cookie must be filled in.";
+            ShowExportResultMessageBox(caption , msgText , false , string.Empty);
+            return;
+        }
+
+        if( m_GroupedTestCases is null || m_GroupedTestCases.Count() <= 0 )
+        {
+            _logger.Warning("No Diff data got.");
+            return;
+        }
+
+        IsVSTSDataHandleOver = false;
+        OnPropertyChanged(nameof(IsVSTSDataHandleOver));
+
+
+        _logger.Information("Start trying to Get OTE TestCases from VSTS.");
+
+        var DetailTCs =
+            await VSTSDataManager.GET_OTEDetailTestCasesAsync(AppConfigManager.AccessCode , ( ) => { IsVSTSDataHandleOver = null; });
+
+
+        _logger.Information("Start trying to export Detail OTE TestCases to Excel.");
+        ScriptTestCasesMatchResult handleResult = LogScriptResult2Models(DiffTestCases , DetailTCs);
+
+
+
+        IsVSTSDataHandleOver = true;
+        await ExportExcelLogicAsync<OTEDetailTestCase>(handleResult , DetailTCs);
+    }
+
+    public ScriptTestCasesMatchResult LogScriptResult2Models(IEnumerable<DiffTestCase> diffTestCases , ConcurrentBag<OTEDetailTestCase> detailTestCases)
+    {
+        ScriptTestCasesMatchResult result = new() { AllMatch = true };
+
+        List<ScriptInfo> notMatchedScripts = new List<ScriptInfo>();
+        List<OTEDetailTestCase> MatchedTestCases = new List<OTEDetailTestCase>();
+
+        // 使用 Parallel.ForEach 并行处理元素
+        Parallel.ForEach(diffTestCases , diffTC =>
+        {
+            string lowerScriptName = diffTC.Name.ToLowerInvariant().Trim();
+
+            // 使用线程安全的方法来查找匹配的 OTEDetailTestCase 对象
+            OTEDetailTestCase matchingDetailTC = detailTestCases.FirstOrDefault(d =>
+            {
+                bool isMatch = d.ScriptName.ToLowerInvariant().Replace(scpEx , string.Empty).Trim().Equals(lowerScriptName);
+                if( isMatch ) { return true; }
+                return d.Title.ToLowerInvariant().Replace(hysysPrefix , string.Empty).Trim().Equals(lowerScriptName);
+            });
+
+            if( matchingDetailTC is not null )
+            {
+                matchingDetailTC.Outcome = diffTC.IsIdentical switch
+                {
+                    true => "Passed",
+                    null => "Failed to Complete",
+                    false => "Failed",
+                };
+                matchingDetailTC.RawDataSize = diffTC.RawSize;
+                MatchedTestCases.Add(matchingDetailTC);
+            }
+            else
+            {
+                notMatchedScripts.Add(new() { ScriptName = diffTC.Name , ScriptArea = TestCaseShare.Area });
+                result.AllMatch = false;
+            }
+        });
+
+        result.ScriptsNotMatched = notMatchedScripts;
+        result.TestCasesMatched = MatchedTestCases;
+        result.TestCasesNotMatched = detailTestCases.Except(MatchedTestCases);
+
+        return result;
+    }
+
+    public async Task ExportExcelLogicAsync<T>(ScriptTestCasesMatchResult handleResult , ConcurrentBag<T> concurBags)
+    {
+        _logger.Information($"({nameof(ExportExcelLogicAsync)} Called)");
+
+        string title = $"{App.Current.Resources.MergedDictionaries[0]["ExportDetail"]}";
+        string filter = "Excel (*.xlsx)|*.xlsx|CSV (*.csv)|*.csv|All (*.*)|*.*";
+        string defaultExt = "xlsx";
+        string initialDirectory = LatestExportDirctory;
+        string initialFileNameWithMoreInfo = ConcatMoreInfoToFileName("Detail_" + ImportedFileFullPath.GetFileName(withoutExt: true) , appendTimeNow: true);
+
+        // Actual Export Action
+        Action action = async ( ) =>
+        {
+            _logger.Information($"Start to Export Excel to {m_ExportFileFullPath}.");
+            var result = await FileManager.ExportToExcelAsync<ConcurrentBag<T>>(m_ExportFileFullPath , concurBags);
+
+            // Show Export Result MessageBox 
+            string _messageBoxCaption;
+            string _msgBoxText;
+            string _handleResultMsg = handleResult.AllMatch
+            ? (App.Current.Resources.MergedDictionaries[0]["ExportToExcelAllMatch"].ToString() ?? "All Match √")
+            : (App.Current.Resources.MergedDictionaries[0]["ExportToExcelNotAllMatch"].ToString() ?? "!!! Not All Match !!!")
+            + Environment.NewLine
+            + (App.Current.Resources.MergedDictionaries[0]["ExportToExcelNotAllMatchMore"].ToString() ?? "More details in file");
+
+            if( result.SucceedDone )
+            {
+                bool succeedExportMatchResult = true;
+
+                // Export Match Result to Excel
+                if( !handleResult.AllMatch )
+                {
+                    string matchResultExportFullPath = Path.Combine(Path.GetDirectoryName(m_ExportFileFullPath) ?? Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
+                                                       , "ERROR_" + m_ExportFileFullPath.GetFileName(withoutExt: true) + ".xlsx");
+
+                    succeedExportMatchResult = await ExportScriptTestCasesMatchResultToExcel(matchResultExportFullPath , handleResult);
+
+                    if( !succeedExportMatchResult )
+                    {
+                        _handleResultMsg = (App.Current.Resources.MergedDictionaries[0]["ExportToExcelNotAllMatch"].ToString() ?? "!!! Not All Match !!!")
+                                         + Environment.NewLine
+                                         + Environment.NewLine
+                                         + (App.Current.Resources.MergedDictionaries[0]["ExportMatchResultToExcelFailed"].ToString() ?? "!!! Failed to export ERROR analysis file !!!")
+                                         + Environment.NewLine
+                                         + (App.Current.Resources.MergedDictionaries[0]["ExportPath"].ToString() ?? "Export Path")
+                                         + Environment.NewLine
+                                         + matchResultExportFullPath;
+                    }
+                }
+
+                _messageBoxCaption = App.Current.Resources.MergedDictionaries[0]["SucceedExport"].ToString() ?? "Export Result"; ;
+                _msgBoxText = (App.Current.Resources.MergedDictionaries[0]["ExportDetailDescription"].ToString() ?? "Export detail to excel successfully.")
+                            + Environment.NewLine
+                            + (App.Current.Resources.MergedDictionaries[0]["ExportPath"].ToString() ?? "Export Path")
+                            + Environment.NewLine
+                            + m_ExportFileFullPath
+                            + Environment.NewLine
+                            + Environment.NewLine
+                            + _handleResultMsg
+                            + Environment.NewLine
+                            + App.Current.Resources.MergedDictionaries[0]["ClickYesToOpen"].ToString()
+                            ?? $"Yes to open the directory of it.";
+            }
+            else
+            {
+                _messageBoxCaption = App.Current.Resources.MergedDictionaries[0]["FailedExport"].ToString() ?? "Export Result";
+                _msgBoxText = _messageBoxCaption
+                            + Environment.NewLine
+                            + Environment.NewLine
+                            + (App.Current.Resources.MergedDictionaries[0]["ExportPath"].ToString() ?? "Export Path")
+                            + Environment.NewLine
+                            + m_ExportFileFullPath
+                            + Environment.NewLine;
+            }
+
+            _logger.Information("Start to show MessageBox.");
+            ShowExportResultMessageBox(_messageBoxCaption , _msgBoxText , result.SucceedDone , m_ExportFileFullPath);
+        };
+
+        await ShowSaveDialog(title , filter , defaultExt , initialDirectory , initialFileNameWithMoreInfo , action);
+    }
+
+
+    #endregion To be Continue.
 
 
     [RelayCommand]
@@ -408,7 +608,7 @@ public partial class MainWindowViewModel : ObservableObject
     // LogResultExceptNonIdenticalScripts is better than LogResultForPassedScripts normally, but for different situation, it may have different performance.
     // 1. Set all scripts except the Failed to Passed first.
     // 2. Set the string.Empty for non-identical scripts.
-    [Obsolete("Recommand use HandlePassedScriptsToTestCases Method instead of this.")]
+    [Obsolete("Recommand to use HandlePassedScriptsToTestCases Method instead of this.")]
     public bool LogResultExceptNonIdenticalScripts(IEnumerable<string?> nonIdenticalScripts , ConcurrentBag<OTETestCase> oTETestCases)
     {
         bool success = false;
@@ -417,8 +617,6 @@ public partial class MainWindowViewModel : ObservableObject
 
         foreach( string scriptName in nonIdenticalScripts )
         {
-            const string scpEx = @".scp";
-            const string hysysPrefix = @"hytest: ";
             string lowerScriptName = scriptName.ToLowerInvariant().Trim();
 
             OTETestCase matchingTestCase = oTETestCases.FirstOrDefault(t =>
@@ -439,12 +637,9 @@ public partial class MainWindowViewModel : ObservableObject
         return success;
     }
 
-    [Obsolete("Recommand use HandlePassedScriptsToTestCases Method instead of this.")]
+    [Obsolete("Recommand to use HandlePassedScriptsToTestCases Method instead of this.")]
     public bool CheckScriptsMatchOTETestCases(IEnumerable<string?> identicalScripts , IEnumerable<string?> nonIdenticalScripts , ConcurrentBag<OTETestCase> oTETestCases)
     {
-        const string scpEx = @".scp";
-        const string hysysPrefix = @"hytest: ";
-
         IEnumerable<OTETestCase> nonIdenticalTCs = null;
         IEnumerable<OTETestCase> identicalTCs = null;
 
@@ -494,7 +689,7 @@ public partial class MainWindowViewModel : ObservableObject
     // 1. Set all scripts except the Failed to Passed first.
     // 2. Set the string.Empty for non-identical scripts.
     // LogResultExceptNonIdenticalScripts is better than LogResultForPassedScripts normally, but for different situation, it may have different performance.
-    [Obsolete("Recommand use HandlePassedScriptsToTestCases Method instead of this.")]
+    [Obsolete("Recommand to use HandlePassedScriptsToTestCases Method instead of this.")]
     public bool LogResultForPassedScripts(IEnumerable<string?> passedScripts , ConcurrentBag<OTETestCase> oTETestCases)
     {
         bool success = false;
@@ -534,8 +729,6 @@ public partial class MainWindowViewModel : ObservableObject
 
         foreach( string scriptName in passedScripts )
         {
-            const string scpEx = @".scp";
-            const string hysysPrefix = @"hytest: ";
             string lowerScriptName = scriptName?.ToLowerInvariant().Trim() ?? "!!! ERROR on ScriptName !!!";
 
             OTETestCase matchingTestCase = oTETestCases.FirstOrDefault(t =>
@@ -672,6 +865,7 @@ public partial class MainWindowViewModel : ObservableObject
         }
 
     }
+
 
 
 
