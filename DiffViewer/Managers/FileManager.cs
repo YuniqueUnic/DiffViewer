@@ -56,6 +56,12 @@ class FileManager
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="path"></param>
+    /// <returns></returns>
     public static async Task WriteToAsync(string context , string path)
     {
         try

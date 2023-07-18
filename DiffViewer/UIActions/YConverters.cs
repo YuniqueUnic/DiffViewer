@@ -500,9 +500,9 @@ public class RawSizeToGradientStopConverter : DependencyObject, IValueConverter
 
 public class RawSizeToGradientStopMultiConverter : IMultiValueConverter
 {
-    public double SmallSize { get; set; } = 0.001;
-    public double MediumSize { get; set; } = 0.01;
-    public double LargeSize { get; set; } = 0.1;
+    public double SmallSize { get; set; } = 2;
+    public double MediumSize { get; set; } = 50;
+    public double LargeSize { get; set; } = 200;
     public Color SmallColor { get; set; } = Colors.Transparent;
     public Color MediumColor { get; set; } = Colors.Gold;
     public Color LargeColor { get; set; } = Colors.Red;
@@ -516,8 +516,8 @@ public class RawSizeToGradientStopMultiConverter : IMultiValueConverter
 
         if( values[0] is double rawSize && values[1] is double totalSize )
         {
-            rawSize = rawSize / totalSize;
-            App.Logger.Information($"rawSize {rawSize}, totalSize {totalSize}");
+            //rawSize = rawSize / totalSize;
+            //App.Logger.Information($"rawSize {rawSize}, totalSize {totalSize}");
 
             var gradientStop = new GradientStop
             {

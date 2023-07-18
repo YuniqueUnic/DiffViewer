@@ -8,6 +8,7 @@ using DiffViewer.Messages;
 using DiffViewer.Models;
 using DiffViewer.Views;
 using MvvmDialogs;
+using MvvmDialogs.FrameworkDialogs.FolderBrowser;
 using MvvmDialogs.FrameworkDialogs.MessageBox;
 using MvvmDialogs.FrameworkDialogs.OpenFile;
 using MvvmDialogs.FrameworkDialogs.SaveFile;
@@ -47,7 +48,9 @@ public partial class MainWindowViewModel : ObservableObject
             {
                 return Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             }
-            return Path.GetDirectoryName(m_ImportFileFullPath) ?? Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            return Directory.Exists(m_ImportFileFullPath)
+                   ? m_ImportFileFullPath
+                   : Path.GetDirectoryName(m_ImportFileFullPath) ?? Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
         }
     }
     public string LatestExportDirctory
@@ -58,7 +61,9 @@ public partial class MainWindowViewModel : ObservableObject
             {
                 return Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             }
-            return Path.GetDirectoryName(m_ExportFileFullPath) ?? Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            return Directory.Exists(m_ExportFileFullPath)
+                    ? m_ExportFileFullPath
+                    : Path.GetDirectoryName(m_ExportFileFullPath) ?? Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
         }
     }
 
@@ -377,7 +382,6 @@ public partial class MainWindowViewModel : ObservableObject
         SelectedTestCaseName = testCase.Name ?? string.Empty;
     }
 
-    #region To be Continue.
 
     [RelayCommand]
     public async Task ExportDetailToExcel( )
@@ -544,8 +548,6 @@ public partial class MainWindowViewModel : ObservableObject
         await ShowSaveDialog(title , filter , defaultExt , initialDirectory , initialFileNameWithMoreInfo , action);
     }
 
-
-    #endregion To be Continue.
 
 
     [RelayCommand]
@@ -1004,6 +1006,71 @@ public partial class MainWindowViewModel : ObservableObject
             ShowExportResultMessageBox(_messageBoxCaption , _messageBoxText , false , exportFileFullPath);
         }
     }
+
+
+    [RelayCommand]
+    public async Task ExportAllDiffResultToTxt( )
+    {
+        _logger.Information($"({nameof(ExportAllDiffResultToTxt)} Called)");
+
+        if( DiffTestCases is null || DiffTestCases.Count <= 0 ) { return; }
+
+        string title = $"{App.Current.Resources.MergedDictionaries[0]["ExportAllDiffResult"]}";
+        string filter = "All (*.*)|*.*";
+        string initialDirectory = LatestExportDirctory;
+
+        // Actual Export Action
+        Action action = async ( ) =>
+        {
+            _logger.Information($"Start to Export All Diff to txt at: {m_ExportFileFullPath}.");
+
+            string fileFullPath = string.Empty;
+            for( int i = 0; i < DiffTestCases.Count; i++ )
+            {
+                fileFullPath = Path.Combine(LatestExportDirctory , DiffTestCases[i].Name + ".txt");
+                await FileManager.WriteToAsync(DiffTestCases[i].Raw ?? string.Empty , fileFullPath);
+            }
+
+            _logger.Information("Start to show MessageBox.");
+
+            string _messageBoxCaption = $"{App.Current.Resources.MergedDictionaries[0]["ExportAllDiffResult"]}";
+            string _msgBoxText = $"{App.Current.Resources.MergedDictionaries[0]["ExportAllDiffResultDescription"]} successfully."
+                               + Environment.NewLine
+                               + Environment.NewLine
+                               + $"Total: {DiffTestCases.Count}"
+                               + Environment.NewLine
+                               + Environment.NewLine
+                               + LatestExportDirctory
+                               + Environment.NewLine
+                               + Environment.NewLine
+                               + App.Current.Resources.MergedDictionaries[0]["ClickYesToOpen"].ToString()
+                               ?? $"Yes to open the directory of it.";
+
+            ShowExportResultMessageBox(_messageBoxCaption , _msgBoxText , true , LatestExportDirctory);
+        };
+
+
+        var settings = new FolderBrowserDialogSettings()
+        {
+            RootFolder = Environment.SpecialFolder.Desktop ,
+            ShowNewFolderButton = true ,
+            Description = title ,
+            SelectedPath = LatestExportDirctory ,
+        };
+
+        bool? success = _dialogService.ShowFolderBrowserDialog(this , settings);
+
+        if( success == true )
+        {
+            m_ExportFileFullPath = settings.SelectedPath;
+
+            var location = $"({nameof(ShowSaveDialog)} Called).(Export File Full Path: {m_ExportFileFullPath})";
+            await TasksManager.RunTaskAsync(action , location);
+        }
+    }
+
+
+
 
 
     #region Refactoring export function ★☆★☆★

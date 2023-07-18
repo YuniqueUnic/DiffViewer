@@ -12,6 +12,8 @@
     <s:String x:Key="ExportFailNullDescription">导出 Non-Identical TestCases 为 Hytest 运行的 .Lst 文件</s:String>
     <s:String x:Key="ExportDetail">导出 详细信息 为 Excel</s:String>
     <s:String x:Key="ExportDetailDescription">导出 OTE + ScriptName + RawDataSize ... 为 Excel</s:String>
+    <s:String x:Key="ExportAllDiffResult">导出 Diff 文件为 TxT</s:String>
+    <s:String x:Key="ExportAllDiffResultDescription">导出所有的 Diff 文件为 TxT</s:String>
     <s:String x:Key="ExportPath">导出路径</s:String>
     <s:String x:Key="SucceedExport">导出成功</s:String>
     <s:String x:Key="FailedExport">导出失败</s:String>

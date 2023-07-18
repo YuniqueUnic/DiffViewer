@@ -174,7 +174,8 @@ public class VSTSDataManager
                     TestPointId = (int)v.pointAssignments.FirstOrDefault(point => point.id >= default(int))?.id ,
                     Configuration = v.pointAssignments.FirstOrDefault(point => point.configurationName != null)?.configurationName ,
                     AssignedTo = v.pointAssignments.FirstOrDefault(point => point.tester != null)?.tester.displayName ,
-                    Outcome = TurnOutcomeToIdentialFormat(querModel.value.FirstOrDefault(tempQueryModel => tempQueryModel.testCaseReference.id == v.workItem.id)?.results.outcome ?? string.Empty) ,
+                    //Outcome = TurnOutcomeToIdentialFormat(querModel.value.FirstOrDefault(tempQueryModel => tempQueryModel.testCaseReference.id == v.workItem.id)?.results.outcome ?? string.Empty) ,
+                    Outcome = string.Empty ,
                     RunBy = v.pointAssignments.FirstOrDefault(point => point.tester != null)?.tester.uniqueName ,
                 };
                 OTE_TestCast.SetIndex(currentIndex);
@@ -248,7 +249,8 @@ public class VSTSDataManager
                     TestPointId = (int)v.pointAssignments.FirstOrDefault(point => point.id >= default(int))?.id ,
                     Configuration = v.pointAssignments.FirstOrDefault(point => point.configurationName != null)?.configurationName ,
                     AssignedTo = v.pointAssignments.FirstOrDefault(point => point.tester != null)?.tester.displayName ,
-                    Outcome = TurnOutcomeToIdentialFormat(querModel.value.FirstOrDefault(tempQueryModel => tempQueryModel.testCaseReference.id == v.workItem.id)?.results.outcome ?? string.Empty) ,
+                    //Outcome = TurnOutcomeToIdentialFormat(querModel.value.FirstOrDefault(tempQueryModel => tempQueryModel.testCaseReference.id == v.workItem.id)?.results.outcome ?? string.Empty) ,
+                    Outcome = string.Empty ,
                     RunBy = v.pointAssignments.FirstOrDefault(point => point.tester != null)?.tester.uniqueName ,
                     ScriptName = v.workItem.fields.FirstOrDefault(field => field.scriptName != null)?.scriptName ?? string.Empty ,
                 };
