@@ -224,13 +224,13 @@
                             </MenuItem.Template>
                         </MenuItem>
                     </MenuItem>
-                    <i:Interaction.Triggers>
+                    <!--<i:Interaction.Triggers>
                         <i:EventTrigger EventName="MouseEnter">
                             <i:ChangePropertyAction PropertyName="IsSubmenuOpen"
                                                     TargetName="BaseMoreInfoMenuItem"
                                                     Value="true" />
                         </i:EventTrigger>
-                    </i:Interaction.Triggers>
+                    </i:Interaction.Triggers>-->
                 </Menu>
                 <!--<TextBox Name="OnlySearchTextBox"
                          Grid.Column="1"
@@ -389,7 +389,47 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <!--  SelectedItem="{Binding SelectedTestCase}"  -->
-                <ListView Grid.Row="1"
+                <Grid Grid.Row="0" Margin="0,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Name="SearchTextBox"
+                             Grid.Column="0"
+                             Margin="0,0,2,0"
+                             Padding="2,0"
+                             GotFocus="SearchTextBox_GotFocus"
+                             KeyDown="SearchTextBox_KeyDown"
+                             LostFocus="SearchTextBox_LostFocus"
+                             ToolTip="{Binding RelativeSource={RelativeSource self}, Path=Text}"
+                             Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <TextBox.Style>
+                            <Style TargetType="TextBox">
+                                <Setter Property="Foreground" Value="{StaticResource TextDarkGrey}" />
+                                <Style.Triggers>
+                                    <Trigger Property="Text" Value="Search...">
+                                        <Setter Property="Foreground" Value="{StaticResource TextGrey}" />
+                                    </Trigger>
+                                    <Trigger Property="Text" Value="搜 索...">
+                                        <Setter Property="Foreground" Value="{StaticResource TextGrey}" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+                    <Button Name="SearchButton"
+                            Style="{StaticResource IconButtonStyle}"
+                            Grid.Column="1"
+                            Background="Transparent"
+                            Click="SearchButton_Click"
+                            ToolTip="{DynamicResource Search}">
+                        <Image Style="{StaticResource IconImageStyle}"
+                               d:Source="../Resources/Images/Icons/Search.png"
+                               Source="{StaticResource SearchIcon}" />
+                    </Button>
+                </Grid>
+                <ListView Name="DiffTestCasesListView"
+                          Grid.Row="1"
                           Background="Transparent"
                           d:ItemsSource="{d:SampleData ItemCount=100}"
                           iMy:AdditionalInfoClass.AdditionalInfoDouble="{Binding DiffRawSizeSum}"

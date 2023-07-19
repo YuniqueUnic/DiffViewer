@@ -114,7 +114,7 @@ public partial class MainWindowViewModel : ObservableObject
 
 
     [ObservableProperty]
-    string _searchText = "Search...";
+    string _searchText = App.Current.Resources.MergedDictionaries[0]["Search"].ToString() + "...";
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TestCaseShare))]

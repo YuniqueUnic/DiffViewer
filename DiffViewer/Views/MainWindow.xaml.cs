@@ -24,7 +24,7 @@ public partial class MainWindow : Window
 
     private void App_LanguageChanged(object? sender , LanguageChangedEventArgs e)
     {
-        //UpdateSearchTextLanguage();
+        UpdateSearchTextLanguage();
     }
 
     /// <summary>
@@ -109,45 +109,63 @@ public partial class MainWindow : Window
 
     }
 
-    //private void UpdateSearchTextLanguage( )
-    //{
-    //    SearchTextBox.Text = SearchTextBox.Text switch
-    //    {
-    //        "Search..." => "搜索...",
-    //        "搜索..." => "Search...",
-    //        _ => SearchTextBox.Text,
-    //    };
-    //}
+    private void UpdateSearchTextLanguage( )
+    {
+        SearchTextBox.Text = SearchTextBox.Text switch
+        {
+            "Search..." => "搜 索...",
+            "搜 索..." => "Search...",
+            _ => SearchTextBox.Text,
+        };
+    }
 
-    //private void SearchTextBox_GotFocus(object sender , RoutedEventArgs e)
-    //{
-    //    if( SearchTextBox.Text == OnlySearchTextBox.Text + "..." )
-    //    {
-    //        SearchTextBox.Text = "";
-    //    }
-    //}
+    private void SearchTextBox_GotFocus(object sender , RoutedEventArgs e)
+    {
+        if( SearchTextBox.Text == App.Current.Resources.MergedDictionaries[0]["Search"].ToString() + "..." )
+        {
+            SearchTextBox.Text = "";
+        }
+    }
 
-    //private void SearchTextBox_LostFocus(object sender , RoutedEventArgs e)
-    //{
-    //    if( SearchTextBox.Text == "" )
-    //    {
-    //        SearchTextBox.Text = OnlySearchTextBox.Text + "...";
-    //    }
-    //}
+    private void SearchTextBox_LostFocus(object sender , RoutedEventArgs e)
+    {
+        if( SearchTextBox.Text == "" )
+        {
+            SearchTextBox.Text = App.Current.Resources.MergedDictionaries[0]["Search"].ToString() + "...";
+        }
+    }
 
-    //private void DiffViewer_ScrollChanged( )
-    //{
-    //    new TextBoxBase(diffPlexDiffViewer).
-    //    diffPlexDiffViewer.SetHeaderAsOldToNew();
-    //    //object sender, ScrollChangedEventArgs e
-    //    //var scrollViewerToUpdate = sender == this.OldDiffRichTextBox ? new TextBoxBase[] { this.NewDiffRichTextBox } :
-    //    //                                       sender == this.NewDiffRichTextBox ? new TextBoxBase[] { this.OldDiffRichTextBox } :
-    //    //                                       new TextBoxBase[0];
+    private void SearchTextBox_KeyDown(object sender , System.Windows.Input.KeyEventArgs e)
+    {
+        if( e.Key == System.Windows.Input.Key.Enter || e.Key == System.Windows.Input.Key.Return )
+        {
+            SearchButton_Click(sender , e);
+        }
+    }
 
-    //    //scrollViewerToUpdate.ToList().ForEach(textToSync =>
-    //    //{
-    //    //    textToSync.ScrollToVerticalOffset(e.VerticalOffset);
-    //    //    textToSync.ScrollToHorizontalOffset(e.HorizontalOffset);
-    //    //});
-    //}
+    private void SearchButton_Click(object sender , RoutedEventArgs e)
+    {
+        if( DiffTestCasesListView.Items.Count > 0 )
+        {
+            if( SearchTextBox.Text != App.Current.Resources.MergedDictionaries[0]["Search"].ToString() + "..." )
+            {
+                DiffTestCasesListView.Items.Filter = o =>
+                {
+                    if( o is DiffTestCase diffTestCase )
+                    {
+                        return diffTestCase.Name?.IndexOf(SearchTextBox.Text , StringComparison.OrdinalIgnoreCase) >= 0;
+                    }
+                    else
+                    {
+                        return false; // 删除非 DiffTestCase 类型的对象
+                    }
+                };
+            }
+            else
+            {
+                DiffTestCasesListView.Items.Filter = null; // 取消筛选
+            }
+        }
+    }
+
 }
