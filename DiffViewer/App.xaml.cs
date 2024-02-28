@@ -5,7 +5,9 @@ using Serilog;
 using System;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace DiffViewer;
@@ -104,9 +106,19 @@ public partial class App : Application
     {
         ILogger logger = ViewModelLocator.Logger!;
         logger.Information($"Trying to switch language from {e.OldLanguage} to {e.NewLangugae}.");
-
+        
         var path = Path.GetFullPath($"{AppConfigManager.LanguageFolder}/{e.NewLangugae}.xaml");
         var backup_langpath = Path.GetFullPath($"{AppConfigManager.LanguageFolder}/{e.OldLanguage}.xaml");
+        if (!File.Exists(path))
+        {
+            string directoryPath = Path.GetDirectoryName(path);
+            Directory.CreateDirectory(directoryPath);
+            using var langStream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"DiffViewer.Resources.Languages.{e.NewLangugae}.xaml");
+            using (FileStream fileStream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+            {
+                langStream.CopyTo(fileStream);
+            }
+        }
         var uri = new Uri(path , UriKind.RelativeOrAbsolute);
         var backup_languri = new Uri(backup_langpath , UriKind.RelativeOrAbsolute);
 

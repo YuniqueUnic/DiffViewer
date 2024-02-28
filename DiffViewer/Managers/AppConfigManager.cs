@@ -36,7 +36,8 @@ class AppConfigManager
         }
     }
     public static string ThemeName { get; set; } = "HYSYS";
-    public static string LanguageFolder { get; } = "./Resources/Languages";
+    public static string LanguageFolder { get; } = Path.Combine(Path.GetDirectoryName(ConfigPath),"Resources\\Languages");
+    public static string LogPath { get; } = Path.Combine(Path.GetDirectoryName(ConfigPath),"Logs\\Log.txt");
     public static Dictionary<string , string> SupportLanguages { get; } = new() {
          { "zh-cn", "中文 (简体)" },
          { "en-us", "English (US)" },

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <!--<OutputType>WinExe</OutputType>-->
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
@@ -9,7 +9,7 @@
     <StartupObject>DiffViewer.App</StartupObject>
     <ApplicationIcon>DiffViewer.ico</ApplicationIcon>
     <Copyright>MIT</Copyright>
-    <Version>1.6.2</Version>
+    <Version>1.7.0</Version>
     <Authors>Yun</Authors>
     <PackageProjectUrl>https://github.com/YooogiYun/DiffViewer</PackageProjectUrl>
     <PackageIcon>DiffViewerPNG.png</PackageIcon>
@@ -181,10 +181,10 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <EmbeddedResource Include="Resources\Languages\en-us.xaml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\Languages\zh-cn.xaml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
 
@@ -211,5 +211,4 @@
       <HintPath>..\..\HysysToolModels\VSTSDataProvider\bin\Release\net6.0-windows\VSTSDataProvider.dll</HintPath>
     </Reference>
   </ItemGroup>
-
 </Project>

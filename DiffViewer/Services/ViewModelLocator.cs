@@ -17,26 +17,6 @@ public class ViewModelLocator
 
     public IServiceProvider Services { get; set; }
 
-    //private AboutWindow AboutWindowSingleton = new AboutWindow();
-    //private object AboutWindowLock = new object();
-    //public AboutWindow About_WindowSingleton
-    //{
-    //    get
-    //    {
-    //        if( AboutWindowSingleton is null )
-    //        {
-    //            lock( AboutWindowLock )
-    //            {
-    //                AboutWindowSingleton ??= new AboutWindow();
-    //                return AboutWindowSingleton;
-    //            }
-    //        }
-    //        return AboutWindowSingleton;
-    //    }
-    //}
-
-
-
 
     /// <summary>
     /// Init IOC Container
@@ -58,7 +38,7 @@ public class ViewModelLocator
                     .WriteTo.Console())
                 .WriteTo.Logger(lc => lc
                     .Filter.ByIncludingOnly(e => e.Level >= LogEventLevel.Information)
-                    .WriteTo.File("./Log/log.txt" ,
+                    .WriteTo.File(      AppConfigManager.LogPath ,
                                        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}" ,
                                        rollingInterval: RollingInterval.Hour ,
                                        fileSizeLimitBytes: 1024 * 1024 * 10 ,

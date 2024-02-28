@@ -7,6 +7,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.WebRequestMethods;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
+using static VSTSDataProvider.Models.ExecuteVSTSModel;
+using static VSTSDataProvider.Models.QueryVSTSModel;
 
 namespace DiffViewer.Managers;
 
@@ -21,8 +25,10 @@ public class DiffDataManager
     const char m_MinusChar = '-';
 
     const string m_Completedin = " completed in ";
+    const string m_FailedtoCompletein = " failed to complete in ";
     const string m_Identical = "are identical";
     const string m_PostProcessing = "Post Processing...";
+    const string m_FailedtoComplete = " failed to complete.";
 
     const string m_ValidationResults = "Validation Results";
     const string m_EndofSummary = "End of Summary";
@@ -131,17 +137,21 @@ public class DiffDataManager
                     {
                         name = strings[i].Replace(m_PostProcessing , string.Empty).Trim();
                         continue;
+                    }else if( name is null && (strings[i].EndsWith(m_FailedtoComplete) || strings[i].Contains(m_FailedtoComplete)) )
+                    {
+                        name = strings[i].Replace(m_FailedtoComplete, string.Empty).Trim();
+                        continue;
                     }
                     sb.AppendLine(strings[i]);
                 }
 
                 var raw = sb.ToString();
 
-                var location = $"{nameof(DiffDataManager)}.{nameof(ExtractTestCaseDiffResultAsync)}.{nameof(SplitResult)}.{name}";
+                var location = $"{nameof(DiffDataManager)}.{nameof(ExtractTestCaseDiffResultAsync)}.{nameof(SplitResultToDiffString)}.{name}";
 
-                var splitedData = TasksManager.RunTaskWithReturn(( ) =>
+                var splitData = TasksManager.RunTaskWithReturn(( ) =>
                 {
-                    return SplitResult(raw);
+                    return SplitResultToDiffString(raw);
                 } , location , catchException: true , throwException: false);
 
                 try
@@ -151,8 +161,8 @@ public class DiffDataManager
                     m_testCases.First(t => (t.Name.Equals(name)))
                                .SetRaw(raw)
                                .SetRawSize(raw)
-                               .SetNewText(splitedData.actualText)
-                               .SetOldText(splitedData.baseLineText)
+                               .SetNewText(splitData.actualText)
+                               .SetOldText(splitData.baseLineText)
                                .SetIdentical(raw);
 
                 }
@@ -186,9 +196,13 @@ public class DiffDataManager
 
             for( int i = 0; i < strings.Length; i++ )
             {
-                if( strings[i].Contains(m_Completedin) )
+                if( strings[i].Contains(m_Completedin))
                 {
                     testCaselist.Add(strings[i].Substring(0 , strings[i].IndexOf(m_Completedin , StringComparison.OrdinalIgnoreCase)));
+                }
+                else if (strings[i].Contains(m_FailedtoCompletein))
+                {
+                    testCaselist.Add(strings[i].Substring(0, strings[i].IndexOf(m_FailedtoCompletein, StringComparison.OrdinalIgnoreCase)));
                 }
             }
 
@@ -219,6 +233,7 @@ public class DiffDataManager
                 StringBuilder sb = new StringBuilder();
                 int bufferSize = 4096;
                 int numPostProcessing = 0;
+                int numFailedToComplete = 0;
                 using( FileStream fs = new FileStream(diffFilePath , FileMode.Open , FileAccess.Read , FileShare.Read , bufferSize , useAsync: true) )
                 {
                     using( StreamReader sr = new StreamReader(fs , Encoding.UTF8 , true , bufferSize / 4) )
@@ -250,21 +265,52 @@ public class DiffDataManager
                             }
 
                             // Get the Diff Content for each TestCase.
-                            if( m_IsContainEndofSummary && m_IsContainValidation )
+                            // 1. Get the first Post Processing and identity the start of numPostProcessing
+                            // 2. Find the next m_PostProcessing, and remove the redundant content which append with the last string builder.
+                            // 3. Store the string builder content as the last Test Case diff result and empty sb to append the new Test case diff result.
+                            // For instance: 
+                            // Last string builder (Test Case diff result):
+                            // Post Processing...3phase1
+                            // #######################################################
+                            //
+                            // Results... 
+                            // Files v:\hytest\results\dyn_v15media302\3phase1.dmp and V:\HyTest\suites\20_dynamics\standard\3phase1.dmp are identical
+                            //
+                            //
+                            // #######################################################
+
+                            if ( m_IsContainEndofSummary && m_IsContainValidation )
                             {
-                                if( numPostProcessing == 1 && (line.StartsWith(m_PostProcessing) || line.Contains(m_PostProcessing)) )
+                                bool PostProcessingMatched = line.StartsWith(m_PostProcessing) || line.Contains(m_PostProcessing);
+                                bool FailedtoCompleteMatched = line.EndsWith(m_FailedtoComplete) || line.Contains(m_FailedtoComplete);
+
+                                if ( numPostProcessing == 1 && (PostProcessingMatched || FailedtoCompleteMatched) )
                                 {
                                     sb.Remove(sb.Length - line.Length - 2 , line.Length);
                                     mDiffResults.Add(sb.ToString());
                                     sb.Clear();
                                     sb.AppendLine(line);
                                 }
-                                else if( numPostProcessing == 0 && (line.StartsWith(m_PostProcessing) || line.Contains(m_PostProcessing)) )
+                                else if (numFailedToComplete == 1 && (PostProcessingMatched || FailedtoCompleteMatched))
+                                {
+                                    sb.Remove(sb.Length - line.Length - 2, line.Length);
+                                    mDiffResults.Add(sb.ToString());
+                                    sb.Clear();
+                                    sb.AppendLine(line);
+                                }
+                                else if( numPostProcessing == 0 && PostProcessingMatched)
                                 {
                                     sb.Clear();
                                     sb.AppendLine(line);
                                     numPostProcessing = 1;
                                 }
+                                else if (numFailedToComplete == 0 && FailedtoCompleteMatched)
+                                {
+                                    sb.Clear();
+                                    sb.AppendLine(line);
+                                    numFailedToComplete = 1;
+                                }
+
                             }
                         }
                     }
@@ -293,7 +339,7 @@ public class DiffDataManager
     /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>
-    private (string baseLineText, string actualText) SplitResult(string input)
+    private (string baseLineText, string actualText) SplitResultToDiffString(string input)
     {
         // Split content
         var lines = input.Split('\n').ToList();
