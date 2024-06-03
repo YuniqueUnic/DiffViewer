@@ -1,5 +1,7 @@
 # DiffViewer
 
+![DiffViewer](https://github.com/YuniqueUnic/DiffViewer/assets/28824415/f7ed29b3-2f67-4f9b-91f0-8fbc10f68eb4)
+
 This software uses open source libraries
 
 - CommunityToolkit.Mvvm v8.2.0 License MIT
